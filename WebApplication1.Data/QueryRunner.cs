@@ -4,20 +4,19 @@ namespace WebApplication1.Data
 {
     public class QueryRunner
     {
-        
+        private readonly BloggingContext _bloggingContent;
+        private readonly DbContextPersistenceLayerWrapper _wrapper;
+
         public QueryRunner(BloggingContext bloggingContent)
         {
-            BloggingContent = bloggingContent;
-            Wrapper = new DbContextPersistenceLayerWrapper();
+            _bloggingContent = bloggingContent;
+            _wrapper = new DbContextPersistenceLayerWrapper();
         }
 
-        public BloggingContext BloggingContent { get; private set; }
-        public DbContextPersistenceLayerWrapper Wrapper { get; private set; }
-
-        public ReturnT Run<QueryParametersT, DataSetT, ReturnT>(IQuery<QueryParametersT, DataSetT, BloggingContext, ReturnT> query, QueryParametersT parameters)
+        public ReturnT Run<DataSetT, ReturnT>(IQuery<DataSetT, BloggingContext, ReturnT> query)
             where DataSetT : class
         {
-            return Wrapper.GetResults(this.BloggingContent, query, parameters);
+            return _wrapper.GetResults(this._bloggingContent, query);
         }
     }
 }

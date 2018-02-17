@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using WebApplication1.Data;
+using WebApplication1.Data.Queries;
 
 namespace WebApplication1.Controllers
 {
     [Route("api/[controller]")]
-    public class ValuesController : Controller
+    public class BlogController : Controller
     {
+        private readonly QueryRunner _queryRunner;
+
+        public BlogController(QueryRunner queryRunner)
+        {
+            _queryRunner = queryRunner;
+        }
+
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
@@ -18,9 +27,10 @@ namespace WebApplication1.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public ObjectResult Get(int id)
         {
-            return "value";
+            var query = new BlogPersistanceLayer().GetById(id); //no need to mock because this line can be copied to the test but you can if you want
+            return Ok(_queryRunner.Run(query));
         }
 
         // POST api/values
