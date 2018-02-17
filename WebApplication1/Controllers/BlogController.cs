@@ -11,9 +11,9 @@ namespace WebApplication1.Controllers
     [Route("api/[controller]")]
     public class BlogController : Controller
     {
-        private readonly QueryRunner _queryRunner;
+        private readonly IQueryRunner _queryRunner;
 
-        public BlogController(QueryRunner queryRunner)
+        public BlogController(IQueryRunner queryRunner)
         {
             _queryRunner = queryRunner;
         }

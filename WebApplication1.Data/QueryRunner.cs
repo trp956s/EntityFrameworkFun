@@ -2,7 +2,7 @@
 
 namespace WebApplication1.Data
 {
-    public class QueryRunner
+    public class QueryRunner : IQueryRunner
     {
         private readonly BloggingContext _bloggingContent;
         private readonly DbContextPersistenceLayerWrapper _wrapper;
