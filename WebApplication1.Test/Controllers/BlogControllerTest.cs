@@ -4,9 +4,7 @@ using FakeItEasy;
 using FakeItEasy.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
-using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Models;
-using WebApplication1.Data.Queries;
 
 namespace WebApplication1.Test.Controllers
 {
