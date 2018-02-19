@@ -1,4 +1,5 @@
-﻿using WebApplication1.Data.Helpers;
+﻿using System.Threading.Tasks;
+using WebApplication1.Data.Helpers;
 
 namespace WebApplication1.Data
 {
@@ -13,10 +14,10 @@ namespace WebApplication1.Data
             _wrapper = new DbContextPersistenceLayerWrapper();
         }
 
-        public ReturnT Run<DataSetT, ReturnT>(IQuery<DataSetT, BloggingContext, ReturnT> query)
+        public async Task<ReturnT> Run<DataSetT, ReturnT>(IQuery<DataSetT, BloggingContext, ReturnT> query)
             where DataSetT : class
         {
-            return _wrapper.GetResults(this._bloggingContent, query);
+            return await _wrapper.GetResults(this._bloggingContent, query);
         }
     }
 }

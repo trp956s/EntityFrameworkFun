@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Models;
@@ -28,7 +29,7 @@ namespace WebApplication1.Data.Queries
                 return content.Blogs;
             }
 
-            public Blog Execute(IQueryable<Blog> queryable)
+            public async Task<Blog> Execute(IQueryable<Blog> queryable)
             {
                 return queryable.FirstOrDefault(b => b.Id == this._id);
             }

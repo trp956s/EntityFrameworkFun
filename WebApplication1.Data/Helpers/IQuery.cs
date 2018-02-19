@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication1.Data.Helpers
@@ -7,6 +8,6 @@ namespace WebApplication1.Data.Helpers
         where DataSetT : class
     {
         DbSet<DataSetT> GetDataSet(DbContextT content);
-        ReturnT Execute(IQueryable<DataSetT> queryable);
+        Task<ReturnT> Execute(IQueryable<DataSetT> queryable);
     }
 }

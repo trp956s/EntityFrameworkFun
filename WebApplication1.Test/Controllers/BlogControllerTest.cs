@@ -5,6 +5,7 @@ using FakeItEasy.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
 using WebApplication1.Data.Models;
+using System.Threading.Tasks;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -27,18 +28,18 @@ namespace WebApplication1.Test.Controllers
             public class WithId : Get
             {
                 [TestMethod]
-                public void ReturnsOkWithQueryResult()
+                public async Task ReturnsOkWithQueryResult()
                 {
                     var id = 0;
                     var fakeBlog = A.Fake<Blog>();
                     A.CallTo(_queryRunner)
                         .Method("Run")
-                        .Returns(fakeBlog);
+                        .Returns(Task.FromResult(fakeBlog));
                     
-                    var result = _controller.Get(id);
+                    var result = await _controller.Get(id);
                     
                     Assert.IsInstanceOfType(result, typeof(OkObjectResult));
-                    Assert.AreEqual(result.Value, fakeBlog);
+                    Assert.AreEqual(fakeBlog, result.Value);
                 }
             }
         }

@@ -29,11 +29,12 @@ namespace WebApplication1.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public ObjectResult Get(int id)
+        public async Task<ObjectResult> Get(int id)
         {
             var query = new BlogPersistanceLayer().GetById(id);
+            var results = await _queryRunner.Run(query);
 
-            return Ok(_queryRunner.Run(query));
+            return Ok(results);
         }
 
         // POST api/values
