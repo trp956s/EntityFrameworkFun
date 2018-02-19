@@ -8,6 +8,8 @@ using WebApplication1.Data.Queries;
 
 namespace WebApplication1.Controllers
 {
+    //todo: 8, 9, 10, 11: test drive the rest of this class keeping blogs simple
+    //todo: 12, 13, 14, 15, 16: test drive post using a service to encapsulate relationships and business rules and a PostApi to pass to/from the controller
     [Route("api/[controller]")]
     public class BlogController : Controller
     {
@@ -29,7 +31,8 @@ namespace WebApplication1.Controllers
         [HttpGet("{id}")]
         public ObjectResult Get(int id)
         {
-            var query = new BlogPersistanceLayer().GetById(id); //no need to mock because this line can be copied to the test but you can if you want
+            var query = new BlogPersistanceLayer().GetById(id);
+
             return Ok(_queryRunner.Run(query));
         }
 
