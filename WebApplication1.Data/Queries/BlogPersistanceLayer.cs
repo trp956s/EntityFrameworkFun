@@ -30,7 +30,13 @@ namespace WebApplication1.Data.Queries
 
             public Blog Execute(IQueryable<Blog> queryable)
             {
-                throw new NotImplementedException();
+                var count = queryable.Count(b => b.Id == _id);
+                if(count == 1)
+                {
+                    return queryable.FirstOrDefault(b => b.Id == this._id);
+                }
+
+                return null;
             }
         }
     }
