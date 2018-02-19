@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
 using WebApplication1.Data.Models;
 using System.Threading.Tasks;
+using static WebApplication1.Data.Queries.BlogPersistanceLayer;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -36,10 +37,44 @@ namespace WebApplication1.Test.Controllers
                         .Method("Run")
                         .Returns(Task.FromResult(fakeBlog));
                     
-                    var result = await _controller.Get(id);
+                    var result = (ObjectResult) await _controller.Get(id);
                     
                     Assert.IsInstanceOfType(result, typeof(OkObjectResult));
                     Assert.AreEqual(fakeBlog, result.Value);
+                }
+
+                [TestMethod]
+                public async Task SetsUpQueryResultsCorrectly()
+                {
+                    var id = 5;
+                    var fakeBlog = A.Fake<Blog>();
+                    A.CallTo(_queryRunner)
+                        .Method("Run")
+                        .Returns(Task.FromResult(fakeBlog));
+
+                    await _controller.Get(id);
+
+                    A.CallTo(_queryRunner)
+                        .Where(call =>
+                            call.Method.Name == "Run" &&
+                            call.GetArgument<QueryById>(0).Id == id
+                        )
+                        .MustHaveHappened();
+                        
+                }
+
+                [TestMethod]
+                public async Task Returns404WhenNothingFound()
+                {
+                    var id = 0;
+                    var fakeBlog = (Blog)null;
+                    A.CallTo(_queryRunner)
+                        .Method("Run")
+                        .Returns(Task.FromResult(fakeBlog));
+
+                    var result = await _controller.Get(id);
+
+                    Assert.IsInstanceOfType(result, typeof(NotFoundResult));
                 }
             }
         }

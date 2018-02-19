@@ -18,11 +18,11 @@ namespace WebApplication1.Data.Queries
 
         public class QueryById : IQuery<Blog, BloggingContext, Blog>
         {
-            private readonly int _id;
+            public int Id { get; private set; }
 
             public QueryById(int id)
             {
-                _id = id;
+                Id = id;
             }
             public DbSet<Blog> GetDataSet(BloggingContext content)
             {
@@ -31,7 +31,7 @@ namespace WebApplication1.Data.Queries
 
             public async Task<Blog> Execute(IQueryable<Blog> queryable)
             {
-                return queryable.FirstOrDefault(b => b.Id == this._id);
+                return queryable.FirstOrDefault(b => b.Id == Id);
             }
         }
     }
