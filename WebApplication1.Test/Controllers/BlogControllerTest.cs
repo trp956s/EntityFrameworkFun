@@ -31,19 +31,21 @@ namespace WebApplication1.Test.Controllers
             public class Empty : Get
             {
                 [TestMethod]
-                public async Task ReturnsOK()
+                public async Task ReturnsOKWithValue()
                 {
+                    var blogs = (new List<Blog> {
+                                new Blog()
+                            }).AsEnumerable();
+
                     A.CallTo(_queryRunner)
                         .Method("Run")
-                        .Returns(Task.FromResult(
-                            (new List<Blog> {
-                                new Blog()
-                            }).AsEnumerable())
+                        .Returns(Task.FromResult(blogs)
                         );
 
-                    var result = await _controller.Get();
+                    var result = (OkObjectResult) await _controller.Get();
 
                     Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+                    Assert.AreEqual(blogs, result.Value);
                 }
 
                 [TestMethod]

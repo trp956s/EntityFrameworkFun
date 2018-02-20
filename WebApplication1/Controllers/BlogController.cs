@@ -29,7 +29,7 @@ namespace WebApplication1.Controllers
 
             if (results.Any())
             {
-                return Ok(new string[] { "value1", "value2" });
+                return Ok(results);
             }
 
             return NotFound();
