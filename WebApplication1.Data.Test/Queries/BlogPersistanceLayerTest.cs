@@ -81,7 +81,21 @@ namespace WebApplication1.Data.Test.Queries
 
                     Assert.AreEqual(blog, result);
                 }
+            }
+        }
 
+        [TestClass]
+        public class QueryAllTest : BlogPersistanceLayerTest
+        {
+            [TestMethod]
+            public async Task ReturnsAllBlogs()
+            {
+                var blogs = new List<Blog> { new Blog(), new Blog() }.AsQueryable();
+                var queryAll = new QueryAll();
+
+                var result = await queryAll.Execute(blogs);
+
+                Assert.AreEqual(blogs, result);
             }
         }
     }

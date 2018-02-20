@@ -40,17 +40,9 @@ namespace WebApplication1.Data.Queries
             }
         }
 
-        public class QueryAll : IQuery<Blog, BloggingContext, IEnumerable<Blog>>
+        public class QueryAll : Queries.General.QueryAll<Blog, BloggingContext>
         {
-            public Task<IEnumerable<Blog>> Execute(IQueryable<Blog> queryable)
-            {
-                throw new NotImplementedException();
-            }
 
-            public DbSet<Blog> GetDataSet(BloggingContext content)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

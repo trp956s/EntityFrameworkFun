@@ -25,7 +25,9 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            var results = await _queryRunner.Run(new BlogPersistanceLayer().GetAll());
+            var results = await _queryRunner.Run(
+                new BlogPersistanceLayer().GetAll()
+            );
 
             if (results.Any())
             {
