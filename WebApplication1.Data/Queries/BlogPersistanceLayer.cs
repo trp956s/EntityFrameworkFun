@@ -16,6 +16,11 @@ namespace WebApplication1.Data.Queries
             return new QueryById(id);
         }
 
+        public QueryAll GetAll()
+        {
+            return new QueryAll();
+        }
+
         public class QueryById : IQuery<Blog, BloggingContext, Blog>
         {
             public int Id { get; private set; }
@@ -32,6 +37,19 @@ namespace WebApplication1.Data.Queries
             public async Task<Blog> Execute(IQueryable<Blog> queryable)
             {
                 return queryable.FirstOrDefault(b => b.Id == Id);
+            }
+        }
+
+        public class QueryAll : IQuery<Blog, BloggingContext, IEnumerable<Blog>>
+        {
+            public Task<IEnumerable<Blog>> Execute(IQueryable<Blog> queryable)
+            {
+                throw new NotImplementedException();
+            }
+
+            public DbSet<Blog> GetDataSet(BloggingContext content)
+            {
+                throw new NotImplementedException();
             }
         }
     }

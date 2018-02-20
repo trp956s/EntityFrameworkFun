@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
 using WebApplication1.Data.Models;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using static WebApplication1.Data.Queries.BlogPersistanceLayer;
 
 namespace WebApplication1.Test.Controllers
@@ -25,6 +27,60 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Get : BlogControllerTest
         {
+            [TestClass]
+            public class Empty : Get
+            {
+                [TestMethod]
+                public async Task ReturnsOK()
+                {
+                    A.CallTo(_queryRunner)
+                        .Method("Run")
+                        .Returns(Task.FromResult(
+                            (new List<Blog> {
+                                new Blog()
+                            }).AsEnumerable())
+                        );
+
+                    var result = await _controller.Get();
+
+                    Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+                }
+
+                [TestMethod]
+                public async Task ReturnsNotFoundWhenNoBlogs()
+                {
+                    var result = await _controller.Get();
+
+                    A.CallTo(_queryRunner)
+                        .Method("Run")
+                        .Returns(Task.FromResult(
+                            new List<Blog>())
+                        );
+
+                    Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+                }
+
+                [TestMethod]
+                public async Task SetsUpTheQueryCorrectly()
+                {
+                    A.CallTo(_queryRunner)
+                        .Method("Run")
+                        .Returns(Task.FromResult(
+                                new List<Blog>().AsEnumerable()
+                            )
+                        );
+
+                    await _controller.Get();
+
+                    A.CallTo(_queryRunner)
+                        .Where(call =>
+                            call.Method.Name == "Run" &&
+                            call.GetArgument<QueryAll>(0) != null
+                        )
+                        .MustHaveHappened();
+                }
+            }
+
             [TestClass]
             public class WithId : Get
             {
@@ -59,8 +115,7 @@ namespace WebApplication1.Test.Controllers
                             call.Method.Name == "Run" &&
                             call.GetArgument<QueryById>(0).Id == id
                         )
-                        .MustHaveHappened();
-                        
+                        .MustHaveHappened();                        
                 }
 
                 [TestMethod]

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
+using WebApplication1.Data.Models;
 using WebApplication1.Data.Queries;
 
 namespace WebApplication1.Controllers
@@ -22,9 +23,16 @@ namespace WebApplication1.Controllers
 
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult> Get()
         {
-            return new string[] { "value1", "value2" };
+            var results = await _queryRunner.Run(new BlogPersistanceLayer().GetAll());
+
+            if (results.Any())
+            {
+                return Ok(new string[] { "value1", "value2" });
+            }
+
+            return NotFound();
         }
 
         // GET api/values/5
