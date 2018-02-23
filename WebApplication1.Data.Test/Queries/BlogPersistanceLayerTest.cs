@@ -43,7 +43,7 @@ namespace WebApplication1.Data.Test.Queries
                 [TestMethod]
                 public async Task ReturnsNullWhenEmptyDataSet()
                 {
-                    var blogs = new List<Blog>().AsQueryable();
+                    var blogs = new List<Blog>().ToAsyncEnumerable();
 
                     var result = await _query.Execute(blogs);
 
@@ -53,7 +53,7 @@ namespace WebApplication1.Data.Test.Queries
                 [TestMethod]
                 public async Task ReturnsNullWhenNoMatchFound()
                 {
-                    var blogs = new List<Blog> { new Blog() { Id = 0 } }.AsQueryable();
+                    var blogs = new List<Blog> { new Blog() { Id = 0 } }.ToAsyncEnumerable();
 
                     var result = await _query.Execute(blogs);
 
@@ -64,7 +64,7 @@ namespace WebApplication1.Data.Test.Queries
                 public async Task ReturnsBlogWhenMatchFound()
                 {
                     var blog = new Blog() { Id = _id };
-                    var blogs = new List<Blog> { blog }.AsQueryable();
+                    var blogs = new List<Blog> { blog }.ToAsyncEnumerable();
 
                     var result = await _query.Execute(blogs);
 
@@ -75,7 +75,7 @@ namespace WebApplication1.Data.Test.Queries
                 public async Task ReturnsFirstMatchingBlog()
                 {
                     var blog = new Blog() { Id = _id };
-                    var blogs = new List<Blog> { blog, new Blog() { Id = _id } }.AsQueryable();
+                    var blogs = new List<Blog> { blog, new Blog() { Id = _id } }.ToAsyncEnumerable();
 
                     var result = await _query.Execute(blogs);
 
