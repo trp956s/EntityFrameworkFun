@@ -28,7 +28,7 @@ namespace WebApplication1.Test.Controllers
         public class Get : BlogControllerTest
         {
             [TestClass]
-            public class Empty : Get
+            public class Empty : BlogControllerTest.Get
             {
                 [TestMethod]
                 public async Task ReturnsOKWithValue()
