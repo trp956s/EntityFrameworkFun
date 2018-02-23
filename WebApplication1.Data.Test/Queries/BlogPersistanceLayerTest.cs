@@ -90,12 +90,12 @@ namespace WebApplication1.Data.Test.Queries
             [TestMethod]
             public async Task ReturnsAllBlogs()
             {
-                var blogs = new List<Blog> { new Blog(), new Blog() }.AsQueryable();
+                var blogs = new List<Blog> { new Blog(), new Blog() };
                 var queryAll = new QueryAll();
 
-                var result = await queryAll.Execute(blogs);
+                var result = await queryAll.Execute(blogs.ToAsyncEnumerable());
 
-                Assert.AreEqual(blogs, result);
+                CollectionAssert.AreEqual(blogs, result.ToList());
             }
         }
     }
