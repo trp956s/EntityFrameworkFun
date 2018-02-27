@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using FakeItEasy;
 using static WebApplication1.Data.Queries.BlogPersistanceLayer;
 using System.Collections.Generic;
 using WebApplication1.Data.Models;
@@ -31,7 +30,7 @@ namespace WebApplication1.Data.Test.Queries
                 public void ReturnsTheBlogDbSet()
                 {
                     var context = new BloggingContext(new Microsoft.EntityFrameworkCore.DbContextOptions<BloggingContext>());
-                    var dataset = _query.GetDataSet(context);
+                    var dataset = _query.GetDataEnumerable(context);
 
                     Assert.AreEqual(dataset, context.Blogs);
                 }
@@ -111,7 +110,7 @@ namespace WebApplication1.Data.Test.Queries
                     var queryAll = new QueryAll();
                     var context = new BloggingContext(new Microsoft.EntityFrameworkCore.DbContextOptions<BloggingContext>());
 
-                    var dataSet = queryAll.GetDataSet(context);
+                    var dataSet = queryAll.GetDataEnumerable(context);
 
                     Assert.AreEqual(context.Blogs, dataSet);
                 }

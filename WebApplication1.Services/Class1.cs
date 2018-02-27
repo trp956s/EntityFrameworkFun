@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace WebApplication1.Services
+﻿namespace WebApplication1.Services
 {
     public class Class1
     {

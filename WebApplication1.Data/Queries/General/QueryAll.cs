@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 using WebApplication1.Data.Helpers;
 
 namespace WebApplication1.Data.Queries.General
@@ -16,6 +13,6 @@ namespace WebApplication1.Data.Queries.General
             return await queryable.ToList();
         }
 
-        public abstract IAsyncEnumerableAccessor<T> GetDataSet(Context content);
+        public abstract IEnumerable<T> GetDataEnumerable(Context content);
     }
 }

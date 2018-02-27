@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WebApplication1.Data.Models
+﻿namespace WebApplication1.Data.Models
 {
     public class Post
     {
