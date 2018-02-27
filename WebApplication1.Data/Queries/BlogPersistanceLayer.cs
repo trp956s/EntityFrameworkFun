@@ -44,7 +44,10 @@ namespace WebApplication1.Data.Queries
 
         public class QueryAll : Queries.General.QueryAll<Blog, BloggingContext>
         {
-
+            public override IAsyncEnumerableAccessor<Blog> GetDataSet(BloggingContext content)
+            {
+                return content.Blogs;
+            }
         }
     }
 }

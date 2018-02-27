@@ -87,15 +87,34 @@ namespace WebApplication1.Data.Test.Queries
         [TestClass]
         public class QueryAllTest : BlogPersistanceLayerTest
         {
-            [TestMethod]
-            public async Task ReturnsAllBlogs()
+            [TestClass]
+            public class Execute: QueryAllTest
             {
-                var blogs = new List<Blog> { new Blog(), new Blog() };
-                var queryAll = new QueryAll();
+                [TestMethod]
+                public async Task ReturnsAllBlogs()
+                {
+                    var blogs = new List<Blog> {new Blog(), new Blog()};
+                    var queryAll = new QueryAll();
 
-                var result = await queryAll.Execute(blogs.ToAsyncEnumerable());
+                    var result = await queryAll.Execute(blogs.ToAsyncEnumerable());
 
-                CollectionAssert.AreEqual(blogs, result.ToList());
+                    CollectionAssert.AreEqual(blogs, result.ToList());
+                }
+            }
+
+            [TestClass]
+            public class GetDataSet : QueryAllTest
+            {
+                [TestMethod]
+                public void ReturnsBlogs()
+                {
+                    var queryAll = new QueryAll();
+                    var context = new BloggingContext(new Microsoft.EntityFrameworkCore.DbContextOptions<BloggingContext>());
+
+                    var dataSet = queryAll.GetDataSet(context);
+
+                    Assert.AreEqual(context.Blogs, dataSet);
+                }
             }
         }
     }
