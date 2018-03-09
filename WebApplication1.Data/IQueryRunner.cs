@@ -7,4 +7,9 @@ namespace WebApplication1.Data
     {
         Task<ReturnT> Run<DataSetT, ReturnT>(IQuery<DataSetT, BloggingContext, ReturnT> query) where DataSetT : class;
     }
+
+    public interface IBlogContext
+    {
+        Task<ReturnT> Run<DataSetT, ReturnT>(IExecutable<DataSetT, ReturnT> executable) where DataSetT : class;
+    }
 }
