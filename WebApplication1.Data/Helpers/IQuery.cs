@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using WebApplication1.Data.Core;
 
 namespace WebApplication1.Data.Helpers
 {
@@ -7,11 +8,5 @@ namespace WebApplication1.Data.Helpers
         where DataSetT : class
     {
         IEnumerable<DataSetT> GetDataEnumerable(DbContextT content);
-    }
-
-    public interface IExecutable<InputTypeT, ReturnT>
-        where InputTypeT : class
-    {
-        Task<ReturnT> Execute(InputTypeT queryable);
     }
 }
