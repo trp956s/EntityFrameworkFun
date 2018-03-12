@@ -17,9 +17,15 @@ namespace WebApplication1.Data
         IEnumerable<T> DbSet { get; }
     }
 
-    public class AsyncExecutableRunner
+    public interface IAsyncExecutableRunner
     {
-        public virtual Task<ReturnTypeT> Run<ArgumentsTypeT, ReturnTypeT>(IExecutable<ArgumentsTypeT, ReturnTypeT> executable, IDependencyInjectionWrapper<ArgumentsTypeT> di) 
+        Task<ReturnTypeT> Run<ArgumentsTypeT, ReturnTypeT>(IExecutable<ArgumentsTypeT, ReturnTypeT> executable, IDependencyInjectionWrapper<ArgumentsTypeT> di)
+        where ArgumentsTypeT : class;
+    }
+
+    public class AsyncExecutableRunner : IAsyncExecutableRunner
+    {
+        public Task<ReturnTypeT> Run<ArgumentsTypeT, ReturnTypeT>(IExecutable<ArgumentsTypeT, ReturnTypeT> executable, IDependencyInjectionWrapper<ArgumentsTypeT> di) 
         where ArgumentsTypeT : class 
         {
             return executable.Execute(di.Dependency);
@@ -31,21 +37,15 @@ namespace WebApplication1.Data
         T Dependency {get;}
     }
 
-    public class DependencyInjectionWrapper<T> : IDependencyInjectionWrapper<IAsyncEnumerable<T>>
+    public class DbSetInjection<T> : IDependencyInjectionWrapper<IAsyncEnumerable<T>>
     where T : class
     {
-        private readonly IDbSetWrapper<T> _dbSetWrapper;
-
-        public DependencyInjectionWrapper(IDbSetWrapper<T> dbSetWrapper)
+        public DbSetInjection(IDbSetWrapper<T> dbSetWrapper)
         {
-            this._dbSetWrapper = dbSetWrapper;
+            DbSetWrapper = dbSetWrapper;
         }
-        public virtual IAsyncEnumerable<T> Dependency 
-            {
-                get
-                {
-                return _dbSetWrapper.DbSet.ToAsyncEnumerable<T>();
-                }
-            }
+        public IAsyncEnumerable<T> Dependency => DbSetWrapper.DbSet.ToAsyncEnumerable<T>();
+
+        public IDbSetWrapper<T> DbSetWrapper {get;}
     }
 }

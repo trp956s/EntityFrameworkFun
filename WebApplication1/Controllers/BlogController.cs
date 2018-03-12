@@ -15,13 +15,14 @@ namespace WebApplication1.Controllers
     public class BlogController : Controller
     {
         private readonly IQueryRunner _queryRunner;
-        public readonly AsyncExecutableRunner _runner;
+        public readonly IAsyncExecutableRunner _runner;
         private readonly BlogContext _blogContext;
 
-        public BlogController(IQueryRunner queryRunner, AsyncExecutableRunner runner)
+        public BlogController(IQueryRunner queryRunner, IAsyncExecutableRunner runner, BlogContext blogContext)
         {
             _queryRunner = queryRunner;
             _runner = runner;
+            _blogContext = blogContext;
         }
 
         // GET api/values
@@ -29,7 +30,8 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Get()
         {
             var results = await _runner.Run(
-                new QueryAllBlogs(), null
+                new QueryAllBlogs(), 
+                new DbSetInjection<Blog>(_blogContext)
             );
 
             if (results.Any())

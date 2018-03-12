@@ -17,13 +17,15 @@ namespace WebApplication1.Test.Controllers
     {
         private BlogController _controller;
         private IQueryRunner _queryRunner;
-        private AsyncExecutableRunner _runner;
+        private BlogContext _blogContext;
+        private IAsyncExecutableRunner _runner;
         [TestInitialize]
         public void Initialize()
         {
-            _runner = A.Fake<AsyncExecutableRunner>();
+            _runner = A.Fake<IAsyncExecutableRunner>();
             _queryRunner = A.Fake<IQueryRunner>();
-            _controller = new BlogController(_queryRunner, _runner);
+            _blogContext = A.Fake<BlogContext>(options => options.WithArgumentsForConstructor(new object[] { null }));
+            _controller = new BlogController(_queryRunner, _runner, _blogContext);
         }
 
         [TestClass]
@@ -74,12 +76,15 @@ namespace WebApplication1.Test.Controllers
 
                     await _controller.Get();
 
-                    A.CallTo(_runner)
-                        .Where(call =>
-                            call.Method.Name == "Run" &&
-                            call.GetArgument<QueryAllBlogs>(0) != null
+                    A.CallTo(() => _runner.Run(
+                        A<QueryAllBlogs>.That.IsNotNull(), 
+                        A<DbSetInjection<Blog>>.That
+                            .Matches(arg => 
+                                arg.DbSetWrapper == _blogContext
+                            )
                         )
-                        .MustHaveHappened();
+                    )
+                    .MustHaveHappenedOnceExactly();
                 }
             }
 
