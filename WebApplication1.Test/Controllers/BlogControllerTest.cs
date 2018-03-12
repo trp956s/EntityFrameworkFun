@@ -8,7 +8,7 @@ using WebApplication1.Data.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using static WebApplication1.Data.Queries.BlogPersistanceLayer;
+using WebApplication1.Data.Queries.BlogPersistanceLayer;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -77,7 +77,7 @@ namespace WebApplication1.Test.Controllers
                     A.CallTo(_queryRunner)
                         .Where(call =>
                             call.Method.Name == "Run" &&
-                            call.GetArgument<QueryAll>(0) != null
+                            call.GetArgument<QueryAllBlogs>(0) != null
                         )
                         .MustHaveHappened();
                 }
@@ -115,7 +115,7 @@ namespace WebApplication1.Test.Controllers
                     A.CallTo(_queryRunner)
                         .Where(call =>
                             call.Method.Name == "Run" &&
-                            call.GetArgument<QueryById>(0).Id == id
+                            call.GetArgument<QueryBlogsById>(0).Id == id
                         )
                         .MustHaveHappened();                        
                 }

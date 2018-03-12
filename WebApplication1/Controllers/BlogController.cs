@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
 using WebApplication1.Data.Queries;
+using WebApplication1.Data.Queries.BlogPersistanceLayer;
 using WebApplication1.Data.Models;
 
 namespace WebApplication1.Controllers
@@ -27,7 +28,7 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Get()
         {
             var results = await _queryRunner.Run(
-                new BlogPersistanceLayer().GetAll()
+                new QueryAllBlogs()
             );
 
             if (results.Any())
@@ -42,7 +43,7 @@ namespace WebApplication1.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> Get(int id)
         {
-            var query = new BlogPersistanceLayer().GetById(id);
+            var query = new QueryBlogsById(id);
             var results = await _queryRunner.Run(query);
 
             if(results == null)

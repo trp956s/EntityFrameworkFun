@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static WebApplication1.Data.Queries.BlogPersistanceLayer;
+using WebApplication1.Data.Queries.BlogPersistanceLayer;
 using System.Collections.Generic;
 using WebApplication1.Data.Models;
 using System.Linq;
@@ -14,13 +14,13 @@ namespace WebApplication1.Data.Test.Queries
         public class QueryByIdTest : BlogPersistanceLayerTest
         {
             public int _id;
-            public QueryById _query;
+            public QueryBlogsById _query;
 
             [TestInitialize]
             public void Initialize()
             {
                 _id = 9;
-                _query = new QueryById(_id);
+                _query = new QueryBlogsById(_id);
             }
 
             [TestClass]
@@ -93,7 +93,7 @@ namespace WebApplication1.Data.Test.Queries
                 public async Task ReturnsAllBlogs()
                 {
                     var blogs = new List<Blog> {new Blog(), new Blog()};
-                    var queryAll = new QueryAll();
+                    var queryAll = new QueryAllBlogs();
 
                     var result = await queryAll.Execute(blogs.ToAsyncEnumerable());
 
@@ -107,7 +107,7 @@ namespace WebApplication1.Data.Test.Queries
                 [TestMethod]
                 public void ReturnsBlogs()
                 {
-                    var queryAll = new QueryAll();
+                    var queryAll = new QueryAllBlogs();
                     var context = new BloggingContext(new Microsoft.EntityFrameworkCore.DbContextOptions<BloggingContext>());
 
                     var dataSet = queryAll.GetDataEnumerable(context);
