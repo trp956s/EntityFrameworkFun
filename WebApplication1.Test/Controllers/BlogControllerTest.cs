@@ -16,16 +16,14 @@ namespace WebApplication1.Test.Controllers
     public class BlogControllerTest
     {
         private BlogController _controller;
-        private IQueryRunner _queryRunner;
         private BlogContext _blogContext;
         private IAsyncExecutableRunner _runner;
         [TestInitialize]
         public void Initialize()
         {
             _runner = A.Fake<IAsyncExecutableRunner>();
-            _queryRunner = A.Fake<IQueryRunner>();
             _blogContext = A.Fake<BlogContext>(options => options.WithArgumentsForConstructor(new object[] { null }));
-            _controller = new BlogController(_queryRunner, _runner, _blogContext);
+            _controller = new BlogController(_runner, _blogContext);
         }
 
         [TestClass]

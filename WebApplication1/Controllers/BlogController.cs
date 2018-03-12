@@ -14,13 +14,11 @@ namespace WebApplication1.Controllers
     [Route("api/[controller]")]
     public class BlogController : Controller
     {
-        private readonly IQueryRunner _queryRunner;
         public readonly IAsyncExecutableRunner _runner;
         private readonly BlogContext _blogContext;
 
-        public BlogController(IQueryRunner queryRunner, IAsyncExecutableRunner runner, BlogContext blogContext)
+        public BlogController(IAsyncExecutableRunner runner, BlogContext blogContext)
         {
-            _queryRunner = queryRunner;
             _runner = runner;
             _blogContext = blogContext;
         }
