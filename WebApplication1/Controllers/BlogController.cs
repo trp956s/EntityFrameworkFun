@@ -15,7 +15,7 @@ namespace WebApplication1.Controllers
     public class BlogController : Controller
     {
         private readonly IQueryRunner _queryRunner;
-        private readonly AsyncExecutableRunner _runner;
+        public AsyncExecutableRunner _runner;
         private readonly BlogContext _blogContext;
 
         public BlogController(IQueryRunner queryRunner)
@@ -27,8 +27,8 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            var results = await _queryRunner.Run(
-                new QueryAllBlogs()
+            var results = await _runner.Run(
+                new QueryAllBlogs(), null
             );
 
             if (results.Any())

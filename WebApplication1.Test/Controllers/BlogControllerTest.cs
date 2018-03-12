@@ -17,11 +17,14 @@ namespace WebApplication1.Test.Controllers
     {
         private BlogController _controller;
         private IQueryRunner _queryRunner;
+        private AsyncExecutableRunner _runner;
         [TestInitialize]
         public void Initialize()
         {
+            _runner = A.Fake<AsyncExecutableRunner>();
             _queryRunner = A.Fake<IQueryRunner>();
             _controller = new BlogController(_queryRunner);
+            _controller._runner = _runner;
         }
 
         [TestClass]
@@ -37,7 +40,7 @@ namespace WebApplication1.Test.Controllers
                                 new Blog()
                             }).AsEnumerable();
 
-                    A.CallTo(_queryRunner)
+                    A.CallTo(_runner)
                         .Method("Run")
                         .Returns(Task.FromResult(blogs)
                         );
@@ -53,7 +56,7 @@ namespace WebApplication1.Test.Controllers
                 {
                     var result = await _controller.Get();
 
-                    A.CallTo(_queryRunner)
+                    A.CallTo(_runner)
                         .Method("Run")
                         .Returns(Task.FromResult(
                             new List<Blog>())
@@ -65,7 +68,7 @@ namespace WebApplication1.Test.Controllers
                 [TestMethod]
                 public async Task SetsUpTheQueryCorrectly()
                 {
-                    A.CallTo(_queryRunner)
+                    A.CallTo(_runner)
                         .Method("Run")
                         .Returns(Task.FromResult(
                                 new List<Blog>().AsEnumerable()
@@ -74,7 +77,7 @@ namespace WebApplication1.Test.Controllers
 
                     await _controller.Get();
 
-                    A.CallTo(_queryRunner)
+                    A.CallTo(_runner)
                         .Where(call =>
                             call.Method.Name == "Run" &&
                             call.GetArgument<QueryAllBlogs>(0) != null
