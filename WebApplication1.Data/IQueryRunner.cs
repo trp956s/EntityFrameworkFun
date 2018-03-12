@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 using WebApplication1.Data.Helpers;
+using WebApplication1.Data.Models;
+using System.Collections.Generic;
 
 namespace WebApplication1.Data
 {
@@ -8,8 +10,12 @@ namespace WebApplication1.Data
         Task<ReturnT> Run<DataSetT, ReturnT>(IQuery<DataSetT, BloggingContext, ReturnT> query) where DataSetT : class;
     }
 
-    public interface IBlogContext
+    public interface IBlogContext: IDbSetLookup<Blog>
     {
-        Task<ReturnT> Run<DataSetT, ReturnT>(IExecutable<DataSetT, ReturnT> executable) where DataSetT : class;
+    }
+
+    public interface IDbSetLookup<T> where T: class
+    {
+        Task<T> Run(IExecutable<IAsyncEnumerable<T>, T> executable);
     }
 }

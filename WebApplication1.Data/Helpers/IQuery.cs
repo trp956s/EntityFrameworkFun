@@ -3,15 +3,15 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data.Helpers
 {
-    public interface IQuery<DataSetT, DbContextT, ReturnT> : IExecutable<DataSetT, ReturnT>
+    public interface IQuery<DataSetT, DbContextT, ReturnT> : IExecutable<IAsyncEnumerable<DataSetT>, ReturnT>
         where DataSetT : class
     {
         IEnumerable<DataSetT> GetDataEnumerable(DbContextT content);
     }
 
-    public interface IExecutable<DataSetT, ReturnT>
-        where DataSetT : class
+    public interface IExecutable<InputTypeT, ReturnT>
+        where InputTypeT : class
     {
-        Task<ReturnT> Execute(IAsyncEnumerable<DataSetT> queryable);
+        Task<ReturnT> Execute(InputTypeT queryable);
     }
 }
