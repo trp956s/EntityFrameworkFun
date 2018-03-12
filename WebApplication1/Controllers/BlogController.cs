@@ -6,6 +6,7 @@ using WebApplication1.Data.Models;
 using WebApplication1.Data.Injectors;
 using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Core;
+using WebApplication1.Data.Upserts;
 
 namespace WebApplication1.Controllers
 {
@@ -61,8 +62,30 @@ namespace WebApplication1.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody]string value)
+        public async Task<StatusCodeResult> Post(Blog blog)
         {
+            if(blog == null)
+            {
+                return NotFound();
+            }
+
+            var query = new QueryBlogsById(blog.Id);
+            var results = await _runner.Run(
+                query,
+                new DbSetInjection<Blog>(_blogContext)
+            );
+
+            if (results == null)
+            {
+                return NotFound();
+            }
+
+            await _runner.Run(
+                new InsertBlog(),
+                new DbSetInjection<Blog>(_blogContext)
+            );
+
+            return Ok();
         }
 
         // PUT api/values/5

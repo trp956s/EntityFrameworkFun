@@ -11,6 +11,8 @@ using WebApplication1.Data.Queries.BlogPersistanceLayer;
 using WebApplication1.Data.Injectors;
 using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Core;
+using WebApplication1.Data.Upserts;
+using System;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -139,6 +141,95 @@ namespace WebApplication1.Test.Controllers
 
                     Assert.IsInstanceOfType(result, typeof(NotFoundResult));
                 }
+            }
+        }
+
+        [TestClass]
+        public class Post : BlogControllerTest
+        {
+            [TestMethod]
+            public async Task Returns404WhenNothingSent()
+            {
+                var result = await _controller.Post(null);
+
+                Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+            }
+
+            [TestMethod]
+            public async Task ReturnsOKWhenUpdateRecordFound()
+            {
+                var blogToUpdate = new Blog();
+                var blogInDatabase = new Blog();
+
+                A.CallTo(() => 
+                    _runner.Run(
+                        A<QueryBlogsById>.Ignored, 
+                        A<DbSetInjection<Blog>>.Ignored
+                    )
+                )
+                .Returns(blogInDatabase);
+
+                var result = await _controller.Post(blogToUpdate);
+
+                Assert.IsInstanceOfType(result, typeof(OkResult));
+            }
+
+            [TestMethod]
+            public async Task Returns404WhenNothingFound()
+            {
+                var blogToUpdate = new Blog();
+                var blogInDatabase = (Blog)null;
+
+                A.CallTo(() =>
+                    _runner.Run(
+                        A<QueryBlogsById>.Ignored,
+                        A<DbSetInjection<Blog>>.Ignored
+                    )
+                )
+                .Returns(blogInDatabase);
+
+                var result = await _controller.Post(blogToUpdate);
+
+                Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+
+            }
+
+            [TestMethod]
+            public async Task LooksForTheRightId()
+            {
+                var expectedId = 9;
+
+                var result = await _controller.Post(new Blog() { Id = expectedId });
+
+                A.CallTo(() =>
+                    _runner.Run(
+                        A<QueryBlogsById>.That.Matches(arg => arg.Id == expectedId),
+                        A<DbSetInjection<Blog>>.Ignored
+                    )
+                )
+                .MustHaveHappenedOnceExactly();
+            }
+
+            [TestMethod]
+            public async Task ReturnsInsertFailure()
+            {
+                var expectedException = new Exception();
+
+                A.CallTo(() =>
+                    _runner.Run(
+                        A<InsertBlog>.That.IsNotNull(),
+                        A<DbSetInjection<Blog>>.Ignored
+                    )
+                )
+                .Throws(expectedException);
+                ;
+
+                var actualResult = await Assert.ThrowsExceptionAsync<Exception>(() =>
+                    _controller.Post(new Blog())
+                );
+
+
+                Assert.AreEqual(actualResult, expectedException);
             }
         }
     }
