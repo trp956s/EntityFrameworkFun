@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApplication1.Data.Queries.BlogPersistanceLayer;
 using WebApplication1.Data.Injectors;
+using WebApplication1.Data.Helpers;
+using WebApplication1.Data.Core;
 
 namespace WebApplication1.Test.Controllers
 {

@@ -6,6 +6,8 @@ using WebApplication1.Data.Queries;
 using WebApplication1.Data.Queries.BlogPersistanceLayer;
 using WebApplication1.Data.Models;
 using WebApplication1.Data.Injectors;
+using WebApplication1.Data.Helpers;
+using WebApplication1.Data.Core;
 
 namespace WebApplication1.Controllers
 {
