@@ -23,8 +23,7 @@ namespace WebApplication1.Test.Controllers
         {
             _runner = A.Fake<AsyncExecutableRunner>();
             _queryRunner = A.Fake<IQueryRunner>();
-            _controller = new BlogController(_queryRunner);
-            _controller._runner = _runner;
+            _controller = new BlogController(_queryRunner, _runner);
         }
 
         [TestClass]
@@ -36,14 +35,13 @@ namespace WebApplication1.Test.Controllers
                 [TestMethod]
                 public async Task ReturnsOKWithValue()
                 {
-                    var blogs = (new List<Blog> {
+                    var blogs = new List<Blog> {
                                 new Blog()
-                            }).AsEnumerable();
+                            };
 
                     A.CallTo(_runner)
                         .Method("Run")
-                        .Returns(Task.FromResult(blogs)
-                        );
+                        .Returns(blogs.ToEnumTask());
 
                     var result = (OkObjectResult) await _controller.Get();
 
@@ -58,8 +56,8 @@ namespace WebApplication1.Test.Controllers
 
                     A.CallTo(_runner)
                         .Method("Run")
-                        .Returns(Task.FromResult(
-                            new List<Blog>())
+                        .Returns(
+                            new List<Blog>().ToEnumTask()
                         );
 
                     Assert.IsInstanceOfType(result, typeof(NotFoundResult));
@@ -70,9 +68,8 @@ namespace WebApplication1.Test.Controllers
                 {
                     A.CallTo(_runner)
                         .Method("Run")
-                        .Returns(Task.FromResult(
-                                new List<Blog>().AsEnumerable()
-                            )
+                        .Returns(
+                            new List<Blog>().ToEnumTask()
                         );
 
                     await _controller.Get();
@@ -147,6 +144,11 @@ namespace WebApplication1.Test.Controllers
             return fakeCall
                 .Where(call => call.Method.Name == methodName)
                 .WithNonVoidReturnType();
+        }
+
+        public static Task<IEnumerable<T>> ToEnumTask<T>(this IEnumerable<T> enumerable)
+        {
+            return Task.FromResult(enumerable.AsEnumerable());
         }
     }
 }

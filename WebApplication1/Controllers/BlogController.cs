@@ -15,12 +15,13 @@ namespace WebApplication1.Controllers
     public class BlogController : Controller
     {
         private readonly IQueryRunner _queryRunner;
-        public AsyncExecutableRunner _runner;
+        public readonly AsyncExecutableRunner _runner;
         private readonly BlogContext _blogContext;
 
-        public BlogController(IQueryRunner queryRunner)
+        public BlogController(IQueryRunner queryRunner, AsyncExecutableRunner runner)
         {
             _queryRunner = queryRunner;
+            _runner = runner;
         }
 
         // GET api/values
