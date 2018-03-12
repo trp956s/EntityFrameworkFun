@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using WebApplication1.Data.Injectors;
 
 namespace WebApplication1.Data
 {
@@ -9,6 +10,7 @@ namespace WebApplication1.Data
         {
             services.AddDbContext<BloggingContext>(options => options.UseSqlServer(connection));
             services.AddScoped<IAsyncExecutableRunner, AsyncExecutableRunner>();
+            services.AddScoped<BlogDbSetInjector>();
         }
     }
 }
