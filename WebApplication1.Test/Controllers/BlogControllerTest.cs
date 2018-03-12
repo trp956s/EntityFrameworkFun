@@ -96,7 +96,7 @@ namespace WebApplication1.Test.Controllers
                 {
                     var id = 0;
                     var fakeBlog = A.Fake<Blog>();
-                    A.CallTo(_queryRunner)
+                    A.CallTo(_runner)
                         .Method("Run")
                         .Returns(Task.FromResult(fakeBlog));
                     
@@ -111,13 +111,13 @@ namespace WebApplication1.Test.Controllers
                 {
                     var id = 5;
                     var fakeBlog = A.Fake<Blog>();
-                    A.CallTo(_queryRunner)
+                    A.CallTo(_runner)
                         .Method("Run")
                         .Returns(Task.FromResult(fakeBlog));
 
                     await _controller.Get(id);
 
-                    A.CallTo(_queryRunner)
+                    A.CallTo(_runner)
                         .Where(call =>
                             call.Method.Name == "Run" &&
                             call.GetArgument<QueryBlogsById>(0).Id == id
@@ -130,7 +130,7 @@ namespace WebApplication1.Test.Controllers
                 {
                     var id = 0;
                     var fakeBlog = (Blog)null;
-                    A.CallTo(_queryRunner)
+                    A.CallTo(_runner)
                         .Method("Run")
                         .Returns(Task.FromResult(fakeBlog));
 

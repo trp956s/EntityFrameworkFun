@@ -47,7 +47,10 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Get(int id)
         {
             var query = new QueryBlogsById(id);
-            var results = await _queryRunner.Run(query);
+            var results = await _runner.Run(
+                query,
+                new DbSetInjection<Blog>(_blogContext)
+            );
 
             if(results == null)
             {
