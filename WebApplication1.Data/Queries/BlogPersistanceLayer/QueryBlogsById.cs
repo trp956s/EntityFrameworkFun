@@ -5,7 +5,7 @@ using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries.BlogPersistanceLayer
-{        
+{
     public class QueryBlogsById : IQuery<Blog, BloggingContext, Blog>
     {
         public int Id { get; private set; }
