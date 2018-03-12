@@ -3,7 +3,6 @@ using WebApplication1.Controllers;
 using FakeItEasy;
 using FakeItEasy.Configuration;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Data;
 using WebApplication1.Data.Models;
 using System.Threading.Tasks;
 using System.Collections.Generic;
