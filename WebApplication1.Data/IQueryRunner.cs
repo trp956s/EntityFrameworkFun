@@ -7,11 +7,6 @@ using System.Linq;
 
 namespace WebApplication1.Data
 {
-    public interface IQueryRunner
-    {
-        Task<ReturnT> Run<DataSetT, ReturnT>(IQuery<DataSetT, BloggingContext, ReturnT> query) where DataSetT : class;
-    }
-
     public interface IDbSetWrapper<T> where T: class
     {
         IEnumerable<T> DbSet { get; }

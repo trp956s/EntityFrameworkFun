@@ -19,6 +19,7 @@ namespace WebApplication1.Test.Controllers
         private BlogController _controller;
         private BlogDbSetInjector _blogContext;
         private IAsyncExecutableRunner _runner;
+
         [TestInitialize]
         public void Initialize()
         {

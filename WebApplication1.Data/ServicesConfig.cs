@@ -8,7 +8,7 @@ namespace WebApplication1.Data
         public void Configure(IServiceCollection services, string connection)
         {
             services.AddDbContext<BloggingContext>(options => options.UseSqlServer(connection));
-            services.AddScoped<IQueryRunner, QueryRunner>();
+            services.AddScoped<IAsyncExecutableRunner, AsyncExecutableRunner>();
         }
     }
 }
