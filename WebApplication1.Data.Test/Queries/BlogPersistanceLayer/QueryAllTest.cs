@@ -24,20 +24,5 @@ namespace WebApplication1.Data.Test.Queries.BlogPersistanceLayer
                 CollectionAssert.AreEqual(blogs, result.ToList());
             }
         }
-
-        [TestClass]
-        public class GetDataSet : QueryAllTest
-        {
-            [TestMethod]
-            public void ReturnsBlogs()
-            {
-                var queryAll = new QueryAllBlogs();
-                var context = new BloggingContext(new Microsoft.EntityFrameworkCore.DbContextOptions<BloggingContext>());
-
-                var dataSet = queryAll.GetDataEnumerable(context);
-
-                Assert.AreEqual(context.Blogs, dataSet);
-            }
-        }
     }
 }

@@ -21,19 +21,6 @@ namespace WebApplication1.Data.Test.Queries.BlogPersistanceLayer
         }
 
         [TestClass]
-        public class GetDataSet : QueryByIdTest
-        {
-            [TestMethod]
-            public void ReturnsTheBlogDbSet()
-            {
-                var context = new BloggingContext(new Microsoft.EntityFrameworkCore.DbContextOptions<BloggingContext>());
-                var dataset = _query.GetDataEnumerable(context);
-
-                Assert.AreEqual(dataset, context.Blogs);
-            }
-        }
-
-        [TestClass]
         public class Execute : QueryByIdTest
         {
             [TestMethod]

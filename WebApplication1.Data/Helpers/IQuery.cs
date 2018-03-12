@@ -4,9 +4,8 @@ using WebApplication1.Data.Core;
 
 namespace WebApplication1.Data.Helpers
 {
-    public interface IQuery<DataSetT, DbContextT, ReturnT> : IExecutable<IAsyncEnumerable<DataSetT>, ReturnT>
+    public interface IQuery<DataSetT, ReturnT> : IExecutable<IAsyncEnumerable<DataSetT>, ReturnT>
         where DataSetT : class
     {
-        IEnumerable<DataSetT> GetDataEnumerable(DbContextT content);
     }
 }
