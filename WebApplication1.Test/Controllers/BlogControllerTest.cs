@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using WebApplication1.Data.Queries.BlogPersistanceLayer;
+using WebApplication1.Data.Injectors;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -16,13 +17,13 @@ namespace WebApplication1.Test.Controllers
     public class BlogControllerTest
     {
         private BlogController _controller;
-        private BlogContext _blogContext;
+        private BlogDbSetInjector _blogContext;
         private IAsyncExecutableRunner _runner;
         [TestInitialize]
         public void Initialize()
         {
             _runner = A.Fake<IAsyncExecutableRunner>();
-            _blogContext = A.Fake<BlogContext>(options => options.WithArgumentsForConstructor(new object[] { null }));
+            _blogContext = A.Fake<BlogDbSetInjector>(options => options.WithArgumentsForConstructor(new object[] { null }));
             _controller = new BlogController(_runner, _blogContext);
         }
 

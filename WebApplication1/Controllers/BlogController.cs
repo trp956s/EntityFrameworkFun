@@ -5,6 +5,7 @@ using WebApplication1.Data;
 using WebApplication1.Data.Queries;
 using WebApplication1.Data.Queries.BlogPersistanceLayer;
 using WebApplication1.Data.Models;
+using WebApplication1.Data.Injectors;
 
 namespace WebApplication1.Controllers
 {
@@ -15,9 +16,9 @@ namespace WebApplication1.Controllers
     public class BlogController : Controller
     {
         public readonly IAsyncExecutableRunner _runner;
-        private readonly BlogContext _blogContext;
+        private readonly BlogDbSetInjector _blogContext;
 
-        public BlogController(IAsyncExecutableRunner runner, BlogContext blogContext)
+        public BlogController(IAsyncExecutableRunner runner, BlogDbSetInjector blogContext)
         {
             _runner = runner;
             _blogContext = blogContext;
