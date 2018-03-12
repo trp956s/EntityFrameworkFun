@@ -4,7 +4,7 @@ using WebApplication1.Data.Core;
 
 namespace WebApplication1.Data.Helpers
 {
-    public interface IQuery<DataSetT, ReturnT> : IExecutable<IAsyncEnumerable<DataSetT>, ReturnT>
+    public interface IQuerySingle<DataSetT> : IExecutable<IAsyncEnumerable<DataSetT>, DataSetT>
         where DataSetT : class
     {
     }

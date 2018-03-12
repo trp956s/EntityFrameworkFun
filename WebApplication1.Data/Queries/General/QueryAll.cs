@@ -5,7 +5,7 @@ using WebApplication1.Data.Helpers;
 
 namespace WebApplication1.Data.Queries.General
 {
-    public abstract class QueryAll<T> : IQuery<T, IEnumerable<T>>
+    public abstract class QueryAll<T> : IQueryMany<T>
     where T : class
     {
         public async Task<IEnumerable<T>> Execute(IAsyncEnumerable<T> queryable)
