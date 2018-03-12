@@ -17,35 +17,35 @@ namespace WebApplication1.Data
         IEnumerable<T> DbSet { get; }
     }
 
-    public class AsyncExecutableRunner<ArgumentsTypeT, ReturnTypeT> where ArgumentsTypeT : class 
+    public class AsyncExecutableRunner
     {
-        public virtual Task<ReturnTypeT> Return(IExecutable<ArgumentsTypeT, ReturnTypeT> executable, Func<ArgumentsTypeT> argumentsFunction)
+        public virtual Task<ReturnTypeT> Run<ArgumentsTypeT, ReturnTypeT>(IExecutable<ArgumentsTypeT, ReturnTypeT> executable, IDependencyInjectionWrapper<ArgumentsTypeT> di) 
+        where ArgumentsTypeT : class 
         {
-            return executable.Execute(argumentsFunction());
+            return executable.Execute(di.Dependency);
         }
     }
 
-    public class AsyncEnumerableWrapper<T> where T : class
+    public interface IDependencyInjectionWrapper<T>
+    {
+        T Dependency {get;}
+    }
+
+    public class DependencyInjectionWrapper<T> : IDependencyInjectionWrapper<IAsyncEnumerable<T>>
+    where T : class
     {
         private readonly IDbSetWrapper<T> _dbSetWrapper;
 
-        public AsyncEnumerableWrapper(IDbSetWrapper<T> dbSetWrapper)
+        public DependencyInjectionWrapper(IDbSetWrapper<T> dbSetWrapper)
         {
             this._dbSetWrapper = dbSetWrapper;
         }
-        public virtual IAsyncEnumerable<T> ToAsyncEnumerable()
-        {
-            return _dbSetWrapper.DbSet.ToAsyncEnumerable<T>();
-        }
-    }
-
-    public class DbSetContextWrapper<T> where T : class
-    {
-        private IEnumerable<T> _context;
-
-        public DbSetContextWrapper(IEnumerable<T> context)
-        {
-            this._context = context;
-        }
+        public virtual IAsyncEnumerable<T> Dependency 
+            {
+                get
+                {
+                return _dbSetWrapper.DbSet.ToAsyncEnumerable<T>();
+                }
+            }
     }
 }

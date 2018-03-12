@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data;
 using WebApplication1.Data.Queries;
+using WebApplication1.Data.Models;
 
 namespace WebApplication1.Controllers
 {
@@ -13,6 +14,8 @@ namespace WebApplication1.Controllers
     public class BlogController : Controller
     {
         private readonly IQueryRunner _queryRunner;
+        private readonly AsyncExecutableRunner _runner;
+        private readonly BlogContext _blogContext;
 
         public BlogController(IQueryRunner queryRunner)
         {
