@@ -27,7 +27,7 @@ namespace WebApplication1.Test.Controllers
         public void Initialize()
         {
             _runner = A.Fake<IAsyncExecutableRunner>();
-            _blogContext = A.Fake<BlogDbSetInjector>(options => options.WithArgumentsForConstructor(new object[] { null }));
+            _blogContext = A.Fake<BlogDbSetInjector>(options => options.WithArgumentsForConstructor(new object[] { null }));            
             _controller = new BlogController(_runner, _blogContext);
         }
 
@@ -218,7 +218,7 @@ namespace WebApplication1.Test.Controllers
                 A.CallTo(() =>
                     _runner.Run<IUpsertDbSet<Blog>, int>(
                         A<InsertBlog>.That.IsNotNull(),
-                        A<IDependencyInjectionWrapper<IUpsertDbSet<Blog>>>.Ignored
+                        A<UpserterInjection<Blog>>.Ignored
                     )
                 )
                 .Throws(expectedException);
@@ -247,9 +247,9 @@ namespace WebApplication1.Test.Controllers
                 ).MustHaveHappenedOnceExactly();
 
                 A.CallTo(() =>
-                    _runner.Run<IAsyncEnumerable<Blog>, Blog>(
+                    _runner.Run<IUpsertDbSet<Blog>, int>(
                         A<InsertBlog>.Ignored,
-                        A<DbSetInjection<Blog>>.That.Matches(arg =>
+                        A<UpserterInjection<Blog>>.That.Matches(arg =>
                             arg.DbSetWrapper == _blogContext
                         )
                     )

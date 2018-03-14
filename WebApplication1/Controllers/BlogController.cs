@@ -92,7 +92,7 @@ namespace WebApplication1.Controllers
 
             await _runner.Run<IUpsertDbSet<Blog>, int>(
                 new InsertBlog(null),
-                null
+                new UpserterInjection<Blog>(_blogContext)
             );
 
             return Ok();
