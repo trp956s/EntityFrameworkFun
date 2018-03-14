@@ -18,12 +18,12 @@ namespace WebApplication1.Data.Test.Upserts
             {
                 var blogToInsert = new Blog();
                 var insertBlog = new InsertBlog(blogToInsert);
-                var upserter = A.Fake<IUpsertDbSet>();
+                var upserter = A.Fake<IUpsertDbSet<Blog>>();
 
                 await insertBlog.Execute(upserter);
 
                 A.CallTo(() =>
-                    upserter.AddAsync(A<Blog>.That.IsNotNull())
+                    upserter.AddAsync(A<Blog>.That.IsSameAs(blogToInsert))
                 ).MustHaveHappenedOnceExactly();
             }
         }

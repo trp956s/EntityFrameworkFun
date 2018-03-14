@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data.Helpers
 {
-    public interface IUpsertDbSet
+    public interface IUpsertDbSet<T>
     {
-        Task AddAsync(object v);
+        Task AddAsync(T entityToTrack);
     }
 }

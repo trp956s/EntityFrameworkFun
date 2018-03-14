@@ -21,7 +21,7 @@ namespace WebApplication1.Data.Upserts
             throw new System.NotImplementedException();
         }
 
-        public async Task Execute(IUpsertDbSet blogInserter)
+        public async Task Execute(IUpsertDbSet<Blog> blogInserter)
         {
             await blogInserter.AddAsync(blogToInsert);
         }
