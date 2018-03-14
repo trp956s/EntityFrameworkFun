@@ -8,5 +8,6 @@ namespace WebApplication1.Data.Helpers
     public interface IUpsertDbSet<T>
     {
         Task AddAsync(T entityToTrack);
+        Task Save();
     }
 }

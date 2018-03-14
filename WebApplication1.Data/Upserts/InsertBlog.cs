@@ -24,6 +24,7 @@ namespace WebApplication1.Data.Upserts
         public async Task Execute(IUpsertDbSet<Blog> blogInserter)
         {
             await blogInserter.AddAsync(blogToInsert);
+            await blogInserter.Save();
         }
     }
 }
