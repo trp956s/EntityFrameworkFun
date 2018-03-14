@@ -250,7 +250,7 @@ namespace WebApplication1.Test.Controllers
                     _runner.Run<IUpsertDbSet<Blog>, int>(
                         A<InsertBlog>.Ignored,
                         A<UpserterInjection<Blog>>.That.Matches(arg =>
-                            arg.DbSetWrapper == _blogContext
+                            arg.Dependency == _blogContext
                         )
                     )
                 ).MustHaveHappenedOnceExactly();
