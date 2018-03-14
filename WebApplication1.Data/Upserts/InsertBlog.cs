@@ -9,11 +9,11 @@ namespace WebApplication1.Data.Upserts
 {
     public class InsertBlog : IExecutable<IAsyncEnumerable<Blog>, Blog>, IExecutable<IUpsertDbSet<Blog>, int>
     {
-        private Blog blogToInsert;
+        public Blog BlogToInsert { get; }
 
         public InsertBlog(Blog blogToInsert)
         {
-            this.blogToInsert = blogToInsert;
+            this.BlogToInsert = blogToInsert;
         }
 
         public Task<Blog> Execute(IAsyncEnumerable<Blog> queryable)
@@ -23,7 +23,7 @@ namespace WebApplication1.Data.Upserts
 
         public async Task<int> Execute(IUpsertDbSet<Blog> blogInserter)
         {
-            await blogInserter.AddAsync(blogToInsert);
+            await blogInserter.AddAsync(BlogToInsert);
             return await blogInserter.Save();
         }
     }

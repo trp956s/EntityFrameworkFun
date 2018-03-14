@@ -65,7 +65,7 @@ namespace WebApplication1.Controllers
 
         // POST api/values
         [HttpPost]
-        public async Task<StatusCodeResult> Post(Blog blog)
+        public async Task<StatusCodeResult> Post([FromBody] Blog blog)
         {
             if(blog == null)
             {
@@ -74,18 +74,19 @@ namespace WebApplication1.Controllers
 
             var query = new QueryBlogsById(blog.Id);
 
-            var results = await _runner.Run(
+            var blogWithMatchingId = await _runner.Run(
                 query,
                 blogContextInjection
             );
 
-            if (results == null)
+            //wait a sec... I should be testing if it does NOT exist.  This is an insert, duh!
+            if (blogWithMatchingId == null)
             {
                 return NotFound();
             }
 
             await _runner.Run<IUpsertDbSet<Blog>, int>(
-                new InsertBlog(null),
+                new InsertBlog(blog),
                 new UpserterInjection<Blog>(_blogContext)
             );
 

@@ -233,9 +233,10 @@ namespace WebApplication1.Test.Controllers
             }
 
             [TestMethod]
-            public async Task UsesBlogContext()
+            public async Task UsesBlogAndBlogContext()
             {
-                var result = _controller.Post(new Blog());
+                var expectedBlog = new Blog();
+                var result = _controller.Post(expectedBlog);
 
                 A.CallTo(() =>
                     _runner.Run(
@@ -248,7 +249,9 @@ namespace WebApplication1.Test.Controllers
 
                 A.CallTo(() =>
                     _runner.Run<IUpsertDbSet<Blog>, int>(
-                        A<InsertBlog>.Ignored,
+                        A<InsertBlog>.That.Matches(arg =>
+                            arg.BlogToInsert == expectedBlog
+                        ),
                         A<UpserterInjection<Blog>>.That.Matches(arg =>
                             arg.Dependency == _blogContext
                         )
