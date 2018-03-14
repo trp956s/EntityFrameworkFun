@@ -7,6 +7,7 @@ using WebApplication1.Data.Injectors;
 using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Core;
 using WebApplication1.Data.Upserts;
+using System.Collections.Generic;
 
 namespace WebApplication1.Controllers
 {
@@ -90,8 +91,16 @@ namespace WebApplication1.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public async Task Put(int id, [FromBody]string value)
         {
+            // pretend these were injected
+            BlogDbSetInjector blogInjector1 = null;
+            BlogDbSetInjector blogInjector2 = null;
+
+            await _runner.Run(
+                new ExampleExecutableOfMultipleDbSets(),
+                new ExampleInjectionOfMultipleDbSets(blogInjector1, blogInjector2)
+            );
         }
 
         // DELETE api/values/5
@@ -99,5 +108,40 @@ namespace WebApplication1.Controllers
         public void Delete(int id)
         {
         }
+    }
+
+    public class ExampleExecutableOfMultipleDbSets : IExecutable<ExampleMultipleDbSets, object>//IExecutable<IAsyncEnumerable<Blog>, Blog>
+    {
+        public Task<object> Execute(ExampleMultipleDbSets queryable)
+        {
+            var v = queryable.BlogInjector1;
+            var v2 = queryable.BlogInjector1;
+
+            return Task.FromResult((object)null);
+        }
+    }
+
+    public class ExampleInjectionOfMultipleDbSets : IDependencyInjectionWrapper<ExampleMultipleDbSets>
+    {
+        public ExampleInjectionOfMultipleDbSets(BlogDbSetInjector blogInjector1, BlogDbSetInjector blogInjector2)
+        {
+            Dependency = new ExampleMultipleDbSets(blogInjector1, blogInjector2);
+        }
+
+        public ExampleMultipleDbSets Dependency { get; }
+    }
+
+    public class ExampleMultipleDbSets
+    {
+        public ExampleMultipleDbSets(IDbSetWrapper<Blog> blogWrapper1, IDbSetWrapper<Blog> blogWrapper2)
+        {
+            BlogWrapper1 = blogWrapper1;
+            BlogWrapper2 = blogWrapper2;
+        }
+
+        public IAsyncEnumerable<Blog> BlogInjector1 => BlogWrapper1.DbSet.ToAsyncEnumerable();
+        public IAsyncEnumerable<Blog> BlogInjector2 => BlogWrapper2.DbSet.ToAsyncEnumerable();
+        public IDbSetWrapper<Blog> BlogWrapper1 { get; }
+        public IDbSetWrapper<Blog> BlogWrapper2 { get; }
     }
 }
