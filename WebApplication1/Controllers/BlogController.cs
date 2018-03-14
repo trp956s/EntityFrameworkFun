@@ -84,9 +84,15 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
+            //TODO: DELETE BECAUSE THE NEXT RUN will replace this
             await _runner.Run<IAsyncEnumerable<Blog>, Blog>(
                 new InsertBlog(null),
                 blogContextInjection
+            );
+
+            await _runner.Run<IUpsertDbSet<Blog>, int>(
+                new InsertBlog(null),
+                null
             );
 
             return Ok();

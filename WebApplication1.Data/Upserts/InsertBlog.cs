@@ -7,7 +7,7 @@ using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Upserts
 {
-    public class InsertBlog : IExecutable<IAsyncEnumerable<Blog>, Blog>
+    public class InsertBlog : IExecutable<IAsyncEnumerable<Blog>, Blog>, IExecutable<IUpsertDbSet<Blog>, int>
     {
         private Blog blogToInsert;
 

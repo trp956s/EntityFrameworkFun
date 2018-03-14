@@ -216,9 +216,9 @@ namespace WebApplication1.Test.Controllers
                 var expectedException = new Exception();
 
                 A.CallTo(() =>
-                    _runner.Run<IAsyncEnumerable<Blog>, Blog>(
+                    _runner.Run<IUpsertDbSet<Blog>, int>(
                         A<InsertBlog>.That.IsNotNull(),
-                        A<DbSetInjection<Blog>>.Ignored
+                        A<IDependencyInjectionWrapper<IUpsertDbSet<Blog>>>.Ignored
                     )
                 )
                 .Throws(expectedException);
