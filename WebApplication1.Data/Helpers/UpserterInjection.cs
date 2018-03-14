@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WebApplication1.Data.Core;
-using WebApplication1.Data.Injectors;
-using WebApplication1.Data.Models;
+﻿using WebApplication1.Data.Core;
 
 namespace WebApplication1.Data.Helpers
 {

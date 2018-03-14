@@ -7,7 +7,6 @@ using WebApplication1.Data.Injectors;
 using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Core;
 using WebApplication1.Data.Upserts;
-using System.Collections.Generic;
 
 namespace WebApplication1.Controllers
 {
