@@ -51,6 +51,22 @@ namespace WebApplication1.Data.Test.Upserts
                     upserter.Save()
                 ).MustNotHaveHappened();
             }
+
+            [TestMethod]
+            public async Task ReturnsSaveChanges()
+            {
+                var expectedResult = 1;
+                var insertBlog = new InsertBlog(null);
+                var upserter = A.Fake<IUpsertDbSet<Blog>>();
+
+                A.CallTo(() =>
+                    upserter.Save()
+                ).Returns(expectedResult);
+
+                var actualResult = await new InsertBlog(null).Execute(upserter);
+
+                Assert.AreEqual(expectedResult, actualResult);
+            }
         }
     }
 }
