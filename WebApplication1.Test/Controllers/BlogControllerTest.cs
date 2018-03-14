@@ -231,6 +231,30 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.AreEqual(actualResult, expectedException);
             }
+
+            [TestMethod]
+            public async Task UsesBlogContext()
+            {
+                var result = await _controller.Post(new Blog());
+
+                A.CallTo(() =>
+                    _runner.Run(
+                        A<QueryBlogsById>.Ignored,
+                        A<DbSetInjection<Blog>>.That.Matches(arg =>
+                            arg.DbSetWrapper == _blogContext
+                        )
+                    )
+                ).MustHaveHappenedOnceExactly();
+
+                A.CallTo(() =>
+                    _runner.Run(
+                        A<InsertBlog>.Ignored,
+                        A<DbSetInjection<Blog>>.That.Matches(arg =>
+                            arg.DbSetWrapper == _blogContext
+                        )
+                    )
+                ).MustHaveHappenedOnceExactly();
+            }
         }
     }
 
