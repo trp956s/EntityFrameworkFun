@@ -29,6 +29,14 @@ namespace WebApplication1.Test.Controllers
             _runner = A.Fake<IAsyncExecutableRunner>();
             _blogContext = A.Fake<BlogDbSetInjector>(options => options.WithArgumentsForConstructor(new object[] { null }));            
             _controller = new BlogController(_runner, _blogContext);
+
+            //override default return of this method
+            A.CallTo(() =>
+                _runner.Run(
+                    A<QueryBlogsById>.Ignored,
+                    A<DbSetInjection<Blog>>.Ignored
+                )
+            ).Returns((Blog)null);
         }
 
         [TestClass]
@@ -156,18 +164,10 @@ namespace WebApplication1.Test.Controllers
             }
 
             [TestMethod]
-            public async Task ReturnsOKWhenUpdateRecordFound()
+            public async Task ReturnsOKWhenUpdateRecordNotFound()
             {
                 var blogToUpdate = new Blog();
                 var blogInDatabase = new Blog();
-
-                A.CallTo(() => 
-                    _runner.Run(
-                        A<QueryBlogsById>.Ignored, 
-                        A<DbSetInjection<Blog>>.Ignored
-                    )
-                )
-                .Returns(blogInDatabase);
 
                 var result = await _controller.Post(blogToUpdate);
 
@@ -175,10 +175,10 @@ namespace WebApplication1.Test.Controllers
             }
 
             [TestMethod]
-            public async Task Returns404WhenNothingFound()
+            public async Task Returns400WhenSomethingFound()
             {
                 var blogToUpdate = new Blog();
-                var blogInDatabase = (Blog)null;
+                var blogInDatabase = blogToUpdate;
 
                 A.CallTo(() =>
                     _runner.Run(
@@ -190,7 +190,7 @@ namespace WebApplication1.Test.Controllers
 
                 var result = await _controller.Post(blogToUpdate);
 
-                Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+                Assert.IsInstanceOfType(result, typeof(BadRequestResult));
 
             }
 
@@ -217,7 +217,7 @@ namespace WebApplication1.Test.Controllers
 
                 A.CallTo(() =>
                     _runner.Run<IUpsertDbSet<Blog>, int>(
-                        A<InsertBlog>.That.IsNotNull(),
+                        A<InsertBlog>.Ignored,
                         A<UpserterInjection<Blog>>.Ignored
                     )
                 )

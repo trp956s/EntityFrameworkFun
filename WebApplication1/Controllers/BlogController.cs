@@ -79,10 +79,9 @@ namespace WebApplication1.Controllers
                 blogContextInjection
             );
 
-            //wait a sec... I should be testing if it does NOT exist.  This is an insert, duh!
-            if (blogWithMatchingId == null)
+            if (blogWithMatchingId != null)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             await _runner.Run<IUpsertDbSet<Blog>, int>(
