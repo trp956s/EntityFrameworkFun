@@ -216,7 +216,7 @@ namespace WebApplication1.Test.Controllers
                 var expectedException = new Exception();
 
                 A.CallTo(() =>
-                    _runner.Run(
+                    _runner.Run<IAsyncEnumerable<Blog>, Blog>(
                         A<InsertBlog>.That.IsNotNull(),
                         A<DbSetInjection<Blog>>.Ignored
                     )
@@ -235,7 +235,7 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task UsesBlogContext()
             {
-                var result = await _controller.Post(new Blog());
+                var result = _controller.Post(new Blog());
 
                 A.CallTo(() =>
                     _runner.Run(
@@ -247,7 +247,7 @@ namespace WebApplication1.Test.Controllers
                 ).MustHaveHappenedOnceExactly();
 
                 A.CallTo(() =>
-                    _runner.Run(
+                    _runner.Run<IAsyncEnumerable<Blog>, Blog>(
                         A<InsertBlog>.Ignored,
                         A<DbSetInjection<Blog>>.That.Matches(arg =>
                             arg.DbSetWrapper == _blogContext

@@ -7,6 +7,7 @@ using WebApplication1.Data.Injectors;
 using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Core;
 using WebApplication1.Data.Upserts;
+using System.Collections.Generic;
 
 namespace WebApplication1.Controllers
 {
@@ -83,7 +84,7 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            await _runner.Run(
+            await _runner.Run<IAsyncEnumerable<Blog>, Blog>(
                 new InsertBlog(null),
                 blogContextInjection
             );
