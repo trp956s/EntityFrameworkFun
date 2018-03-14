@@ -25,13 +25,15 @@ namespace WebApplication1.Controllers
             _blogContext = blogContext;
         }
 
+        private DbSetInjection<Blog> blogContextInjection => new DbSetInjection<Blog>(_blogContext);
+
         // GET api/values
         [HttpGet]
         public async Task<ActionResult> Get()
         {
             var results = await _runner.Run(
-                new QueryAllBlogs(), 
-                new DbSetInjection<Blog>(_blogContext)
+                new QueryAllBlogs(),
+                blogContextInjection
             );
 
             if (results.Any())
@@ -49,7 +51,7 @@ namespace WebApplication1.Controllers
             var query = new QueryBlogsById(id);
             var results = await _runner.Run(
                 query,
-                new DbSetInjection<Blog>(_blogContext)
+                blogContextInjection
             );
 
             if(results == null)
@@ -70,9 +72,10 @@ namespace WebApplication1.Controllers
             }
 
             var query = new QueryBlogsById(blog.Id);
+
             var results = await _runner.Run(
                 query,
-                new DbSetInjection<Blog>(_blogContext)
+                blogContextInjection
             );
 
             if (results == null)
@@ -82,7 +85,7 @@ namespace WebApplication1.Controllers
 
             await _runner.Run(
                 new InsertBlog(),
-                new DbSetInjection<Blog>(_blogContext)
+                blogContextInjection
             );
 
             return Ok();
