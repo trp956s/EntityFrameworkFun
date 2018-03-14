@@ -84,7 +84,7 @@ namespace WebApplication1.Controllers
             }
 
             await _runner.Run(
-                new InsertBlog(),
+                new InsertBlog(null),
                 blogContextInjection
             );
 
