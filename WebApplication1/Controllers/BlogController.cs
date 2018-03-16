@@ -7,10 +7,43 @@ using WebApplication1.Data.Injectors;
 using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Core;
 using WebApplication1.Data.Upserts;
+using System.Collections.Generic;
 
 namespace WebApplication1.Controllers
 {
-    //todo: 9,  10, 11: test drive the rest of this class keeping blogs simple
+    public class DbSetExecutableWrapper2<T, ReturnT>
+    where T : class
+    {
+        public DbSetExecutableWrapper2(IDbSetWrapper<T> dbSetWrapper)
+        {
+            DbSetWrapper = dbSetWrapper;
+        }
+
+        public IDbSetWrapper<T> DbSetWrapper { get; }
+
+        public async Task<ReturnT> Execute(IExecutable<IAsyncEnumerable<T>, ReturnT> query)
+        {
+            return await query.Execute(DbSetWrapper.DbSet.ToAsyncEnumerable());
+        }
+    }
+
+    public class DbSetExecutableWrapper<T, ReturnT> : IExecutable<IDbSetWrapper<T>, ReturnT>
+    where T : class
+    {
+        public DbSetExecutableWrapper(IExecutable<IAsyncEnumerable<T>, ReturnT> wrappedExecutable)
+        {
+            WrappedExecutable = wrappedExecutable;
+        }
+
+        public IExecutable<IAsyncEnumerable<T>, ReturnT> WrappedExecutable { get; }
+
+        public async Task<ReturnT> Execute(IDbSetWrapper<T> queryable)
+        {
+            return await WrappedExecutable.Execute(queryable.DbSet.ToAsyncEnumerable());
+        }
+    }
+
+    //todo: 10, 11: test drive the rest of this class keeping blogs simple
     //todo: 12, 13, 14, 15, 16: test drive post using a service to encapsulate relationships and business rules and a PostApi to pass to/from the controller
     //todo: 17 - use custom logger to show full path names
     [Route("api/[controller]")]
