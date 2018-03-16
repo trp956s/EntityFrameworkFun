@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace WebApplication1.Controllers
 {
-    public class DbSetExecutableWrapper2<T, ReturnT>
+    public class DbSetExecutableWrapper2<T, ReturnT> : IExecutable<IExecutable<IAsyncEnumerable<T>, ReturnT>, ReturnT>
     where T : class
     {
         public DbSetExecutableWrapper2(IDbSetWrapper<T> dbSetWrapper)
