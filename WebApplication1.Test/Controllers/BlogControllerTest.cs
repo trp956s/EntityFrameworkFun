@@ -13,9 +13,28 @@ using WebApplication1.Data.Helpers;
 using WebApplication1.Data.Core;
 using WebApplication1.Data.Upserts;
 using System;
+using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data;
 
 namespace WebApplication1.Test.Controllers
 {
+    //TODO: move to test helpers
+    public class DbContextFake<T> : DbContext
+    where T : class
+    {
+        public DbContextFake(IEnumerable<T> data):base(
+            new DbContextOptionsBuilder<DbContextFake<T>>()
+                .UseInMemoryDatabase(
+                    databaseName: System.IO.Path.GetRandomFileName()
+                )
+                .Options
+        ) { 
+            Data.AddRange(data);
+            SaveChanges();
+        }
+        public DbSet<T> Data {get;set;}
+    } 
+
     [TestClass]
     public class BlogControllerTest
     {
@@ -45,6 +64,25 @@ namespace WebApplication1.Test.Controllers
             [TestClass]
             public class Empty : BlogControllerTest.Get
             {
+                [TestMethod]
+                public async Task DbSet()
+                {
+                    using (var context = new DbContextFake<Blog>(new Blog[]{new Blog()}))
+                    {
+                        Assert.AreEqual(1, context.Data.Count());
+                    }
+                }
+
+                [TestMethod]
+                public async Task DbSet2()
+                {
+                    using (var context = new DbContextFake<Blog>(new Blog[]{new Blog()}))
+                    {
+                        Assert.AreEqual(1, context.Data.Count());
+                    }
+                }
+                
+
                 [TestMethod]
                 public async Task ReturnsOKWithValue()
                 {
