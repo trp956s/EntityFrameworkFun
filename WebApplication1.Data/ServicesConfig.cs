@@ -1,13 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ExecutionStrategyCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace WebApplication1.Data
 {
-    public class ServicesConfig
+    public class ServicesConfig : IServicesConfig
     {
-        public void Configure(IServiceCollection services, string connection)
+        private readonly IServiceCollectionWrapper serviceCollectionWrapper;
+
+        public ServicesConfig(IServiceCollectionWrapper serviceCollectionWrapper)
         {
-            services.AddDbContext<BloggingContext>(options => options.UseSqlServer(connection));
+            this.serviceCollectionWrapper = serviceCollectionWrapper;
+        }
+
+        public void ConfigureServices()
+        {
+            var connection = @"Server=(localdb)\mssqllocaldb;Database=EFGetStarted.AspNetCore.NewDb;Trusted_Connection=True;ConnectRetryCount=0";
+
+            serviceCollectionWrapper.AddDbContext<BloggingContext>(options => options.UseSqlServer(connection));
         }
     }
 }

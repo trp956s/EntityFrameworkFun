@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <StartupObject>WebApplication1.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ExecutionStrategyCore\ExecutionStrategyCore.csproj" />
     <ProjectReference Include="..\WebApplication1.Data\WebApplication1.Data.csproj" />
   </ItemGroup>
 

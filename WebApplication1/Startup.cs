@@ -1,27 +1,31 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using ExecutionStrategyCore;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using WebApplication1.Data;
 
 namespace WebApplication1
 {
     public class Startup
     {
+        private readonly IConfiguration configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
-            ServicesConfig = new ServicesConfig();
+            this.configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
-        public ServicesConfig ServicesConfig { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var connection = @"Server=(localdb)\mssqllocaldb;Database=EFGetStarted.AspNetCore.NewDb;Trusted_Connection=True;ConnectRetryCount=0";
-            ServicesConfig.Configure(services, connection);
+            services.AddSingleton<IServiceCollection>(services);
+            services.AddScoped<IServiceCollectionWrapper, ServiceCollectionWrapper>();
+            services.AddScoped<ScopedTypesInjector>();
+
+            var scopedTypesInjector = services.BuildServiceProvider().GetService<ScopedTypesInjector>();
+            scopedTypesInjector.ConfigureServices();
 
             services.AddMvc();
         }
