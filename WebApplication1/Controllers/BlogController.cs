@@ -1,12 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using WebApplication1.Data.Queries.BlogPersistanceLayer;
 using WebApplication1.Data.Models;
-using WebApplication1.Data.Injectors;
-using WebApplication1.Data.Helpers;
-using WebApplication1.Data.Core;
-using WebApplication1.Data.Upserts;
 
 namespace WebApplication1.Controllers
 {
@@ -16,31 +11,10 @@ namespace WebApplication1.Controllers
     [Route("api/[controller]")]
     public class BlogController : Controller
     {
-        public readonly IAsyncExecutableRunner _runner;
-        private readonly BlogDbSetInjector _blogContext;
-
-        public BlogController(IAsyncExecutableRunner runner, BlogDbSetInjector blogContext)
-        {
-            _runner = runner;
-            _blogContext = blogContext;
-        }
-
-        private DbSetInjection<Blog> blogContextInjection => new DbSetInjection<Blog>(_blogContext);
-
         // GET api/values
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            var results = await _runner.Run(
-                new QueryAllBlogs(),
-                blogContextInjection
-            );
-
-            if (results.Any())
-            {
-                return Ok(results);
-            }
-
             return NotFound();
         }
 
@@ -48,47 +22,14 @@ namespace WebApplication1.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> Get(int id)
         {
-            var query = new QueryBlogsById(id);
-            var results = await _runner.Run(
-                query,
-                blogContextInjection
-            );
-
-            if(results == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(results);
+            return NotFound();
         }
 
         // POST api/values
         [HttpPost]
         public async Task<StatusCodeResult> Post([FromBody] Blog blog)
         {
-            if(blog == null)
-            {
-                return NotFound();
-            }
-
-            var query = new QueryBlogsById(blog.Id);
-
-            var blogWithMatchingId = await _runner.Run(
-                query,
-                blogContextInjection
-            );
-
-            if (blogWithMatchingId != null)
-            {
-                return BadRequest();
-            }
-
-            await _runner.Run<IUpsertDbSet<Blog>, int>(
-                new InsertBlog(blog),
-                new UpserterInjection<Blog>(_blogContext)
-            );
-
-            return Ok();
+            return BadRequest();
         }
 
         // PUT api/values/5
