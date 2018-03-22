@@ -3,13 +3,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using WebApplication1.Controllers;
+using WebApplication1.Data.Models;
 
 namespace WebApplication1.Test.Controllers
 {
     [TestClass]
     public class BlogControllerTest
     {
-        BlogController blogController = new BlogController(new ExecutionStrategyRunner());
+        ExecutionStrategyRunner runner;
+        BlogController blogController;
+
+        [TestInitialize]
+        public void Initialize() {
+            runner = new ExecutionStrategyRunner();
+            blogController = new BlogController(runner);
+        }
 
         [TestClass]
         public class GetAll : BlogControllerTest
@@ -20,6 +28,20 @@ namespace WebApplication1.Test.Controllers
                 var getResult = await blogController.Get();
 
                 Assert.IsInstanceOfType(getResult, typeof(NotFoundResult));
+            }
+
+            [TestMethod]
+            public async Task ReturnsAnEmptyArray()
+            {
+                var storyRunner = new StoryExecutionStrategyRunner(runner);
+                blogController = new BlogController(storyRunner);
+
+                var getResult = await blogController.Get();
+
+                Assert.IsInstanceOfType(getResult, typeof(OkObjectResult));
+
+                var resultValue = ((OkObjectResult)getResult).Value;
+                Assert.IsInstanceOfType(resultValue, typeof(Blog[]));
             }
         }
 

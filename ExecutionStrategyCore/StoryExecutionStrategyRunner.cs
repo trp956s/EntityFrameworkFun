@@ -22,9 +22,22 @@ namespace ExecutionStrategyCore
 
     public class StoryExecutionStrategyRunner : IExecutionStrategyRunner
     {
-        public Task<T> Run<T>(ExecutionStrategy<T> executionStrategy)
+        private readonly ExecutionStrategyRunner runner;
+
+        public StoryExecutionStrategyRunner(ExecutionStrategyRunner runner)
         {
-            throw new NotImplementedException();
+            this.runner = runner;
+        }
+
+        public async Task<T> Run<T>(ExecutionStrategy<T> executionStrategy)
+        {
+            if (executionStrategy is StoryToggleExecutionStrategy<T>)
+            {
+                var strategy = (StoryToggleExecutionStrategy<T>)executionStrategy;
+                executionStrategy = strategy.StoryExecutionStrategy();
+            }
+
+            return await runner.Run<T>(executionStrategy);
         }
     }
 }
