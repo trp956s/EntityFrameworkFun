@@ -21,21 +21,21 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            return NotFound();
+            return await runner.Run(new ExecutionStrategy<NotFoundResult>(() => NotFound()));
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult> Get(int id)
         {
-            return NotFound();
+            return await runner.Run(new ExecutionStrategy<StatusCodeResult>(() => NotFound()));
         }
 
         // POST api/values
         [HttpPost]
         public async Task<StatusCodeResult> Post([FromBody] Blog blog)
         {
-            return BadRequest();
+            return await runner.Run(new ExecutionStrategy<StatusCodeResult>(() => BadRequest()));
         }
 
         // PUT api/values/5

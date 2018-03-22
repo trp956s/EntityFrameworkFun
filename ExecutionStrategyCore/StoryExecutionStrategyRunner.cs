@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace ExecutionStrategyCore
 {
@@ -21,5 +22,9 @@ namespace ExecutionStrategyCore
 
     public class StoryExecutionStrategyRunner : IExecutionStrategyRunner
     {
+        public Task<T> Run<T>(ExecutionStrategy<T> executionStrategy)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
