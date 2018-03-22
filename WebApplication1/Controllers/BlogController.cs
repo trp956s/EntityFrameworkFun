@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using ExecutionStrategyCore;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data.Models;
 
@@ -10,6 +11,12 @@ namespace WebApplication1.Controllers
     [Route("api/[controller]")]
     public class BlogController : Controller
     {
+        private readonly IExecutionStrategyRunner runner;
+
+        public BlogController(IExecutionStrategyRunner runner) {
+            this.runner = runner;
+        }
+
         // GET api/values
         [HttpGet]
         public async Task<ActionResult> Get()

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ExecutionStrategyCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using WebApplication1.Controllers;
@@ -8,7 +9,7 @@ namespace WebApplication1.Test.Controllers
     [TestClass]
     public class BlogControllerTest
     {
-        BlogController blogController = new BlogController();
+        BlogController blogController = new BlogController(new ExecutionStrategyRunner());
 
         [TestClass]
         public class GetAll : BlogControllerTest

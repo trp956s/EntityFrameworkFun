@@ -33,5 +33,18 @@ namespace ExecutionStrategyCore
         {
             collection.AddDbContext<T>(optionsAction);
         }
+
+        public void AddSingleton<T>(T implementationInstance)
+        where T : class
+        {
+            collection.AddSingleton<T>(implementationInstance);
+        }
+
+        public void AddScoped<T, T2>()
+            where T : class
+            where T2 : class, T
+        {
+            collection.AddScoped<T, T2>();
+        }
     }
 }

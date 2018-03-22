@@ -1,20 +1,38 @@
 ﻿using ExecutionStrategyCore;
+using Microsoft.Extensions.Configuration;
 using WebApplication1.Data;
+using System.Linq;
 
 namespace WebApplication1
 {
+    //TODO: consider appsettings.json picking between an injector that checks for active-stories section and one that does not.  for instance production should probably avoid
     public class ScopedTypesInjector : IServicesConfig
     {
-        private readonly IServiceCollectionWrapper scopedServicesWrapper;
+        private readonly IServiceCollectionWrapper serviceCollectionWrapper;
+        private readonly IConfiguration configuration;
 
-        public ScopedTypesInjector(IServiceCollectionWrapper scopedServicesWrapper)
+        public ScopedTypesInjector(IServiceCollectionWrapper scopedServicesWrapper, IConfiguration configuration)
         {
-            this.scopedServicesWrapper = scopedServicesWrapper;
+            this.serviceCollectionWrapper = scopedServicesWrapper;
+            this.configuration = configuration;
         }
 
         public void ConfigureServices()
         {
-            scopedServicesWrapper.AddConfig<ServicesConfig>();
+            serviceCollectionWrapper.AddConfig<ServicesConfig>();
+
+            var activeStoriesSection = configuration.GetSection("active-stories");
+            if (activeStoriesSection.Exists())
+            {
+                var storyFlags = activeStoriesSection.GetChildren().Select(x => x.Value);
+                serviceCollectionWrapper.AddScoped<ExecutionStrategyRunner>();
+                serviceCollectionWrapper.AddSingleton(new ActiveStories(storyFlags));
+                serviceCollectionWrapper.AddScoped<IExecutionStrategyRunner, StoryExecutionStrategyRunner>();
+            }
+            else
+            {
+                serviceCollectionWrapper.AddScoped<IExecutionStrategyRunner, ExecutionStrategyRunner>();
+            }
         }
     }
 }

@@ -4,8 +4,7 @@ using System.Text;
 
 namespace ExecutionStrategyCore
 {
-    public class ExecutionStrategyRunner : IExecutionStrategyRunner
+    public interface IExecutionStrategyRunner
     {
-
     }
 }
