@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace ExecutionStrategyCore
 {
@@ -22,19 +23,30 @@ namespace ExecutionStrategyCore
 
     public class StoryExecutionStrategyRunner : IExecutionStrategyRunner
     {
+        private readonly ActiveStories stories;
         private readonly ExecutionStrategyRunner runner;
 
-        public StoryExecutionStrategyRunner(ExecutionStrategyRunner runner)
+        public StoryExecutionStrategyRunner(ActiveStories stories, ExecutionStrategyRunner runner)
         {
+            this.stories = stories;
             this.runner = runner;
         }
 
         public async Task<T> Run<T>(ExecutionStrategy<T> executionStrategy)
         {
-            if (executionStrategy is StoryToggleExecutionStrategy<T>)
+            if (stories.Any() && executionStrategy is StoryToggleExecutionStrategy<T>)
             {
-                var strategy = (StoryToggleExecutionStrategy<T>)executionStrategy;
-                executionStrategy = strategy.StoryExecutionStrategy();
+                var storyStrategy = ((StoryToggleExecutionStrategy<T>)
+                    executionStrategy).StoryExecutionStrategy();
+                var strategyStories = storyStrategy.Run.Method
+                    .GetCustomAttributes(typeof(StoryAttribute), true).
+                    Select(x=>((StoryAttribute)x).StoryFlag);
+
+                if (stories.AnyMatching(strategyStories))
+                {
+                    executionStrategy = storyStrategy;
+                }
+
             }
 
             return await runner.Run<T>(executionStrategy);

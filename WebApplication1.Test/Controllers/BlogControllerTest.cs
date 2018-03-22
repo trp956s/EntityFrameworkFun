@@ -33,7 +33,8 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsAnEmptyArray()
             {
-                var storyRunner = new StoryExecutionStrategyRunner(runner);
+                var stories = new ActiveStories(new string[]{"1"});
+                var storyRunner = new StoryExecutionStrategyRunner(stories, runner);
                 blogController = new BlogController(storyRunner);
 
                 var getResult = await blogController.Get();
