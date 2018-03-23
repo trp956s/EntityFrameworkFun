@@ -1,22 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ExecutionStrategyCore
 {
+    public static class StoryOverrideExecutionStrategy
+    {
+        public static StoryOverrideExecutionStrategy<T> Create<T>(
+            ExecutionStrategy<T> originalStrategy,
+            params Func<Task<T>>[] executionStrategyRunOverrideFunctions
+        )
+        {
+            var strategyOverrides = executionStrategyRunOverrideFunctions.
+                Select(x => new Func<ExecutionStrategy<T>>(() =>
+                    new ExecutionStrategy<T>(x)
+                )
+            ).ToArray();
+
+            return new StoryOverrideExecutionStrategy<T>(originalStrategy, strategyOverrides);
+        }
+    }
+
     public class StoryOverrideExecutionStrategy<T> : ExecutionStrategy<T>
     {
-        public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, 
-            params Func<T>[] executionStrategyRunOverrideFunctions
-        ) : base(originalStrategy.Run)
-        {
-            StoryExecutionStrategies = executionStrategyRunOverrideFunctions.
-                Select(x =>
-                    new Func<ExecutionStrategy<T>>(() => 
-                        ExecutionStrategy.Create<T>(x)
-                ));
-        }
-
         public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, 
             params Func<ExecutionStrategy<T>>[] storyExecutionStrategyFunctions
         ) : base(originalStrategy.Run)

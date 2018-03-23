@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ExecutionStrategyCore;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data.Models;
@@ -22,9 +23,9 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Get()
         {
             var notFoundStrategy = ExecutionStrategy.Create<ActionResult>(()=>NotFound());
-            var strategyToggle = new StoryOverrideExecutionStrategy<ActionResult>(
-                notFoundStrategy, 
-                () => new ExecutionStrategy<ActionResult>(GetAllBlogs)
+            var strategyToggle = StoryOverrideExecutionStrategy.Create<ActionResult>(
+                notFoundStrategy,
+                GetAllBlogs
             );
             return await runner.Run(strategyToggle);
         }
