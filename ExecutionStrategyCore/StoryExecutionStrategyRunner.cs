@@ -34,9 +34,9 @@ namespace ExecutionStrategyCore
 
         public async Task<T> Run<T>(ExecutionStrategy<T> executionStrategy)
         {
-            if (stories.Any() && executionStrategy is StoryToggleExecutionStrategy<T>)
+            if (stories.Any() && executionStrategy is StoryOverrideExecutionStrategy<T>)
             {
-                var storyStrategy = ((StoryToggleExecutionStrategy<T>)
+                var storyStrategy = ((StoryOverrideExecutionStrategy<T>)
                     executionStrategy).StoryExecutionStrategy();
                 var strategyStories = storyStrategy.Run.Method
                     .GetCustomAttributes(typeof(StoryAttribute), true).

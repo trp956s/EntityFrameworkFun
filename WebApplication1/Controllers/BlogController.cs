@@ -22,7 +22,7 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Get()
         {
             var notFoundStrategy = ExecutionStrategy.Create<ActionResult>(()=>NotFound());
-            var strategyToggle = new StoryToggleExecutionStrategy<ActionResult>(
+            var strategyToggle = new StoryOverrideExecutionStrategy<ActionResult>(
                 notFoundStrategy, 
                 () => new ExecutionStrategy<ActionResult>(GetAllBlogs)
             );
