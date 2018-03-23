@@ -36,17 +36,26 @@ namespace ExecutionStrategyCore
         {
             if (stories.Any() && executionStrategy is StoryOverrideExecutionStrategy<T>)
             {
-                var storyStrategy = ((StoryOverrideExecutionStrategy<T>)
-                    executionStrategy).StoryExecutionStrategy();
-                var strategyStories = storyStrategy.Run.Method
-                    .GetCustomAttributes(typeof(StoryAttribute), true).
-                    Select(x=>((StoryAttribute)x).StoryFlag);
+                var storyExecutionStrategies = ((StoryOverrideExecutionStrategy<T>)
+                    executionStrategy).StoryExecutionStrategies.Reverse();
 
-                if (stories.AnyMatching(strategyStories))
+                foreach(var storyExecutionStrategyFactory in storyExecutionStrategies)
                 {
-                    executionStrategy = storyStrategy;
-                }
+                    var strategy = storyExecutionStrategyFactory();
+                    var strategyRunMethod = strategy.Run.Method;
+                    var strategyAttributes = strategyRunMethod.GetCustomAttributes(
+                        typeof(StoryAttribute), true);
+                    var strategyStories = strategyAttributes.
+                        OfType<StoryAttribute>().Select(
+                            x => x.StoryFlag
+                        );
 
+                    if (stories.AnyMatching(strategyStories))
+                    {
+                        executionStrategy = strategy;
+                        break;
+                    }
+                }
             }
 
             return await runner.Run<T>(executionStrategy);

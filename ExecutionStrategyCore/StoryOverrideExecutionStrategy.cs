@@ -6,16 +6,20 @@ namespace ExecutionStrategyCore
 {
     public class StoryOverrideExecutionStrategy<T> : ExecutionStrategy<T>
     {
-        public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, Func<T> executionStrategyRunOverride) : base(originalStrategy.Run)
+        public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, Func<T> executionStrategyRunOverride) : this(
+            originalStrategy,
+            () => ExecutionStrategy.Create<T>(executionStrategyRunOverride)
+        )
         {
-            StoryExecutionStrategy = ()=> ExecutionStrategy.Create<T>(executionStrategyRunOverride);
         }
 
         public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, Func<ExecutionStrategy<T>> storyExecutionStrategyFunction) : base(originalStrategy.Run)
         {
-            StoryExecutionStrategy = storyExecutionStrategyFunction;
+            StoryExecutionStrategies = new Func<ExecutionStrategy<T>>[] {
+                storyExecutionStrategyFunction
+            };
         }
 
-        internal Func<ExecutionStrategy<T>> StoryExecutionStrategy { get; }
+        internal IEnumerable<Func<ExecutionStrategy<T>>> StoryExecutionStrategies { get; }
     }
 }
