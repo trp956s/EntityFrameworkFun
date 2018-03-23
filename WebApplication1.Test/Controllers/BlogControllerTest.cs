@@ -10,6 +10,7 @@ using WebApplication1.Test.Helpers;
 using FakeItEasy;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.Entity;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -39,7 +40,7 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsAnEmptyArray()
             {
-                var stories = new ActiveStories(new string[]{"1"});
+                var stories = new ActiveStories(new string[] { "1" });
                 var storyRunner = new StoryExecutionStrategyRunner(stories, runner);
                 blogController = new BlogController(storyRunner);
 
@@ -68,7 +69,7 @@ namespace WebApplication1.Test.Controllers
             }
 
             [TestMethod]
-            public async Task ReturnsAArrayFromDbSet()
+            public async Task ReturnsAArrayFromQuery()
             {
                 var stories = new ActiveStories(new string[] { "3" });
                 var storyRunner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
@@ -76,7 +77,7 @@ namespace WebApplication1.Test.Controllers
                 );
                 var fakeBlogs = new Collection<Blog> { new Blog() };
                 var fakeBlogsTask = Task.FromResult(fakeBlogs.AsEnumerable());
-                A.CallTo(()=>storyRunner.Run<IEnumerable<Blog>>(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
+                A.CallTo(() => storyRunner.Run<IEnumerable<Blog>>(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
                     Returns(fakeBlogsTask);
                 blogController = new BlogController(storyRunner);
 
@@ -86,6 +87,13 @@ namespace WebApplication1.Test.Controllers
 
                 var resultValue = (IEnumerable<Blog>)((OkObjectResult)getResult).Value;
                 CollectionAssert.AreEquivalent(fakeBlogs, new Collection<Blog>(resultValue.ToList()));
+            }
+
+            [TestMethod]
+            public async Task ReturnsAArrayFromDbSet()
+            {
+                var v = await DbFake.CreateDbSet<Blog>(new Blog[] { new Blog() }).ToListAsync();
+                Assert.IsNotNull(v);
             }
         }
 
