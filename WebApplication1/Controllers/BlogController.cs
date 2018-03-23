@@ -25,7 +25,8 @@ namespace WebApplication1.Controllers
             var notFoundStrategy = ExecutionStrategy.Create<ActionResult>(()=>NotFound());
             var strategyToggle = StoryOverrideExecutionStrategy.Create<ActionResult>(
                 notFoundStrategy,
-                GetAllBlogs
+                GetAllBlogs,
+                GetAllBlogs2
             );
             return await runner.Run(strategyToggle);
         }
@@ -34,6 +35,14 @@ namespace WebApplication1.Controllers
         private async Task<ActionResult> GetAllBlogs()
         {
             return await Task.FromResult(Ok(new Blog[] { }));
+        }
+
+        [Story("2")]
+        private async Task<ActionResult> GetAllBlogs2()
+        {
+            return await Task.FromResult(Ok(new Blog[] {
+                new Blog()
+            }));
         }
 
         // GET api/values/5

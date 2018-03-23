@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using WebApplication1.Controllers;
 using WebApplication1.Data.Models;
+using System.Linq;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -44,6 +45,23 @@ namespace WebApplication1.Test.Controllers
                 var resultValue = ((OkObjectResult)getResult).Value;
                 Assert.IsInstanceOfType(resultValue, typeof(Blog[]));
             }
+
+            [TestMethod]
+            public async Task ReturnsASingleItemArray()
+            {
+                var stories = new ActiveStories(new string[] { "2" });
+                var storyRunner = new StoryExecutionStrategyRunner(stories, runner);
+                blogController = new BlogController(storyRunner);
+
+                var getResult = await blogController.Get();
+
+                Assert.IsInstanceOfType(getResult, typeof(OkObjectResult));
+
+                var resultValue = (Blog[])((OkObjectResult)getResult).Value;
+                Assert.AreEqual(resultValue.Count(), 1);
+                CollectionAssert.AllItemsAreNotNull(resultValue);
+            }
+
         }
 
         [TestClass]
