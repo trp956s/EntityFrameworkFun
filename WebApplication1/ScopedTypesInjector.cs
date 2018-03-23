@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using WebApplication1.Data;
 using System.Linq;
+using WebApplication1.Data.Queries;
+using WebApplication1.Data.Models;
 
 namespace WebApplication1
 {
@@ -20,6 +22,7 @@ namespace WebApplication1
         public void ConfigureServices()
         {
             serviceCollectionWrapper.AddConfig<ServicesConfig>();
+            serviceCollectionWrapper.AddScoped<DbSetWrapper<Blog>>();
 
             var activeStoriesSection = configuration.GetSection("active-stories");
             if (activeStoriesSection.Exists())

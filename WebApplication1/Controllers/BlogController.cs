@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ExecutionStrategyCore;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data.Models;
+using WebApplication1.Data.Queries;
 
 namespace WebApplication1.Controllers
 {
@@ -13,6 +14,7 @@ namespace WebApplication1.Controllers
     public class BlogController : Controller
     {
         private readonly IExecutionStrategyRunner runner;
+        private readonly DbSetWrapper<Blog> blogData;
 
         public BlogController(IExecutionStrategyRunner runner) {
             this.runner = runner;
@@ -26,7 +28,8 @@ namespace WebApplication1.Controllers
             var strategyToggle = StoryOverrideExecutionStrategy.Create<ActionResult>(
                 notFoundStrategy,
                 GetAllBlogs,
-                GetAllBlogs2
+                GetAllBlogs2,
+                GetAllBlogs3
             );
             return await runner.Run(strategyToggle);
         }
@@ -44,6 +47,16 @@ namespace WebApplication1.Controllers
                 new Blog()
             }));
         }
+
+        [Story("3")]
+        private async Task<ActionResult> GetAllBlogs3()
+        {
+            var runStrategy = new GetAll<Blog>(null);
+            var queryResult = await runner.Run(runStrategy.CreateExecutionStrategy());
+
+            return Ok(queryResult);
+        }
+
 
         // GET api/values/5
         [HttpGet("{id}")]

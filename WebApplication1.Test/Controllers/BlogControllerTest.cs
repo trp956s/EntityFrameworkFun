@@ -5,6 +5,11 @@ using System.Threading.Tasks;
 using WebApplication1.Controllers;
 using WebApplication1.Data.Models;
 using System.Linq;
+using WebApplication1.Data.Queries;
+using WebApplication1.Test.Helpers;
+using FakeItEasy;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -62,6 +67,26 @@ namespace WebApplication1.Test.Controllers
                 CollectionAssert.AllItemsAreNotNull(resultValue);
             }
 
+            [TestMethod]
+            public async Task ReturnsAArrayFromDbSet()
+            {
+                var stories = new ActiveStories(new string[] { "3" });
+                var storyRunner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
+                    Wrapping(new StoryExecutionStrategyRunner(stories, runner))
+                );
+                var fakeBlogs = new Collection<Blog> { new Blog() };
+                var fakeBlogsTask = Task.FromResult(fakeBlogs.AsEnumerable());
+                A.CallTo(()=>storyRunner.Run<IEnumerable<Blog>>(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
+                    Returns(fakeBlogsTask);
+                blogController = new BlogController(storyRunner);
+
+                var getResult = await blogController.Get();
+
+                Assert.IsInstanceOfType(getResult, typeof(OkObjectResult));
+
+                var resultValue = (IEnumerable<Blog>)((OkObjectResult)getResult).Value;
+                CollectionAssert.AreEquivalent(fakeBlogs, new Collection<Blog>(resultValue.ToList()));
+            }
         }
 
         [TestClass]
