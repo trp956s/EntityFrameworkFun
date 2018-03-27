@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq.Expressions;
+using System;
+using System.Collections;
 
 namespace WebApplication1.Test.Helpers
 {
@@ -16,58 +18,55 @@ namespace WebApplication1.Test.Helpers
                 databaseName: System.IO.Path.GetRandomFileName()
             ).Options;
 
-        public static DbSet<T> CreateDbSet<T>(IEnumerable<T> data)
+        public static async Task CreateDbSet<T>(IEnumerable<T> data)
         where T : class
         {
             var context = new DbContextFake<T>(data);
-            var dbSet = A.Fake<DbSet<T>>(optionsBuilder => optionsBuilder.Wrapping(context.Data));
-//            var dbSet2 = A.Fake<FakeDbSet<T>>();
-//            var dataEnumerator = data.GetEnumerator();
+            var dataEnum = context.Data.AsEnumerable().GetEnumerator();
+            var queryable = A.Fake<DbSet<T>>(optionsBuilder =>
+            {
+                optionsBuilder.Implements<IAsyncEnumerable<T>>();
+                optionsBuilder.Wrapping(context.Data);
+            }
+            );
 
-            var fakeQueryProvider = A.Fake<DbAsyncQueryProvider>();
-            //A.CallTo(() =>
-            //    dbSet2.Provider
-            //).Returns(fakeQueryProvider);
-            //var fakeAsyncEnumerator = A.Fake<IDbAsyncEnumerator<T>>();
-            //A.CallTo(() =>
-            //   dbSet2.GetAsyncEnumerator()
-            //).Returns(fakeAsyncEnumerator);
-            //A.CallTo(() =>
-            //   fakeAsyncEnumerator.Current
-            //).Invokes(() => Task.FromResult(dataEnumerator.Current));
-            //A.CallTo(() =>
-            //   fakeAsyncEnumerator.Dispose()
-            //).Invokes(() => dataEnumerator.Dispose());
-            //A.CallTo(() =>
-            //   fakeAsyncEnumerator.MoveNextAsync(A<CancellationToken>.Ignored)
-            //).Invokes(() => Task.FromResult(dataEnumerator.MoveNext()));
+            var asyncEnum = A.Fake<IAsyncEnumerator<T>>();
+            A.CallTo(queryable).Where(call=>call.Method.Name == "GetEnumerator").
+                WithReturnType<IAsyncEnumerator<T>>().
+                Returns(asyncEnum);
+            A.CallTo(asyncEnum).Where(call => call.Method.Name == "MoveNext").
+                WithReturnType<Task<System.Boolean>>().
+                ReturnsLazily(c => 
+                    Task.FromResult(dataEnum.MoveNext())
+                );
+            A.CallTo(() => asyncEnum.Current).
+                ReturnsLazily(c => 
+                    dataEnum.Current
+                );
+            var v = await queryable.ToListAsync();
 
-            //A.CallTo(() =>
-            //    dbSet2.Provider
-            //).Returns(fakeQueryProvider);
-
-            var v = A.CallTo(fakeQueryProvider).Where(f =>
-                true
-            ).Invokes(call => {
-                System.Console.WriteLine(call.FakedObject);
-                System.Console.WriteLine(call.Method);
-                System.Console.WriteLine(call.Arguments);
-            });
-
-            
-
-            return dbSet;
+            //return dbSet;
         }
     }
 
-    public abstract class DbAsyncQueryProvider : IDbAsyncQueryProvider
+    public abstract class DbAsyncQueryProvider<T> : IQueryable<T>, IAsyncEnumerable<T>
+    where T : class
     {
-        public abstract IQueryable CreateQuery(Expression expression);
-        public abstract IQueryable<TElement> CreateQuery<TElement>(Expression expression);
-        public abstract object Execute(Expression expression);
-        public abstract TResult Execute<TResult>(Expression expression);
-        public abstract Task<object> ExecuteAsync(Expression expression, CancellationToken cancellationToken);
-        public abstract Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken);
+        public abstract Type ElementType { get; }
+        public abstract Expression Expression { get; }
+        public abstract IQueryProvider Provider { get; }
+
+        public abstract IEnumerator<T> GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IAsyncEnumerator<T> IAsyncEnumerable<T>.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }
