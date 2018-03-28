@@ -57,7 +57,6 @@ namespace WebApplication1.Controllers
             return Ok(queryResult);
         }
 
-
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<ActionResult> Get(int id)
