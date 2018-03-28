@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
 using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -18,12 +17,12 @@ namespace WebApplication1.Test.Helpers
                 databaseName: System.IO.Path.GetRandomFileName()
             ).Options;
 
-        public static async Task CreateDbSet<T>(IEnumerable<T> data)
+        public static DbSet<T> CreateAsyncEnumeratorDbSet<T>(IEnumerable<T> data)
         where T : class
         {
             var context = new DbContextFake<T>(data);
             var dataEnum = context.Data.AsEnumerable().GetEnumerator();
-            var queryable = A.Fake<DbSet<T>>(optionsBuilder =>
+            var dbSet = A.Fake<DbSet<T>>(optionsBuilder =>
             {
                 optionsBuilder.Implements<IAsyncEnumerable<T>>();
                 optionsBuilder.Wrapping(context.Data);
@@ -31,7 +30,7 @@ namespace WebApplication1.Test.Helpers
             );
 
             var asyncEnum = A.Fake<IAsyncEnumerator<T>>();
-            A.CallTo(queryable).Where(call=>call.Method.Name == "GetEnumerator").
+            A.CallTo(dbSet).Where(call=>call.Method.Name == "GetEnumerator").
                 WithReturnType<IAsyncEnumerator<T>>().
                 Returns(asyncEnum);
             A.CallTo(asyncEnum).Where(call => call.Method.Name == "MoveNext").
@@ -43,9 +42,8 @@ namespace WebApplication1.Test.Helpers
                 ReturnsLazily(c => 
                     dataEnum.Current
                 );
-            var v = await queryable.ToListAsync();
 
-            //return dbSet;
+            return dbSet;
         }
     }
 

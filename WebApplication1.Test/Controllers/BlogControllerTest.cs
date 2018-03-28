@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 using WebApplication1.Controllers;
 using WebApplication1.Data.Models;
 using System.Linq;
-using WebApplication1.Data.Queries;
 using WebApplication1.Test.Helpers;
 using FakeItEasy;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -92,8 +91,8 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsAArrayFromDbSet()
             {
-                    await DbFake.CreateDbSet<Blog>(new Blog[] { new Blog() { Name = "test" } });
-//                Assert.IsNotNull(v);
+                var dbSet = DbFake.CreateAsyncEnumeratorDbSet<Blog>(new Blog[] { new Blog() { Name = "test" } });
+                Assert.IsNotNull(await dbSet.ToArrayAsync());
             }
         }
 
