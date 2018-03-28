@@ -17,6 +17,12 @@ namespace WebApplication1.Test.Helpers
                 databaseName: System.IO.Path.GetRandomFileName()
             ).Options;
 
+        public static DbSet<T> CreateAsyncEnumeratorDbSet<T>()
+        where T : class
+        {
+            return CreateAsyncEnumeratorDbSet<T>(Enumerable.Empty<T>());
+        }
+
         public static DbSet<T> CreateAsyncEnumeratorDbSet<T>(IEnumerable<T> data)
         where T : class
         {
@@ -46,25 +52,4 @@ namespace WebApplication1.Test.Helpers
             return dbSet;
         }
     }
-
-    public abstract class DbAsyncQueryProvider<T> : IQueryable<T>, IAsyncEnumerable<T>
-    where T : class
-    {
-        public abstract Type ElementType { get; }
-        public abstract Expression Expression { get; }
-        public abstract IQueryProvider Provider { get; }
-
-        public abstract IEnumerator<T> GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IAsyncEnumerator<T> IAsyncEnumerable<T>.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
 }

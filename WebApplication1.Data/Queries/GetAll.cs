@@ -8,11 +8,10 @@ using WebApplication1.Data.ModelInterfaces;
 
 namespace WebApplication1.Data.Queries
 {
-    public class GetAll<T>
+    public struct GetAll<T>
     where T : class, IHasId
     {
         private readonly DbSetWrapper<T> datasetWrapper;
-        private readonly int id;
 
         public GetAll(DbSetWrapper<T> datasetWrapper)
         {
@@ -21,7 +20,7 @@ namespace WebApplication1.Data.Queries
 
         public ExecutionStrategy<IEnumerable<T>> CreateExecutionStrategy()
         {
-            return new ExecutionStrategy<IEnumerable<T>>(Invoke);
+            return new ExecutionStrategy<IEnumerable<T>>(Invoke, this);
         }
 
         //todo: support pageing
@@ -42,7 +41,7 @@ namespace WebApplication1.Data.Queries
 
         public bool Equals(GetAll<T> obj)
         {
-            return obj.id == id && obj.datasetWrapper == datasetWrapper;
+            return obj.datasetWrapper == datasetWrapper;
         }
     }
 }

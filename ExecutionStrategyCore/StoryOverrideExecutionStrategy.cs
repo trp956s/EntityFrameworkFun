@@ -14,7 +14,7 @@ namespace ExecutionStrategyCore
         {
             var strategyOverrides = executionStrategyRunOverrideFunctions.
                 Select(x => new Func<ExecutionStrategy<T>>(() =>
-                    new ExecutionStrategy<T>(x)
+                    new ExecutionStrategy<T>(x, originalStrategy.Source)
                 )
             ).ToArray();
 
@@ -26,7 +26,7 @@ namespace ExecutionStrategyCore
     {
         public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, 
             params Func<ExecutionStrategy<T>>[] storyExecutionStrategyFunctions
-        ) : base(originalStrategy.Run)
+        ) : base(originalStrategy.Run, originalStrategy.Source)
         {
             StoryExecutionStrategies = storyExecutionStrategyFunctions;
         }

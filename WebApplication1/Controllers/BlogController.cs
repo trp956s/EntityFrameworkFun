@@ -16,8 +16,9 @@ namespace WebApplication1.Controllers
         private readonly IExecutionStrategyRunner runner;
         private readonly DbSetWrapper<Blog> blogData;
 
-        public BlogController(IExecutionStrategyRunner runner) {
+        public BlogController(IExecutionStrategyRunner runner, DbSetWrapper<Blog> blogData) {
             this.runner = runner;
+            this.blogData = blogData;
         }
 
         // GET api/values
@@ -51,7 +52,7 @@ namespace WebApplication1.Controllers
         [Story("3")]
         private async Task<ActionResult> GetAllBlogs3()
         {
-            var runStrategy = new GetAll<Blog>(null);
+            var runStrategy = new GetAll<Blog>(blogData);
             var queryResult = await runner.Run(runStrategy.CreateExecutionStrategy());
 
             return Ok(queryResult);

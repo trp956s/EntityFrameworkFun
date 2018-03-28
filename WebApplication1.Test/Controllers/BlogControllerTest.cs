@@ -10,6 +10,7 @@ using FakeItEasy;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data.Queries;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -22,7 +23,7 @@ namespace WebApplication1.Test.Controllers
         [TestInitialize]
         public void Initialize() {
             runner = new ExecutionStrategyRunner();
-            blogController = new BlogController(runner);
+            blogController = new BlogController(runner, null);
         }
 
         [TestClass]
@@ -41,7 +42,7 @@ namespace WebApplication1.Test.Controllers
             {
                 var stories = new ActiveStories(new string[] { "1" });
                 var storyRunner = new StoryExecutionStrategyRunner(stories, runner);
-                blogController = new BlogController(storyRunner);
+                blogController = new BlogController(storyRunner, null);
 
                 var getResult = await blogController.Get();
 
@@ -56,7 +57,7 @@ namespace WebApplication1.Test.Controllers
             {
                 var stories = new ActiveStories(new string[] { "2" });
                 var storyRunner = new StoryExecutionStrategyRunner(stories, runner);
-                blogController = new BlogController(storyRunner);
+                blogController = new BlogController(storyRunner, null);
 
                 var getResult = await blogController.Get();
 
@@ -68,7 +69,7 @@ namespace WebApplication1.Test.Controllers
             }
 
             [TestMethod]
-            public async Task ReturnsAArrayFromQuery()
+            public async Task ReturnsAnArrayFromQuery()
             {
                 var stories = new ActiveStories(new string[] { "3" });
                 var storyRunner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
@@ -76,9 +77,9 @@ namespace WebApplication1.Test.Controllers
                 );
                 var fakeBlogs = new Collection<Blog> { new Blog() };
                 var fakeBlogsTask = Task.FromResult(fakeBlogs.AsEnumerable());
-                A.CallTo(() => storyRunner.Run<IEnumerable<Blog>>(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
+                A.CallTo(() => storyRunner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
                     Returns(fakeBlogsTask);
-                blogController = new BlogController(storyRunner);
+                blogController = new BlogController(storyRunner, null);
 
                 var getResult = await blogController.Get();
 
@@ -89,10 +90,25 @@ namespace WebApplication1.Test.Controllers
             }
 
             [TestMethod]
-            public async Task ReturnsAArrayFromDbSet()
+            public async Task SearchesAgainstBlogDbSet()
             {
-                var dbSet = DbFake.CreateAsyncEnumeratorDbSet<Blog>(new Blog[] { new Blog() { Name = "test" } });
-                Assert.IsNotNull(await dbSet.ToArrayAsync());
+                var expectedDbSetWrapper = A.Fake<DbSetWrapper<Blog>>();
+                var expectedStrategySource = new GetAll<Blog>(expectedDbSetWrapper);
+                var stories = new ActiveStories(new string[] { "3" });
+                var storyRunner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
+                    Wrapping(new StoryExecutionStrategyRunner(stories, runner))
+                );
+                blogController = new BlogController(storyRunner, expectedDbSetWrapper);
+                A.CallTo(() => storyRunner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
+                    Returns(Task.FromResult(Enumerable.Empty<Blog>()));
+
+                var getResult = await blogController.Get();
+
+                A.CallTo(() => storyRunner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.That.
+                    Matches(s=>
+                        s.Source.Equals(expectedStrategySource)))
+                    ).
+                    MustHaveHappenedOnceExactly();
             }
         }
 
