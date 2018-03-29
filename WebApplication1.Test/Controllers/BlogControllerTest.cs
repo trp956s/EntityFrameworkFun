@@ -67,13 +67,10 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsAnArrayFromQuery()
             {
-                var runner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
-                    Wrapping(runnerWrapper.CreateStoryRunner("3"))
-                );
+                var runner = runnerWrapper.CreateStoryRunner("3");
                 var fakeBlogs = new Collection<Blog> { new Blog() };
-                var fakeBlogsTask = Task.FromResult(fakeBlogs.AsEnumerable());
                 A.CallTo(() => runner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
-                    Returns(fakeBlogsTask);
+                    Returns(Task.FromResult(fakeBlogs.AsEnumerable()));
                 blogController = new BlogController(runner, null);
 
                 var getResult = await blogController.Get();
@@ -139,10 +136,15 @@ namespace WebApplication1.Test.Controllers
         }
 
         public ExecutionStrategyRunner Runner { get; }
-        public StoryExecutionStrategyRunner CreateStoryRunner(params string[] stories)
+        public IExecutionStrategyRunner CreateStoryRunner(params string[] stories)
         {
             var activeStories = new ActiveStories(stories);
-            return new StoryExecutionStrategyRunner(activeStories, Runner);
+            var storyExecutionStrategyRunner = new StoryExecutionStrategyRunner(activeStories, Runner);
+            var fakeRunner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
+                    Wrapping(storyExecutionStrategyRunner)
+            );
+
+            return fakeRunner;
         }
     }
 }
