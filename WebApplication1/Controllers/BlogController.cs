@@ -52,8 +52,8 @@ namespace WebApplication1.Controllers
         [Story("3")]
         private async Task<ActionResult> GetAllBlogs3()
         {
-            var runStrategy = new GetAll<Blog>(blogData);
-            var queryResult = await runner.Run(runStrategy.CreateExecutionStrategy());
+            var runStrategy = new GetAll<Blog>(blogData).CreateExecutionStrategy();
+            var queryResult = await runner.Run(runStrategy);
 
             return Ok(queryResult);
         }

@@ -17,13 +17,13 @@ namespace WebApplication1.Test.Controllers
     [TestClass]
     public class BlogControllerTest
     {
-        ExecutionStrategyRunner runner;
         BlogController blogController;
+        StoryRunnerWrapper runnerWrapper;
 
         [TestInitialize]
         public void Initialize() {
-            runner = new ExecutionStrategyRunner();
-            blogController = new BlogController(runner, null);
+            runnerWrapper = new StoryRunnerWrapper();
+            blogController = new BlogController(runnerWrapper.Runner, null);
         }
 
         [TestClass]
@@ -40,9 +40,7 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsAnEmptyArray()
             {
-                var stories = new ActiveStories(new string[] { "1" });
-                var storyRunner = new StoryExecutionStrategyRunner(stories, runner);
-                blogController = new BlogController(storyRunner, null);
+                blogController = new BlogController(runnerWrapper.CreateStoryRunner("1"), null);
 
                 var getResult = await blogController.Get();
 
@@ -55,9 +53,7 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsASingleItemArray()
             {
-                var stories = new ActiveStories(new string[] { "2" });
-                var storyRunner = new StoryExecutionStrategyRunner(stories, runner);
-                blogController = new BlogController(storyRunner, null);
+                blogController = new BlogController(runnerWrapper.CreateStoryRunner("2"), null);
 
                 var getResult = await blogController.Get();
 
@@ -71,15 +67,14 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsAnArrayFromQuery()
             {
-                var stories = new ActiveStories(new string[] { "3" });
-                var storyRunner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
-                    Wrapping(new StoryExecutionStrategyRunner(stories, runner))
+                var runner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
+                    Wrapping(runnerWrapper.CreateStoryRunner("3"))
                 );
                 var fakeBlogs = new Collection<Blog> { new Blog() };
                 var fakeBlogsTask = Task.FromResult(fakeBlogs.AsEnumerable());
-                A.CallTo(() => storyRunner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
+                A.CallTo(() => runner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
                     Returns(fakeBlogsTask);
-                blogController = new BlogController(storyRunner, null);
+                blogController = new BlogController(runner, null);
 
                 var getResult = await blogController.Get();
 
@@ -94,17 +89,16 @@ namespace WebApplication1.Test.Controllers
             {
                 var expectedDbSetWrapper = A.Fake<DbSetWrapper<Blog>>();
                 var expectedStrategySource = new GetAll<Blog>(expectedDbSetWrapper);
-                var stories = new ActiveStories(new string[] { "3" });
-                var storyRunner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
-                    Wrapping(new StoryExecutionStrategyRunner(stories, runner))
+                var runner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
+                    Wrapping(runnerWrapper.CreateStoryRunner("3"))
                 );
-                blogController = new BlogController(storyRunner, expectedDbSetWrapper);
-                A.CallTo(() => storyRunner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
+                blogController = new BlogController(runner, expectedDbSetWrapper);
+                A.CallTo(() => runner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
                     Returns(Task.FromResult(Enumerable.Empty<Blog>()));
 
                 var getResult = await blogController.Get();
 
-                A.CallTo(() => storyRunner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.That.
+                A.CallTo(() => runner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.That.
                     Matches(s=>
                         s.Source.Equals(expectedStrategySource)))
                     ).
@@ -134,6 +128,21 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(getResult, typeof(BadRequestResult));
             }
+        }
+    }
+
+    public class StoryRunnerWrapper
+    {
+        public StoryRunnerWrapper()
+        {
+            Runner = new ExecutionStrategyRunner();
+        }
+
+        public ExecutionStrategyRunner Runner { get; }
+        public StoryExecutionStrategyRunner CreateStoryRunner(params string[] stories)
+        {
+            var activeStories = new ActiveStories(stories);
+            return new StoryExecutionStrategyRunner(activeStories, Runner);
         }
     }
 }
