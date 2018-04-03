@@ -42,7 +42,7 @@ namespace ExecutionStrategyCore
                 foreach(var storyExecutionStrategyFactory in storyExecutionStrategies)
                 {
                     var strategy = storyExecutionStrategyFactory();
-                    var strategyRunMethod = strategy.Run.Method;
+                    var strategyRunMethod = strategy.Method;
                     var strategyAttributes = strategyRunMethod.GetCustomAttributes(
                         typeof(StoryAttribute), true);
                     var strategyStories = strategyAttributes.

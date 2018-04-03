@@ -11,15 +11,22 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public class ExecutionStrategy<T>
+    public class ExecutionStrategy<T> : IRunner<Task<T>>
     {
-        public ExecutionStrategy(Func<Task<T>> run, object source)
+        private readonly Func<Task<T>> func;
+
+        public ExecutionStrategy(Func<Task<T>> func, object source)
         {
-            Run = run;
+            this.func = func;
             Source = source;
         }
 
-        internal Func<Task<T>> Run { get; }
+//        public Func<Task<T>> Run { get{ return this.func;} }
         public object Source { get; }
+
+        public Task<T> Run()
+        {
+            return this.func();
+        }
     }
 }

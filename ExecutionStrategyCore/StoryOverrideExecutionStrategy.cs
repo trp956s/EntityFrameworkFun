@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace ExecutionStrategyCore
@@ -13,8 +14,8 @@ namespace ExecutionStrategyCore
         )
         {
             var strategyOverrides = executionStrategyRunOverrideFunctions.
-                Select(x => new Func<ExecutionStrategy<T>>(() =>
-                    new ExecutionStrategy<T>(x, originalStrategy.Source)
+                Select(x => new Func<FuncOverrideExecutionStrategy<T>>(() =>
+                    new FuncOverrideExecutionStrategy<T>(x, originalStrategy.Source)
                 )
             ).ToArray();
 
@@ -25,12 +26,22 @@ namespace ExecutionStrategyCore
     public class StoryOverrideExecutionStrategy<T> : ExecutionStrategy<T>
     {
         public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, 
-            params Func<ExecutionStrategy<T>>[] storyExecutionStrategyFunctions
-        ) : base(originalStrategy.Run, originalStrategy.Source)
+            params Func<FuncOverrideExecutionStrategy<T>>[] storyExecutionStrategyFunctions
+        ) : base(((IRunner<Task<T>>) originalStrategy).Run, originalStrategy.Source)
         {
             StoryExecutionStrategies = storyExecutionStrategyFunctions;
         }
 
-        internal IEnumerable<Func<ExecutionStrategy<T>>> StoryExecutionStrategies { get; }
+        internal IEnumerable<Func<FuncOverrideExecutionStrategy<T>>> StoryExecutionStrategies { get; }
+    }
+
+    public class FuncOverrideExecutionStrategy<T> : ExecutionStrategy<T>
+    {
+        public FuncOverrideExecutionStrategy(Func<Task<T>> func, object source) : base(func, source)
+        {
+            this.Method = func.Method;
+        }
+
+        public MethodInfo Method{ get; }
     }
 }
