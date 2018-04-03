@@ -18,16 +18,10 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public interface ITaskRunner //will replace IExecutionStrategyRunner
-    {
-        Task<T> Run<T>(IRunner<Task<T>> wrapper);
-    }
 
-    public interface IMapper<T1, T2>
-    {
-        T2 Run(T1 arg);
-    }
-
+    /*
+     * consider moving all this into the Data Layer library
+     */
     public interface IQuery<DbSetType, ReturnType> : IMapper<DbSet<DbSetType>, InternalRunnerWrapper<Task<ReturnType>>> { }
 
     public class DbSet<T>
@@ -41,31 +35,9 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public struct ValueCacheRunner<T> : IRunner<T>
-    {
-        private readonly T value;
-
-        public ValueCacheRunner(T value) {
-            this.value = value;
-        }
-
-        public T Run()
-        {
-            return value;
-        }
-    }
-
     public interface IDbSetRunner<DbSetType>
     {
         Task<T> Run<T>(IQuery<DbSetType, T> ga);
-    }
-
-    public static class DbSetRunner<DbSetType>
-    {
-        public static async Task<T> Run<T>(ITaskRunner runner, DbSet<DbSetType> dbSet, IQuery<DbSetType, T> ga)
-        {
-            return await runner.Run(ga.Run(dbSet));
-        }
     }
 
     public struct DbBlogSetRunner : IDbSetRunner<int>
@@ -80,9 +52,9 @@ namespace ExecutionStrategyCore
             this.runner = runner;
         }
 
-        public async Task<T> Run<T>(IQuery<int, T> ga)
+        public async Task<T> Run<T>(IQuery<int, T> query)
         {
-            return await DbSetRunner<int>.Run(runner, dbSet, ga);
+            return await query.Run(runner, dbSet);
         }
     }
 }
