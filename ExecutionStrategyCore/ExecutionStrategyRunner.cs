@@ -39,19 +39,24 @@ namespace ExecutionStrategyCore
         IRunner<InternalRunnerWrapper<Task<T>>> Run<T>(IQuery<DbSetType, T> ga);
     }
 
-    public struct DbBlogSetRunner : IDbSetRunner<int>
+    public struct DbBlogSetRunner : IDbSetRunner<int>, IRunner<DbSet<int>>
     {
         //inject dbset 
-        private readonly IRunner<DbSet<int>> dbSet;
+        private readonly DbSet<int> dbSet;
 
         public DbBlogSetRunner(DbSet<int> dbSet)
         {
-            this.dbSet = new ValueCacheRunner<DbSet<int>>(dbSet);
+            this.dbSet = dbSet;
         }
 
         public IRunner<InternalRunnerWrapper<Task<T>>> Run<T>(IQuery<int, T> query)
         {
-            return new MapperRunner<IRunner<DbSet<int>>, T>(query, dbSet);
+            return new MapperRunner<IRunner<DbSet<int>>, T>(query, this);
+        }
+
+        DbSet<int> IRunner<DbSet<int>>.Run()
+        {
+            return dbSet;
         }
     }
 }
