@@ -14,7 +14,7 @@ namespace ExecutionStrategyCore
         )
         {
             var strategyOverrides = executionStrategyRunOverrideFunctions.
-                Select(x => new Func<FuncOverrideExecutionStrategy<T>>(() =>
+                Select(x => new FunctionRunner<FuncOverrideExecutionStrategy<T>>(() =>
                     new FuncOverrideExecutionStrategy<T>(x, originalStrategy.Source)
                 )
             ).ToArray();
@@ -23,18 +23,18 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public class StoryOverrideExecutionStrategy<T> : ExecutionStrategy<T>, IRunner<IEnumerable<Func<FuncOverrideExecutionStrategy<T>>>>
+    public class StoryOverrideExecutionStrategy<T> : ExecutionStrategy<T>, IRunner<IEnumerable<FunctionRunner<FuncOverrideExecutionStrategy<T>>>>
     {
         public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, 
-            params Func<FuncOverrideExecutionStrategy<T>>[] storyExecutionStrategyFunctions
+            params FunctionRunner<FuncOverrideExecutionStrategy<T>>[] storyExecutionStrategyFunctions
         ) : base(((IRunner<Task<T>>) originalStrategy).Run, originalStrategy.Source)
         {
             StoryExecutionStrategies = storyExecutionStrategyFunctions;
         }
 
-        private IEnumerable<Func<FuncOverrideExecutionStrategy<T>>> StoryExecutionStrategies { get; }
+        private FunctionRunner<FuncOverrideExecutionStrategy<T>>[] StoryExecutionStrategies { get; }
 
-        IEnumerable<Func<FuncOverrideExecutionStrategy<T>>> IRunner<IEnumerable<Func<FuncOverrideExecutionStrategy<T>>>>.Run()
+        IEnumerable<FunctionRunner<FuncOverrideExecutionStrategy<T>>> IRunner<IEnumerable<FunctionRunner<FuncOverrideExecutionStrategy<T>>>>.Run()
         {
             return StoryExecutionStrategies;
         }

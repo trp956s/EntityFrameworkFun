@@ -5,34 +5,20 @@ using System.Threading.Tasks;
 
 namespace ExecutionStrategyCore
 {
-    public class MapperRunner<MapParameters, MapResultType> : IRunner<Task<InternalRunnerWrapper<MapResultType>>>
+    public struct MapperRunner<MapParameters, MapResultType> : IRunner<Task<MapResultType>>
     {
-        private readonly IMapper<MapParameters, Task<InternalRunnerWrapper<MapResultType>>> ga;
+        private readonly IMapper<MapParameters, Task<MapResultType>> ga;
         private readonly IRunner<MapParameters> parameters;
 
-        public MapperRunner(IMapper<MapParameters, Task<InternalRunnerWrapper<MapResultType>>> ga, IRunner<MapParameters> parameters)
+        public MapperRunner(IMapper<MapParameters, Task<MapResultType>> ga, IRunner<MapParameters> parameters)
         {
             this.ga = ga;
             this.parameters = parameters;
         }
 
-        public async Task<InternalRunnerWrapper<MapResultType>> Run()
+        public async Task<MapResultType> Run()
         {
             return await ga.Run(parameters.Run());
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (typeof(MapperRunner<MapParameters, MapResultType>).IsInstanceOfType(obj))
-            {
-                return Equals((MapperRunner<MapParameters, MapResultType>)obj);
-            }
-            return base.Equals(obj);
-        }
-
-        public bool Equals(MapperRunner<MapParameters, MapResultType> obj)
-        {
-            return obj.ga.Equals(ga) && obj.parameters.Equals(parameters);
         }
     }
 }

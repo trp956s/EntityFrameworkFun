@@ -12,6 +12,6 @@ namespace ExecutionStrategyCore
 
     public interface ITaskRunner //will replace IExecutionStrategyRunner
     {
-        Task<T> Run<T>(IRunner<Task<T>> wrapper);
+        T Run<T>(IRunner<T> wrapper);
     }
 }

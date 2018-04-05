@@ -34,7 +34,7 @@ namespace ExecutionStrategyCore
 
         public async Task<T> Run<T>(ExecutionStrategy<T> executionStrategy)
         {
-            if (stories.Any() && executionStrategy is StoryOverrideExecutionStrategy<T>)
+            if (stories.Any() && executionStrategy is IRunner<IEnumerable<Func<FuncOverrideExecutionStrategy<T>>>>)
             {
                 var storyExecutionStrategies = ((IRunner<IEnumerable<Func<FuncOverrideExecutionStrategy<T>>>>)
                     executionStrategy).Run().Reverse();

@@ -12,21 +12,21 @@ namespace ExecutionStrategyCore
             return await executionStrategy.Run();
         }
 
-        public async Task<T> Run<T>(IRunner<Task<T>> executionWrapper)
+        public T Run<T>(IRunner<T> executionWrapper)
         {
-            return await executionWrapper.Run();
+            return executionWrapper.Run();
         }
     }
 
     /*
      * consider moving all this into the Data Layer library
      */
-    public interface IQuery<DbSetType, ReturnType> : IMapper<DbSet<DbSetType>, Task<InternalRunnerWrapper<ReturnType>>> { }
+    internal interface IQuery<DbSetType, ReturnType> : IMapper<DbSet<DbSetType>, Task<InternalRunnerWrapper<ReturnType>>> { }
 
-    public class DbSet<T>
+    internal class DbSet<T>
     { }
 
-    public struct GetAll : IQuery<int, int>
+    internal struct GetAll : IQuery<int, int>
     {
         public Task<InternalRunnerWrapper<int>> Run(DbSet<int> arg)
         {
@@ -36,12 +36,12 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public interface IDbSetRunner<DbSetType>
+    internal interface IDbSetRunner<DbSetType>
     {
         IRunner<Task<InternalRunnerWrapper<T>>> Run<T>(IQuery<DbSetType, T> ga);
     }
 
-    public struct DbBlogSetRunner : IDbSetRunner<int>, IRunner<DbSet<int>>
+    internal struct DbBlogSetRunner : IDbSetRunner<int>, IRunner<DbSet<int>>
     {
         //inject dbset 
         private readonly DbSet<int> dbSet;
@@ -53,7 +53,7 @@ namespace ExecutionStrategyCore
 
         public IRunner<Task<InternalRunnerWrapper<T>>> Run<T>(IQuery<int, T> query)
         {
-            return new MapperRunner<DbSet<int>, T>(query, this);
+            return query.ToRunner(this);
         }
 
         DbSet<int> IRunner<DbSet<int>>.Run()

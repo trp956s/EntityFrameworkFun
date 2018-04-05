@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Threading.Tasks;
 using ExecutionStrategyCore;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +17,10 @@ namespace WebApplication1.Controllers
     [Route("api/[controller]")]
     public class BlogController : Controller
     {
-        private readonly IExecutionStrategyRunner runner;
+        private readonly ITaskRunner runner;
         private readonly DbSetWrapper<Blog> blogData;
 
-        public BlogController(IExecutionStrategyRunner runner, DbSetWrapper<Blog> blogData) {
+        public BlogController(ITaskRunner runner, DbSetWrapper<Blog> blogData) {
             this.runner = runner;
             this.blogData = blogData;
         }
@@ -27,9 +29,9 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            var notFoundStrategy = ExecutionStrategy.Create<ActionResult>(()=>NotFound());
-            var strategyToggle = StoryOverrideExecutionStrategy.Create<ActionResult>(
-                notFoundStrategy,
+            Func<Task<ActionResult>> notFoundFunc = () => Task.FromResult((ActionResult)NotFound());
+            var strategyToggle = new StoryOverrideFunctionRunner<Task<ActionResult>>(
+                notFoundFunc,
                 GetAllBlogs,
                 GetAllBlogs2,
                 GetAllBlogs3
@@ -54,8 +56,7 @@ namespace WebApplication1.Controllers
         [Story("3")]
         private async Task<ActionResult> GetAllBlogs3()
         {
-            var runStrategy = new GetAll<Blog>(blogData).CreateExecutionStrategy();
-            var queryResult = await runner.Run(runStrategy);
+            var queryResult = await runner.Run(new GetAll<Blog>(), (IRunner<DbSet<Blog>>)blogData);
 
             return Ok(queryResult);
         }
