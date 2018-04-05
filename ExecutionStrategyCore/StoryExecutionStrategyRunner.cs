@@ -36,8 +36,8 @@ namespace ExecutionStrategyCore
         {
             if (stories.Any() && executionStrategy is StoryOverrideExecutionStrategy<T>)
             {
-                var storyExecutionStrategies = ((StoryOverrideExecutionStrategy<T>)
-                    executionStrategy).StoryExecutionStrategies.Reverse();
+                var storyExecutionStrategies = ((IRunner<IEnumerable<Func<FuncOverrideExecutionStrategy<T>>>>)
+                    executionStrategy).Run().Reverse();
 
                 foreach(var storyExecutionStrategyFactory in storyExecutionStrategies)
                 {

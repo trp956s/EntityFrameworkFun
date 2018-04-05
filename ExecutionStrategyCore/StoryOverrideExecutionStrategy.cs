@@ -23,7 +23,7 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public class StoryOverrideExecutionStrategy<T> : ExecutionStrategy<T>
+    public class StoryOverrideExecutionStrategy<T> : ExecutionStrategy<T>, IRunner<IEnumerable<Func<FuncOverrideExecutionStrategy<T>>>>
     {
         public StoryOverrideExecutionStrategy(ExecutionStrategy<T> originalStrategy, 
             params Func<FuncOverrideExecutionStrategy<T>>[] storyExecutionStrategyFunctions
@@ -32,7 +32,12 @@ namespace ExecutionStrategyCore
             StoryExecutionStrategies = storyExecutionStrategyFunctions;
         }
 
-        internal IEnumerable<Func<FuncOverrideExecutionStrategy<T>>> StoryExecutionStrategies { get; }
+        private IEnumerable<Func<FuncOverrideExecutionStrategy<T>>> StoryExecutionStrategies { get; }
+
+        IEnumerable<Func<FuncOverrideExecutionStrategy<T>>> IRunner<IEnumerable<Func<FuncOverrideExecutionStrategy<T>>>>.Run()
+        {
+            return StoryExecutionStrategies;
+        }
     }
 
     public class FuncOverrideExecutionStrategy<T> : ExecutionStrategy<T>
