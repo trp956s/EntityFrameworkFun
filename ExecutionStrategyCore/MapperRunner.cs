@@ -5,20 +5,20 @@ using System.Threading.Tasks;
 
 namespace ExecutionStrategyCore
 {
-    public class MapperRunner<MapParameters, MapResultType>: IRunner<InternalRunnerWrapper<Task<MapResultType>>>
+    public class MapperRunner<MapParameters, MapResultType>: IRunner<Task<InternalRunnerWrapper<MapResultType>>>
     {
-        private readonly IMapper<MapParameters, InternalRunnerWrapper<Task<MapResultType>>> ga;
-        private readonly MapParameters parameters;
+        private readonly IMapper<MapParameters, Task<InternalRunnerWrapper<MapResultType>>> ga;
+        private readonly IRunner<MapParameters> parameters;
 
-        public MapperRunner(IMapper<MapParameters, InternalRunnerWrapper<Task<MapResultType>>> ga, MapParameters parameters)
+        public MapperRunner(IMapper<MapParameters, Task<InternalRunnerWrapper<MapResultType>>> ga, IRunner<MapParameters> parameters)
         {
             this.ga = ga;
             this.parameters = parameters;
         }
 
-        public InternalRunnerWrapper<Task<MapResultType>> Run()
+        public async Task<InternalRunnerWrapper<MapResultType>> Run()
         {
-            return ga.Run(parameters);
+            return await ga.Run(parameters.Run());
         }
     }
 }
