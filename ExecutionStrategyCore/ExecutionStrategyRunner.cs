@@ -21,14 +21,14 @@ namespace ExecutionStrategyCore
     /*
      * consider moving all this into the Data Layer library
      */
-    internal interface IQuery<DbSetType, ReturnType> : IMapper<DbSet<DbSetType>, Task<InternalRunnerWrapper<ReturnType>>> { }
+    internal interface IQuery<DbSetType, ReturnType> : IMapper<FakeDbSet<DbSetType>, Task<InternalRunnerWrapper<ReturnType>>> { }
 
-    internal class DbSet<T>
+    internal class FakeDbSet<T>
     { }
 
     internal struct GetAll : IQuery<int, int>
     {
-        public Task<InternalRunnerWrapper<int>> Run(DbSet<int> arg)
+        public Task<InternalRunnerWrapper<int>> Run(FakeDbSet<int> arg)
         {
             return Task.FromResult(
                 new InternalRunnerWrapper<int>(new ValueCacheRunner<int>(0))
@@ -41,12 +41,12 @@ namespace ExecutionStrategyCore
         IRunner<Task<InternalRunnerWrapper<T>>> Run<T>(IQuery<DbSetType, T> ga);
     }
 
-    internal struct DbBlogSetRunner : IDbSetRunner<int>, IRunner<DbSet<int>>
+    internal struct DbBlogSetRunner : IDbSetRunner<int>, IRunner<FakeDbSet<int>>
     {
         //inject dbset 
-        private readonly DbSet<int> dbSet;
+        private readonly FakeDbSet<int> dbSet;
 
-        public DbBlogSetRunner(DbSet<int> dbSet)
+        public DbBlogSetRunner(FakeDbSet<int> dbSet)
         {
             this.dbSet = dbSet;
         }
@@ -56,7 +56,7 @@ namespace ExecutionStrategyCore
             return query.ToRunner(this);
         }
 
-        DbSet<int> IRunner<DbSet<int>>.Run()
+        FakeDbSet<int> IRunner<FakeDbSet<int>>.Run()
         {
             return dbSet;
         }

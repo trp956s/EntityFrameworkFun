@@ -1,7 +1,7 @@
 ﻿using ExecutionStrategyCore;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Threading.Tasks;
 using WebApplication1.Data.GeneralInterfaces;
@@ -9,7 +9,7 @@ using WebApplication1.Data.ModelInterfaces;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct GetAll<T> : IDbSetQuery<T, IEnumerable<T>>
+    public class GetAll<T> : IDbSetQuery<T, IEnumerable<T>>, IMapper<DbSet<T>, Task<InternalRunnerWrapper<IEnumerable<T>>>>
     where T : class, IHasId
     {
         //todo: support pageing

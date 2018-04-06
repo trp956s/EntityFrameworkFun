@@ -12,6 +12,8 @@ using System.Collections.ObjectModel;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data.Queries;
 using System;
+using FakeItEasy.Configuration;
+using WebApplication1.Data.GeneralInterfaces;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -43,13 +45,15 @@ namespace WebApplication1.Test.Controllers
             {
                 private ActiveStoryFactory activeStories;
                 private StoryOverrideRunner runnerWrapper;
+                private DbSetWrapper<Blog> dbSet;
 
                 [TestInitialize]
                 public void TestInitialize()
                 {
+                    dbSet = new DbSetWrapper<Blog>();
                     activeStories = new ActiveStoryFactory();
                     runnerWrapper = new StoryOverrideRunner(runner, activeStories);
-                    blogController = new BlogController(runnerWrapper, null);
+                    blogController = new BlogController(runnerWrapper, dbSet);
                 }
 
 
@@ -86,7 +90,8 @@ namespace WebApplication1.Test.Controllers
                     activeStories.ActiveStory = "3";
                     var fakeBlogs = new Collection<Blog> { new Blog() };
 
-                    A.CallTo(() => runner.Run(A<IRunner<Task<InternalRunnerWrapper<IEnumerable<Blog>>>>>.Ignored)).
+                    A.CallTo(runner).Where(x=>true).
+                        WithReturnType<Task<InternalRunnerWrapper<IEnumerable<Blog>>>>().
                         Returns(Task.FromResult(fakeBlogs.AsEnumerable().ToWrapper()));
 
                     var getResult = await blogController.Get();
@@ -95,6 +100,27 @@ namespace WebApplication1.Test.Controllers
 
                     var resultValue = (IEnumerable<Blog>)((OkObjectResult)getResult).Value;
                     CollectionAssert.AreEquivalent(fakeBlogs, new Collection<Blog>(resultValue.ToList()));
+                }
+
+                [TestMethod]
+                public async Task ReturnsAnArrayFromQuery2()
+                {
+                    //activeStories.ActiveStory = "3";
+                    //var fakeBlogs = new Collection<Blog> { new Blog() };
+
+                    //var getAll = (IMapper<DbSet<Blog>, Task<InternalRunnerWrapper<IEnumerable<Blog>>>>)
+                    //    new GetAll<Blog>()
+                    //;
+                    //var getAllRunner = getAll.ToRunner(dbSet);
+                    //A.CallTo(() => runner.Run(getAllRunner)).
+                    //    Returns(Task.FromResult(fakeBlogs.AsEnumerable().ToWrapper()));
+
+                    //var getResult = await blogController.Get();
+
+                    //Assert.IsInstanceOfType(getResult, typeof(OkObjectResult));
+
+                    //var resultValue = (IEnumerable<Blog>)((OkObjectResult)getResult).Value;
+                    //CollectionAssert.AreEquivalent(fakeBlogs, new Collection<Blog>(resultValue.ToList()));
                 }
 
                 [TestMethod]
@@ -151,26 +177,6 @@ namespace WebApplication1.Test.Controllers
         public ActiveStories Run()
         {
             return new ActiveStories(new string[] { ActiveStory });
-        }
-    }
-
-    public class StoryRunnerWrapper
-    {
-        public StoryRunnerWrapper()
-        {
-            Runner = new ExecutionStrategyRunner();
-        }
-
-        public ExecutionStrategyRunner Runner { get; }
-        public IExecutionStrategyRunner CreateStoryRunner(params string[] stories)
-        {
-            var activeStories = new ActiveStories(stories);
-            var storyExecutionStrategyRunner = new StoryExecutionStrategyRunner(activeStories, Runner);
-            var fakeRunner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
-                    Wrapping(storyExecutionStrategyRunner)
-            );
-
-            return fakeRunner;
         }
     }
 }
