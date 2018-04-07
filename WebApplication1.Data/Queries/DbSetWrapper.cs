@@ -5,11 +5,12 @@ namespace WebApplication1.Data.Queries
 {
     public class DbSetWrapper<T> : IRunner<DbSet<T>> where T : class
     {
-        public DbSet<T> DbSet { get; set; }
+        public DbSetWrapper(){
+        }
 
         public DbSet<T> Run()
         {
-            return DbSet;
+            throw new System.Exception("nmot implimented");
         }
     }
 }
