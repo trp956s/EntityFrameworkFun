@@ -12,8 +12,10 @@ namespace WebApplication1.Controllers
     //todo: clean up code, consolidate stories 1-3, reduce test code
     //todo: get by id.. 9-11 are post, put, and delete
     //todo: 9,  10, 11: test drive the rest of this class keeping blogs simple
-    //todo: 12, 13, 14, 15, 16: test drive post using a service to encapsulate relationships and business rules and a PostApi to pass to/from the controller
-    //todo: 17 - use custom logger to show full path names
+    //todo: 12: refactor injection to use IRunner
+    //todo: 13: refactor DbSetRunner
+    //todo: 14, 15, 16, 17, 18: test drive post using a service to encapsulate relationships and business rules and a PostApi to pass to/from the controller
+    //todo: 19 - use custom logger to show full path names
     [Route("api/[controller]")]
     public class BlogController : Controller
     {

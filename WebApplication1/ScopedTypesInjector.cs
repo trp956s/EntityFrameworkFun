@@ -7,7 +7,7 @@ using WebApplication1.Data.Models;
 
 namespace WebApplication1
 {
-    //TODO: consider appsettings.json picking between an injector that checks for active-stories section and one that does not.  for instance production should probably avoid
+    //TODO: consider appsettings.json picking between an injector that checks for active-stories section and one that does not.  
     public class ScopedTypesInjector : IServicesConfig
     {
         private readonly IServiceCollectionWrapper serviceCollectionWrapper;
@@ -30,11 +30,11 @@ namespace WebApplication1
                 var storyFlags = activeStoriesSection.GetChildren().Select(x => x.Value);
                 serviceCollectionWrapper.AddScoped<ExecutionStrategyRunner>();
                 serviceCollectionWrapper.AddSingleton(new ActiveStories(storyFlags));
-                serviceCollectionWrapper.AddScoped<IExecutionStrategyRunner, StoryExecutionStrategyRunner>();
+                serviceCollectionWrapper.AddScoped<ITaskRunner, StoryOverrideRunner>();
             }
             else
             {
-                serviceCollectionWrapper.AddScoped<IExecutionStrategyRunner, ExecutionStrategyRunner>();
+                serviceCollectionWrapper.AddScoped<ITaskRunner, ExecutionStrategyRunner>();
             }
         }
     }

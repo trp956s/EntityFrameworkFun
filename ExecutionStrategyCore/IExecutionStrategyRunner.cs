@@ -5,12 +5,7 @@ using System.Threading.Tasks;
 
 namespace ExecutionStrategyCore
 {
-    public interface IExecutionStrategyRunner
-    {
-        Task<T> Run<T>(ExecutionStrategy<T> executionStrategy);
-    }
-
-    public interface ITaskRunner //will replace IExecutionStrategyRunner
+    public interface ITaskRunner
     {
         T Run<T>(IRunner<T> wrapper);
     }

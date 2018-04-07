@@ -5,13 +5,8 @@ using System.Threading.Tasks;
 
 namespace ExecutionStrategyCore
 {
-    public class ExecutionStrategyRunner : IExecutionStrategyRunner, ITaskRunner
+    public class ExecutionStrategyRunner : ITaskRunner
     {
-        public async Task<T> Run<T>(ExecutionStrategy<T> executionStrategy)
-        {
-            return await executionStrategy.Run();
-        }
-
         public T Run<T>(IRunner<T> executionWrapper)
         {
             return executionWrapper.Run();
@@ -19,22 +14,12 @@ namespace ExecutionStrategyCore
     }
 
     /*
-     * consider moving all this into the Data Layer library
+     * example of DbSetRunner
      */
     internal interface IQuery<DbSetType, ReturnType> : IMapper<FakeDbSet<DbSetType>, Task<InternalRunnerWrapper<ReturnType>>> { }
 
     internal class FakeDbSet<T>
     { }
-
-    internal struct GetAll : IQuery<int, int>
-    {
-        public Task<InternalRunnerWrapper<int>> Run(FakeDbSet<int> arg)
-        {
-            return Task.FromResult(
-                new InternalRunnerWrapper<int>(new ValueCacheRunner<int>(0))
-            );
-        }
-    }
 
     internal interface IDbSetRunner<DbSetType>
     {
