@@ -43,7 +43,7 @@ namespace WebApplication1.Test.Controllers
             [TestClass]
             public class OverrideStory : GetAll
             {
-                private ActiveStoryFactory activeStories;
+                private FakeActiveStoryFactory activeStories;
                 private StoryOverrideRunner runnerWrapper;
                 private BlogDbSetRunner dbSet;
 
@@ -51,7 +51,7 @@ namespace WebApplication1.Test.Controllers
                 public void TestInitialize()
                 {
                     dbSet = A.Fake<BlogDbSetRunner>();
-                    activeStories = new ActiveStoryFactory();
+                    activeStories = new FakeActiveStoryFactory();
                     runnerWrapper = new StoryOverrideRunner(runner, activeStories);
                     blogController = new BlogController(runnerWrapper, dbSet);
                 }
@@ -169,7 +169,7 @@ namespace WebApplication1.Test.Controllers
         }
     }
 
-    public class ActiveStoryFactory : IRunner<ActiveStories>
+    public class FakeActiveStoryFactory : IRunner<ActiveStories>
     {
         public string ActiveStory {get;set;}
         public ActiveStories Run()

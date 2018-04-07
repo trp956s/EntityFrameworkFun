@@ -29,9 +29,10 @@ namespace WebApplication1
             if (activeStoriesSection.Exists())
             {
                 var storyFlags = activeStoriesSection.GetChildren().Select(x => x.Value);
-                serviceCollectionWrapper.AddScoped<ExecutionStrategyRunner>();
-                serviceCollectionWrapper.AddSingleton(new ActiveStories(storyFlags));
-                serviceCollectionWrapper.AddScoped<ITaskRunner, StoryOverrideRunner>();
+                var activeStories = new ActiveStories(storyFlags);
+                var activeStoryFactory = new ActiveStoryFactory(activeStories);
+                var storyRunner = new StoryOverrideRunner (new ExecutionStrategyRunner(), activeStoryFactory);
+                serviceCollectionWrapper.AddSingleton<ITaskRunner>(storyRunner);
             }
             else
             {
