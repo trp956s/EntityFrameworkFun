@@ -22,7 +22,7 @@ namespace WebApplication1
         public void ConfigureServices()
         {
             serviceCollectionWrapper.AddConfig<ServicesConfig>();
-            serviceCollectionWrapper.AddScoped<DbSetWrapper<Blog>>();
+            serviceCollectionWrapper.AddScoped<BlogDbSetRunner>();
 
             var activeStoriesSection = configuration.GetSection("active-stories");
             if (activeStoriesSection.Exists())

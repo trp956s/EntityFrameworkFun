@@ -45,12 +45,12 @@ namespace WebApplication1.Test.Controllers
             {
                 private ActiveStoryFactory activeStories;
                 private StoryOverrideRunner runnerWrapper;
-                private DbSetWrapper<Blog> dbSet;
+                private BlogDbSetRunner dbSet;
 
                 [TestInitialize]
                 public void TestInitialize()
                 {
-                    dbSet = new DbSetWrapper<Blog>();
+                    dbSet = A.Fake<BlogDbSetRunner>();
                     activeStories = new ActiveStoryFactory();
                     runnerWrapper = new StoryOverrideRunner(runner, activeStories);
                     blogController = new BlogController(runnerWrapper, dbSet);

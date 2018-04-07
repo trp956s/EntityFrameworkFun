@@ -18,9 +18,9 @@ namespace WebApplication1.Controllers
     public class BlogController : Controller
     {
         private readonly ITaskRunner runner;
-        private readonly DbSetWrapper<Blog> blogData;
+        private readonly BlogDbSetRunner blogData;
 
-        public BlogController(ITaskRunner runner, DbSetWrapper<Blog> blogData) {
+        public BlogController(ITaskRunner runner, BlogDbSetRunner blogData) {
             this.runner = runner;
             this.blogData = blogData;
         }
