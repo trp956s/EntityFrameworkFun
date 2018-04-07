@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct BloggingContextRunner : IRunner<BloggingContext>
+    public class BloggingContextRunner : IRunner<BloggingContext>
     {
         private readonly BloggingContext context;
 
