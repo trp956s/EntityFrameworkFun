@@ -9,7 +9,7 @@ using WebApplication1.Data.ModelInterfaces;
 
 namespace WebApplication1.Data.Queries
 {
-    public class GetAll<T> : IDbSetQuery<T, IEnumerable<T>>, IMapper<DbSet<T>, Task<InternalRunnerWrapper<IEnumerable<T>>>>
+    public struct GetAll<T> : IDbSetQuery<T, IEnumerable<T>>, IMapper<DbSet<T>, Task<InternalRunnerWrapper<IEnumerable<T>>>>
     where T : class, IHasId
     {
         //todo: support pageing

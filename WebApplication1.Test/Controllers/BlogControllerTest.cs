@@ -105,22 +105,20 @@ namespace WebApplication1.Test.Controllers
                 [TestMethod]
                 public async Task ReturnsAnArrayFromQuery2()
                 {
-                    //activeStories.ActiveStory = "3";
-                    //var fakeBlogs = new Collection<Blog> { new Blog() };
+                    activeStories.ActiveStory = "3";
+                    var fakeBlogs = new Collection<Blog> { new Blog() };
 
-                    //var getAll = (IMapper<DbSet<Blog>, Task<InternalRunnerWrapper<IEnumerable<Blog>>>>)
-                    //    new GetAll<Blog>()
-                    //;
-                    //var getAllRunner = getAll.ToRunner(dbSet);
-                    //A.CallTo(() => runner.Run(getAllRunner)).
-                    //    Returns(Task.FromResult(fakeBlogs.AsEnumerable().ToWrapper()));
+                    var getAll = new GetAll<Blog>();
+                    var getAllRunner = getAll.ToRunner(dbSet);
+                    A.CallTo(() => runner.Run(getAllRunner)).
+                        Returns(Task.FromResult(fakeBlogs.AsEnumerable().ToWrapper()));
 
-                    //var getResult = await blogController.Get();
+                    var getResult = await blogController.Get();
 
-                    //Assert.IsInstanceOfType(getResult, typeof(OkObjectResult));
+                    Assert.IsInstanceOfType(getResult, typeof(OkObjectResult));
 
-                    //var resultValue = (IEnumerable<Blog>)((OkObjectResult)getResult).Value;
-                    //CollectionAssert.AreEquivalent(fakeBlogs, new Collection<Blog>(resultValue.ToList()));
+                    var resultValue = (IEnumerable<Blog>)((OkObjectResult)getResult).Value;
+                    CollectionAssert.AreEquivalent(fakeBlogs, new Collection<Blog>(resultValue.ToList()));
                 }
 
                 [TestMethod]
