@@ -5,6 +5,7 @@ using ExecutionStrategyCore;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data.Models;
 using WebApplication1.Data.Queries;
+using System.Linq;
 
 namespace WebApplication1.Controllers
 {
@@ -57,7 +58,7 @@ namespace WebApplication1.Controllers
         [Story("3")]
         private async Task<ActionResult> GetAllBlogs3()
         {
-            var queryResult = await runner.Run(new GetAll<Blog>(), (IRunner<DbSet<Blog>>)blogData);
+            var queryResult = await runner.Run(new GetAll<Blog>(), (IRunner<IQueryable<Blog>>)blogData);
 
             return Ok(queryResult);
         }

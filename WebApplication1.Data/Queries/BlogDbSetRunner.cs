@@ -1,10 +1,11 @@
 ﻿using ExecutionStrategyCore;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries
 {
-    public class BlogDbSetRunner : IRunner<DbSet<Blog>>
+    public class BlogDbSetRunner : IRunner<IQueryable<Blog>>
     {
         private readonly IRunner<BloggingContext> context;
 
@@ -12,7 +13,7 @@ namespace WebApplication1.Data.Queries
             this.context = context;
         }
 
-        public DbSet<Blog> Run()
+        public IQueryable<Blog> Run()
         {
             return context.Run().Blogs;
         }
