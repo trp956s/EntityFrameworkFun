@@ -5,7 +5,7 @@ using System.Linq;
 using System.Collections;
 using System.Linq.Expressions;
 
-namespace WebApplication1.Test.Helpers
+namespace WebApplication1.Data.Test.Helpers
 {
     public abstract class FakeDbSet<T> : IDbAsyncEnumerable<T>, IQueryable<T>
     where T : class

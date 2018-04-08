@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace WebApplication1.Test.Helpers
+namespace WebApplication1.Data.Test.Helpers
 {
     public static class DbFake
     {
         public static DbContextOptions<T> CreateInMemoryDatabaseOptions<T>()
         where T : DbContext => new DbContextOptionsBuilder<T>().UseInMemoryDatabase(
-                databaseName: System.IO.Path.GetRandomFileName()
-            ).Options;
+              databaseName: System.IO.Path.GetRandomFileName()
+          ).Options;
 
         public static DbSet<T> CreateAsyncEnumeratorDbSet<T>()
         where T : class
