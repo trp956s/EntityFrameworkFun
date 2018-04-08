@@ -1,6 +1,5 @@
 ﻿using ExecutionStrategyCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace WebApplication1.Data
 {

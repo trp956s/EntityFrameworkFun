@@ -5,15 +5,10 @@ using System.Threading.Tasks;
 using WebApplication1.Controllers;
 using WebApplication1.Data.Models;
 using System.Linq;
-using WebApplication1.Test.Helpers;
 using FakeItEasy;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data.Queries;
-using System;
-using FakeItEasy.Configuration;
-using WebApplication1.Data.GeneralInterfaces;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -119,27 +114,6 @@ namespace WebApplication1.Test.Controllers
 
                     var resultValue = (IEnumerable<Blog>)((OkObjectResult)getResult).Value;
                     CollectionAssert.AreEquivalent(fakeBlogs, new Collection<Blog>(resultValue.ToList()));
-                }
-
-                [TestMethod]
-                public async Task SearchesAgainstBlogDbSet()
-                {
-                    //    var expectedDbSetWrapper = A.Fake<DbSetWrapper<Blog>>();
-                    //    var expectedStrategySource = new GetAll<Blog>(expectedDbSetWrapper);
-                    //    var runner = A.Fake<IExecutionStrategyRunner>(optionsBuilder => optionsBuilder.
-                    //        Wrapping(runnerWrapper.CreateStoryRunner("3"))
-                    //    );
-                    //    blogController = new BlogController(runner, expectedDbSetWrapper);
-                    //    A.CallTo(() => runner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.Ignored)).
-                    //        Returns(Task.FromResult(Enumerable.Empty<Blog>()));
-
-                    //    var getResult = await blogController.Get();
-
-                    //    A.CallTo(() => runner.Run(A<ExecutionStrategy<IEnumerable<Blog>>>.That.
-                    //        Matches(s=>
-                    //            s.Source.Equals(expectedStrategySource)))
-                    //        ).
-                    //        MustHaveHappenedOnceExactly();
                 }
             }
         }

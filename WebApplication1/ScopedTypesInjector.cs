@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using WebApplication1.Data;
 using System.Linq;
 using WebApplication1.Data.Queries;
-using WebApplication1.Data.Models;
 
 namespace WebApplication1
 {

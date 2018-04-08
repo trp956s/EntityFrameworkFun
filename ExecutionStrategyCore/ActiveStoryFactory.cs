@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ExecutionStrategyCore
+﻿namespace ExecutionStrategyCore
 {
     public class ActiveStoryFactory : IRunner<ActiveStories>
     {

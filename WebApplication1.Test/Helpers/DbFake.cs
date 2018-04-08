@@ -2,11 +2,7 @@
 using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Linq.Expressions;
-using System;
-using System.Collections;
 
 namespace WebApplication1.Test.Helpers
 {
