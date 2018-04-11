@@ -93,21 +93,28 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Get(int id)
         {
             var story5 = new StoryFunctionRunner<Task<ActionResult>>(() => GetBlog(id), "5");
+            var story6 = new StoryFunctionRunner<Task<ActionResult>>(() => GetBlog(id), "6");
             return await runner.Run(new StoryOverrideFunctionRunner<Task<ActionResult>>(
                 () => runner.Run(ExecutionStrategy.Create<ActionResult>(() => NotFound())),                
-                story5.Run
+                story5.Run,
+                story6.Run
             ));
         }
 
         private async Task<ActionResult> GetBlog(int id)
         {
-            var getAll = await runner.Run(new GetAllById<Blog>(id), blogData);
-            return WrapGetSingleBlogIntoAResult(null);
+            var runResult = await runner.Run(new GetAllById<Blog>(id), blogData);
+            return WrapGetSingleBlogIntoAResult(runResult);
         }
 
         private ActionResult WrapGetSingleBlogIntoAResult(Blog b)
         {
-            return NotFound();
+            if (b == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(b);
         }
 
         // POST api/values

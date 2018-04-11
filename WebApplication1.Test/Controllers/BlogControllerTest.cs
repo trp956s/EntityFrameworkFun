@@ -166,8 +166,7 @@ namespace WebApplication1.Test.Controllers
                 var mockDbResponse = Task.FromResult(((Blog)null).ToWrapper());
                 activeStories.ActiveStory = "5";
 
-                var getAll = new GetAllById<Blog>(id);
-                var getAllRunner = getAll.ToRunner(dbSet);
+                var getAllRunner = new GetAllById<Blog>(id).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(getAllRunner)).
                     Returns(mockDbResponse);
 
@@ -176,7 +175,23 @@ namespace WebApplication1.Test.Controllers
                 Assert.IsInstanceOfType(getResult, typeof(NotFoundResult));
                 A.CallTo(() => runner.Run(getAllRunner)).
                     MustHaveHappenedOnceExactly();
+            }
 
+            [TestMethod]
+            public async Task ReturnsOkWithValue()
+            {
+                var id = 99;
+                var expectedBlog = new Blog();
+                activeStories.ActiveStory = "6";
+
+                var getAllRunner = new GetAllById<Blog>(id).ToRunner(dbSet);
+                A.CallTo(() => runner.Run(getAllRunner)).
+                    Returns(Task.FromResult(expectedBlog.ToWrapper()));
+
+                var getResult = await blogController.Get(id);
+
+                Assert.IsInstanceOfType(getResult, typeof(OkObjectResult));
+                Assert.AreSame(((OkObjectResult)getResult).Value, expectedBlog);
             }
         }
 
