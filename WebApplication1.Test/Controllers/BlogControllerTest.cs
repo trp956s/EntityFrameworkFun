@@ -51,7 +51,6 @@ namespace WebApplication1.Test.Controllers
                     blogController = new BlogController(runnerWrapper, dbSet);
                 }
 
-
                 [TestMethod]
                 public async Task ReturnsAnEmptyArray()
                 {
@@ -137,14 +136,47 @@ namespace WebApplication1.Test.Controllers
         }
 
         [TestClass]
-        public class Get : BlogControllerTest
+        public class GetOne : BlogControllerTest
         {
+            private FakeActiveStoryFactory activeStories;
+            private StoryOverrideRunner runnerWrapper;
+            private BlogDbSetRunner dbSet;
+
+            [TestInitialize]
+            public void TestInitialize()
+            {
+                dbSet = A.Fake<BlogDbSetRunner>();
+                activeStories = new FakeActiveStoryFactory();
+                runnerWrapper = new StoryOverrideRunner(runner, activeStories);
+                blogController = new BlogController(runnerWrapper, dbSet);
+            }
+
             [TestMethod]
             public async Task ReturnsNotFound()
             {
                 var getResult = await blogController.Get(0);
 
                 Assert.IsInstanceOfType(getResult, typeof(NotFoundResult));
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundWhenDbEmpty()
+            {
+                var id = 99;
+                var mockDbResponse = Task.FromResult(((Blog)null).ToWrapper());
+                activeStories.ActiveStory = "5";
+
+                var getAll = new GetAllById<Blog>(id);
+                var getAllRunner = getAll.ToRunner(dbSet);
+                A.CallTo(() => runner.Run(getAllRunner)).
+                    Returns(mockDbResponse);
+
+                var getResult = await blogController.Get(id);
+
+                Assert.IsInstanceOfType(getResult, typeof(NotFoundResult));
+                A.CallTo(() => runner.Run(getAllRunner)).
+                    MustHaveHappenedOnceExactly();
+
             }
         }
 

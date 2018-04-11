@@ -23,10 +23,24 @@ namespace ExecutionStrategyCore
                 return null;
             }
 
-            return overrides.Reverse().FirstOrDefault(func=>IsFuncAnActiveStoryOverride(func.Method, stories));
+            return overrides.Reverse().FirstOrDefault(func => 
+                IsFuncAnActiveStoryOverride<T>(func.Target, stories)
+                || IsFuncAnActiveStoryOverride(func.Method, stories)
+            );
         }
 
-        private bool IsFuncAnActiveStoryOverride(MethodInfo methodInfo, ActiveStories stories)
+        private bool IsFuncAnActiveStoryOverride<T>(object target, ActiveStories stories)
+        {
+            if (target is StoryFunctionRunner<T>)
+            {
+                var storyFunctionRunner = (StoryFunctionRunner<T>)target;
+                return stories.AnyMatching(storyFunctionRunner.StoryNumbers);
+            }
+
+            return false;
+        }
+
+            private bool IsFuncAnActiveStoryOverride(MethodInfo methodInfo, ActiveStories stories)
         {
             var storyAttributes = methodInfo.GetCustomAttributes(typeof(StoryAttribute), true);
             var storyAttributeValues = storyAttributes.OfType<StoryAttribute>().Select(
