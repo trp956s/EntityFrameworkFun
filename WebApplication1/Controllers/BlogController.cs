@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using WebApplication1.Data.Models;
 using WebApplication1.Data.Queries;
 using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace WebApplication1.Controllers
 {
@@ -36,7 +38,8 @@ namespace WebApplication1.Controllers
                 notFoundFunc,
                 GetAllBlogs,
                 GetAllBlogs2,
-                GetAllBlogs3
+                GetAllBlogs3,
+                GetAllBlogs4
             );
             return await runner.Run(strategyToggle);
         }
@@ -58,10 +61,32 @@ namespace WebApplication1.Controllers
         [Story("3")]
         private async Task<ActionResult> GetAllBlogs3()
         {
-            var queryResult = await runner.Run(new GetAll<Blog>(), (IRunner<IQueryable<Blog>>)blogData);
+            return await GetAllBlogsFromDb("3");
+        }
+
+        [Story("4")]
+        private async Task<ActionResult> GetAllBlogs4()
+        {
+            return await GetAllBlogsFromDb("4");
+        }
+
+        private async Task<ActionResult> GetAllBlogsFromDb(string story)
+        {
+            var queryResult = await GetAllBlogsFromDb();
+
+            if(story == "4" && !queryResult.Any())
+            {
+                return NotFound();
+            }
 
             return Ok(queryResult);
         }
+
+        private async Task<IEnumerable<Blog>> GetAllBlogsFromDb()
+        {
+            return await runner.Run(new GetAll<Blog>(), (IRunner<IQueryable<Blog>>)blogData);
+        }
+
 
         // GET api/values/5
         [HttpGet("{id}")]

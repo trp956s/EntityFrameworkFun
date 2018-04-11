@@ -115,6 +115,24 @@ namespace WebApplication1.Test.Controllers
                     var resultValue = (IEnumerable<Blog>)((OkObjectResult)getResult).Value;
                     CollectionAssert.AreEquivalent(fakeBlogs, new Collection<Blog>(resultValue.ToList()));
                 }
+
+                [TestMethod]
+                public async Task ReturnsNotFoundWhenNoBlogs()
+                {
+                    activeStories.ActiveStory = "4";
+
+                    var getAll = new GetAll<Blog>();
+                    var getAllRunner = getAll.ToRunner(dbSet);
+                    A.CallTo(() => runner.Run(getAllRunner)).
+                        Returns(Task.FromResult(Enumerable.Empty<Blog>().ToWrapper()));
+
+                    var getResult = await blogController.Get();
+
+                    Assert.IsInstanceOfType(getResult, typeof(NotFoundResult));
+                    A.CallTo(() => runner.Run(getAllRunner)).
+                        MustHaveHappenedOnceExactly();
+                }
+
             }
         }
 
