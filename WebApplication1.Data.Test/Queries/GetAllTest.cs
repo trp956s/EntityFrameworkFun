@@ -39,7 +39,7 @@ namespace WebApplication1.Data.Test.Queries
             }
 
             [TestMethod]
-            public async Task ReturnsAllOfQuerySource()
+            public async Task ReturnsAllOfQuerySourceInOrder()
             {
                 var testList = new Collection<object> { new object(), new object(), new object() };
                 var queryableEntity = CreateFakeIAsyncEnum(testList, testList.AsQueryable());
@@ -47,6 +47,9 @@ namespace WebApplication1.Data.Test.Queries
                 var result = runner.Run(await getAllOfAnything.Run(queryableEntity));
 
                 CollectionAssert.AreEquivalent(testList, new Collection<object>(result.ToList()));
+                for(var i = 0; i < testList.Count(); i++) {
+                    Assert.AreEqual(testList.ElementAt(i), result.ElementAt(i));
+                }
             }
 
             private FakeType CreateFakeIAsyncEnum<T, FakeType>(IEnumerable<T> dataToWrap, FakeType fakeToWrap)
