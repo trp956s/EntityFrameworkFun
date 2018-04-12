@@ -20,10 +20,9 @@ namespace WebApplication1.Data.Queries
 
         public async Task<InternalRunnerWrapper<T>> Run(IQueryable<T> dbSet)
         {
-            return await Task.FromResult(default(T).ToWrapper());
-            //            var searchId = id;
-            //            var all = await dbSet.SingleAsync(x=>x.Id == searchId);
-            //            return all.ToWrapper();
+            var searchId = id;
+            var match = await dbSet.FirstOrDefaultAsync(x=>x.Id == searchId);
+            return match.ToWrapper();
         }
     }
 }
