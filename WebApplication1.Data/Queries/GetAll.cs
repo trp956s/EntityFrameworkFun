@@ -8,23 +8,14 @@ using System.Linq;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct GetAllById<T> : IDbSetQuery<T, T>
-    where T : class, IHasId
+    public struct GetAll<T> : IDbSetQuery<T, IEnumerable<T>>
+    where T : class
     {
-        private readonly int id;
-
-        public GetAllById(int id)
-        {
-            this.id = id;
-        }
-
         //todo: support pageing
-        public async Task<InternalRunnerWrapper<T>> Run(IQueryable<T> dbSet)
+        public async Task<InternalRunnerWrapper<IEnumerable<T>>> Run(IQueryable<T> dbSet)
         {
-            throw new System.NotImplementedException();
-//            var searchId = id;
-//            var all = await dbSet.SingleAsync(x=>x.Id == searchId);
-//            return all.ToWrapper();
+            var all = await dbSet.ToArrayAsync();
+            return all.ToWrapper<IEnumerable<T>>();
         }
     }
 }
