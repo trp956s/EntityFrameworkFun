@@ -270,6 +270,12 @@ namespace WebApplication1.Test.Controllers
                     var getByIdCall = A.CallTo(() => runner.Run(getById));
                     getByIdCall.Returns(Task.FromResult(((Blog)null).ToWrapper()));
 
+                    if(story == "9")
+                    {
+                        var createBlog = new CreateBlog(blog).ToRunner(dbSet);
+                        A.CallTo(() => runner.Run(createBlog));
+                    }
+
                     var result = await blogController.Post(blog);
 
                     Assert.IsInstanceOfType(result, typeof(StatusCodeResult));
@@ -281,6 +287,23 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsErrorOccuredDuringInsert()
             {
+                var expected = new System.Exception();
+                var blog = new Blog();
+                activeStories.ActiveStory = "9";
+                var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
+                var createBlog = new CreateBlog(blog).ToRunner(dbSet);
+                A.CallTo(() => runner.Run(getById)).Returns(
+                    Task.FromResult(((Blog)null).ToWrapper())
+                );
+                A.CallTo(() => runner.Run(createBlog)).Throws(
+                    expected
+                );
+
+                var actual = await Assert.ThrowsExceptionAsync<System.Exception>(() =>
+                    blogController.Post(blog)
+                );
+
+                Assert.AreSame(expected, actual);
             }
         }
     }

@@ -122,37 +122,46 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<StatusCodeResult> Post([FromBody] Blog blog)
         {
-            var story7 = new StoryFunctionRunner<Task<StatusCodeResult>>(()=>Story7(blog), "7");
-            var story8 = new StoryFunctionRunner<Task<StatusCodeResult>>(() => Story8(blog), "8");
-            var story9 = new StoryFunctionRunner<Task<StatusCodeResult>>(() => Story8(blog), "9");
+            var post = new StoryFunctionRunner<Task<StatusCodeResult>>(()=>PostBlog(blog), "7", "8", "9");
 
-            var status = await runner.Run(new StoryOverrideFunctionRunner<Task<StatusCodeResult>>(
+            return await runner.Run(new StoryOverrideFunctionRunner<Task<StatusCodeResult>>(
                 () => Task.FromResult((StatusCodeResult)BadRequest()),
-                story7.Run,
-                story8.Run,
-                story9.Run
+                post.Run
             ));
-
-            return await Task.FromResult(status);
         }
 
-        public async Task<StatusCodeResult> Story7(Blog postBlog)
+        private async Task<StatusCodeResult> PostBlog(Blog postBlog)
         {
             if (postBlog == null)
                 return await Task.FromResult(BadRequest());
             var result = await runner.Run(new GetAllById<Blog>(postBlog.Id), blogData);
-            return StatusCode(StatusCodes.Status409Conflict);
+
+            var story8 = new StoryFunctionRunner<Task<StatusCodeResult>>(() => CheckForConflict(result, postBlog), "8", "9");
+
+            return await runner.Run(new StoryOverrideFunctionRunner<Task<StatusCodeResult>>(
+                () => Task.FromResult(StatusCode(StatusCodes.Status409Conflict)),
+                story8.Run
+            ));
         }
 
-        public async Task<StatusCodeResult> Story8(Blog postBlog)
+        private async Task<StatusCodeResult> CheckForConflict(Blog matchingPostId, Blog postBlog)
         {
-            if (postBlog == null)
-                return BadRequest();
-            var result = await runner.Run(new GetAllById<Blog>(postBlog.Id), blogData);
-            if(result != null)
+            if(matchingPostId != null)
                 return StatusCode(StatusCodes.Status409Conflict);
-            return StatusCode(StatusCodes.Status201Created);
+            var story9 = new StoryFunctionRunner<Task<StatusCodeResult>>(() => CreateNew(postBlog), "9");
+            return await runner.Run(new StoryOverrideFunctionRunner<Task<StatusCodeResult>>(
+                () => Task.FromResult(StatusCode(StatusCodes.Status201Created)),
+                story9.Run
+            ));
         }
+
+        private Task<StatusCodeResult> CreateNew(Blog postBlog)
+        {
+            return Task.FromResult(StatusCode(StatusCodes.Status201Created));
+        }
+
+
+
         // PUT api/values/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]string value)
