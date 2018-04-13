@@ -224,7 +224,7 @@ namespace WebApplication1.Test.Controllers
             public async Task ReturnsBadRequestWhenNullInStories()
             {
                 //this would be better with test cases
-                var stories = new string[] { "7", "8"};
+                var stories = new string[] { "7", "8", "9"};
                 foreach (var story in stories)
                 {
                     activeStories.ActiveStory = story;
@@ -238,7 +238,7 @@ namespace WebApplication1.Test.Controllers
             public async Task ReturnsConflictWhenIdIsFound()
             {
                 //this would be better with test cases
-                var stories = new string[] { "7", "8" };
+                var stories = new string[] { "7", "8", "9" };
                 var expectedCount = 1;
                 foreach (var story in stories)
                 {
@@ -260,17 +260,22 @@ namespace WebApplication1.Test.Controllers
             [TestMethod]
             public async Task ReturnsSuccessWhenUnique()
             {
-                var blog = new Blog();
-                activeStories.ActiveStory = "8";
-                var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
-                var getByIdCall = A.CallTo(() => runner.Run(getById));
-                getByIdCall.Returns(Task.FromResult(((Blog)null).ToWrapper()));
+                var stories = new string[] { "8", "9" };
+                var expectedCount = 1;
+                foreach (var story in stories)
+                {
+                    var blog = new Blog();
+                    activeStories.ActiveStory = story;
+                    var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
+                    var getByIdCall = A.CallTo(() => runner.Run(getById));
+                    getByIdCall.Returns(Task.FromResult(((Blog)null).ToWrapper()));
 
-                var result = await blogController.Post(blog);
+                    var result = await blogController.Post(blog);
 
-                Assert.IsInstanceOfType(result, typeof(StatusCodeResult));
-                Assert.AreEqual(result.StatusCode, StatusCodes.Status201Created);
-                getByIdCall.MustHaveHappenedOnceExactly();
+                    Assert.IsInstanceOfType(result, typeof(StatusCodeResult));
+                    Assert.AreEqual(StatusCodes.Status201Created, result.StatusCode);
+                    getByIdCall.MustHaveHappened(expectedCount++, Times.Exactly);
+                }
             }
 
             [TestMethod]

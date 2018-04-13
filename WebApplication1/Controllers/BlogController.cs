@@ -124,11 +124,13 @@ namespace WebApplication1.Controllers
         {
             var story7 = new StoryFunctionRunner<Task<StatusCodeResult>>(()=>Story7(blog), "7");
             var story8 = new StoryFunctionRunner<Task<StatusCodeResult>>(() => Story8(blog), "8");
+            var story9 = new StoryFunctionRunner<Task<StatusCodeResult>>(() => Story8(blog), "9");
 
             var status = await runner.Run(new StoryOverrideFunctionRunner<Task<StatusCodeResult>>(
                 () => Task.FromResult((StatusCodeResult)BadRequest()),
                 story7.Run,
-                story8.Run
+                story8.Run,
+                story9.Run
             ));
 
             return await Task.FromResult(status);
