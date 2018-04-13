@@ -8,6 +8,7 @@ using WebApplication1.Data.Queries;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace WebApplication1.Controllers
 {
@@ -121,9 +122,35 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<StatusCodeResult> Post([FromBody] Blog blog)
         {
-            return await runner.Run(ExecutionStrategy.Create<StatusCodeResult>(() => BadRequest()));
+            var story7 = new StoryFunctionRunner<Task<StatusCodeResult>>(()=>Story7(blog), "7");
+            var story8 = new StoryFunctionRunner<Task<StatusCodeResult>>(() => Story8(blog), "8");
+
+            var status = await runner.Run(new StoryOverrideFunctionRunner<Task<StatusCodeResult>>(
+                () => Task.FromResult((StatusCodeResult)BadRequest()),
+                story7.Run,
+                story8.Run
+            ));
+
+            return await Task.FromResult(status);
         }
 
+        public async Task<StatusCodeResult> Story7(Blog postBlog)
+        {
+            if (postBlog == null)
+                return await Task.FromResult(BadRequest());
+            var result = await runner.Run(new GetAllById<Blog>(postBlog.Id), blogData);
+            return StatusCode(StatusCodes.Status409Conflict);
+        }
+
+        public async Task<StatusCodeResult> Story8(Blog postBlog)
+        {
+            if (postBlog == null)
+                return BadRequest();
+            var result = await runner.Run(new GetAllById<Blog>(postBlog.Id), blogData);
+            if(result != null)
+                return StatusCode(StatusCodes.Status409Conflict);
+            return StatusCode(StatusCodes.Status201Created);
+        }
         // PUT api/values/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody]string value)

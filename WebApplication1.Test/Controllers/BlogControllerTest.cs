@@ -9,6 +9,7 @@ using FakeItEasy;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using WebApplication1.Data.Queries;
+using Microsoft.AspNetCore.Http;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -184,8 +185,8 @@ namespace WebApplication1.Test.Controllers
                 var expectedBlog = new Blog();
                 activeStories.ActiveStory = "6";
 
-                var getAllRunner = new GetAllById<Blog>(id).ToRunner(dbSet);
-                A.CallTo(() => runner.Run(getAllRunner)).
+                var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
+                A.CallTo(() => runner.Run(getById)).
                     Returns(Task.FromResult(expectedBlog.ToWrapper()));
 
                 var getResult = await blogController.Get(id);
@@ -198,12 +199,83 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Post : BlogControllerTest
         {
+            private FakeActiveStoryFactory activeStories;
+            private StoryOverrideRunner runnerWrapper;
+            private BlogDbSetRunner dbSet;
+
+            [TestInitialize]
+            public void TestInitialize()
+            {
+                dbSet = A.Fake<BlogDbSetRunner>();
+                activeStories = new FakeActiveStoryFactory();
+                runnerWrapper = new StoryOverrideRunner(runner, activeStories);
+                blogController = new BlogController(runnerWrapper, dbSet);
+            }
+
             [TestMethod]
-            public async Task ReturnsNotFound()
+            public async Task ReturnsBadRequestWhenNull()
             {
                 var getResult = await blogController.Post(null);
 
                 Assert.IsInstanceOfType(getResult, typeof(BadRequestResult));
+            }
+
+            [TestMethod]
+            public async Task ReturnsBadRequestWhenNullInStories()
+            {
+                //this would be better with test cases
+                var stories = new string[] { "7", "8"};
+                foreach (var story in stories)
+                {
+                    activeStories.ActiveStory = story;
+                    var getResult = await blogController.Post(null);
+
+                    Assert.IsInstanceOfType(getResult, typeof(BadRequestResult));
+                }
+            }
+
+            [TestMethod]
+            public async Task ReturnsConflictWhenIdIsFound()
+            {
+                //this would be better with test cases
+                var stories = new string[] { "7", "8" };
+                var expectedCount = 1;
+                foreach (var story in stories)
+                {
+                    activeStories.ActiveStory = story;
+                    var blog = new Blog();
+
+                    var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
+                    var getByIdCall = A.CallTo(() => runner.Run(getById));
+                    getByIdCall.Returns(Task.FromResult(blog.ToWrapper()));
+
+                    var result = await blogController.Post(blog);
+
+                    Assert.IsInstanceOfType(result, typeof(StatusCodeResult));
+                    Assert.AreEqual(result.StatusCode, StatusCodes.Status409Conflict);
+                    getByIdCall.MustHaveHappened(expectedCount++,Times.Exactly);
+                }
+            }
+
+            [TestMethod]
+            public async Task ReturnsSuccessWhenUnique()
+            {
+                var blog = new Blog();
+                activeStories.ActiveStory = "8";
+                var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
+                var getByIdCall = A.CallTo(() => runner.Run(getById));
+                getByIdCall.Returns(Task.FromResult(((Blog)null).ToWrapper()));
+
+                var result = await blogController.Post(blog);
+
+                Assert.IsInstanceOfType(result, typeof(StatusCodeResult));
+                Assert.AreEqual(result.StatusCode, StatusCodes.Status201Created);
+                getByIdCall.MustHaveHappenedOnceExactly();
+            }
+
+            [TestMethod]
+            public async Task ReturnsErrorOccuredDuringInsert()
+            {
             }
         }
     }
