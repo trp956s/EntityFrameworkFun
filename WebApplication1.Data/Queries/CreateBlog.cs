@@ -7,7 +7,7 @@ using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries
 {
-    public class CreateBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<Blog>>>
+    public struct CreateBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<Blog>>>
     {
         private Blog blog;
 

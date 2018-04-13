@@ -273,7 +273,7 @@ namespace WebApplication1.Test.Controllers
                     if(story == "9")
                     {
                         var createBlog = new CreateBlog(blog).ToRunner(dbSet);
-                        A.CallTo(() => runner.Run(createBlog));
+                        A.CallTo(() => runner.Run(createBlog)).Returns(new Blog().ToWrapper());
                     }
 
                     var result = await blogController.Post(blog);

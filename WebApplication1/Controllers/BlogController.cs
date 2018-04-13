@@ -85,7 +85,7 @@ namespace WebApplication1.Controllers
 
         private async Task<IEnumerable<Blog>> GetAllBlogsFromDb()
         {
-            return await runner.Run(new GetAll<Blog>(), (IRunner<IQueryable<Blog>>)blogData);
+            return await runner.Run(new GetAll<Blog>(), blogData);
         }
 
 
@@ -155,9 +155,10 @@ namespace WebApplication1.Controllers
             ));
         }
 
-        private Task<StatusCodeResult> CreateNew(Blog postBlog)
+        private async Task<StatusCodeResult> CreateNew(Blog postBlog)
         {
-            return Task.FromResult(StatusCode(StatusCodes.Status201Created));
+            await runner.Run(new CreateBlog(postBlog), blogData);
+            return StatusCode(StatusCodes.Status201Created);
         }
 
 
