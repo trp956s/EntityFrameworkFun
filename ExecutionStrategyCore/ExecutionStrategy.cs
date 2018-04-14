@@ -21,7 +21,6 @@ namespace ExecutionStrategyCore
             Source = source;
         }
 
-//        public Func<Task<T>> Run { get{ return this.func;} }
         public object Source { get; }
 
         public Task<T> Run()

@@ -7,7 +7,7 @@ using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct CreateBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<Blog>>>
+    public struct CreateBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<int>>>
     {
         private Blog blog;
 
@@ -16,9 +16,11 @@ namespace WebApplication1.Data.Queries
             this.blog = blog;
         }
 
-        public Task<InternalRunnerWrapper<Blog>> Run(BloggingContext arg)
+        public async Task<InternalRunnerWrapper<int>> Run(BloggingContext bloggingContext)
         {
-            throw new NotImplementedException();
+            bloggingContext.Blogs.Add(blog);
+            var count = await bloggingContext.SaveChangesAsync();
+            return count.ToWrapper();
         }
     }
 }
