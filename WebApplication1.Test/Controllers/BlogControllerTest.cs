@@ -379,11 +379,8 @@ namespace WebApplication1.Test.Controllers
                 var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(getById)).
                     Returns(Task.FromResult(editBlog.ToWrapper()));
-                var updateBlog = new UpdateBlog(putArg).ToRunner(dbSet);
+                var updateBlog = new UpdateBlog(editBlog, putArg).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(updateBlog))
-                    .Invokes(()=> {
-                        Assert.AreEqual(id, putArg.Id);
-                    })
                     .Returns(Task.FromResult(expectedBlog.ToWrapper()));
 
                 var response = await blogController.Put(id, putArg);

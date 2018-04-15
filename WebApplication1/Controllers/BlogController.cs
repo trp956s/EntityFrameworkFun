@@ -167,41 +167,35 @@ namespace WebApplication1.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromBody]Blog blog)
         {
-            var find = new StoryFunctionRunner<Task<ActionResult>>(() => Find(id), "10", "11");
-
-            var response = await runner.Run(new StoryOverrideFunctionRunner<Task<ActionResult>>(
-                () => Task.FromResult<ActionResult>(NotFound()),
-                find.Run
+            var blogFound = await runner.Run(new StoryOverrideFunctionRunner<Task<Blog>>(
+                () => Task.FromResult<Blog>(null),
+                new StoryFunctionRunner<Task<Blog>>(() => 
+                    Find(id), "10", "11"
+                ).Run
             ));
 
-            if(response is OkResult)
-            {
-                var update = new StoryFunctionRunner<Task<ActionResult>>(() => Update(id, blog), "11");
-                return await runner.Run(new StoryOverrideFunctionRunner<Task<ActionResult>>(
-                    () => Task.FromResult(response),
-                    update.Run
-                ));
-            }
-
-            return response;
-        }
-
-        private async Task<ActionResult> Update(int id, Blog blog)
-        {
-            blog.Id = id;
-            var updatedBlog = await runner.Run(new UpdateBlog(blog), blogData);
-
-            return Ok(updatedBlog);
-        }
-
-        private async Task<ActionResult> Find(int id)
-        {
-            if(null == await runner.Run(new GetAllById<Blog>(id), blogData))
+            if (blogFound == null)
             {
                 return NotFound();
             }
 
-            return Ok();
+            var update = new StoryFunctionRunner<Task<ActionResult>>(() => Update(blogFound, blog), "11");
+            return await runner.Run(new StoryOverrideFunctionRunner<Task<ActionResult>>(
+                () => Task.FromResult<ActionResult>(Ok()),
+                update.Run
+            ));
+        }
+
+        private async Task<ActionResult> Update(Blog existingBlog, Blog newBlogValues)
+        {
+            var updatedBlog = await runner.Run(new UpdateBlog(existingBlog, newBlogValues), blogData);
+
+            return Ok(updatedBlog);
+        }
+
+        private async Task<Blog> Find(int id)
+        {
+            return await runner.Run(new GetAllById<Blog>(id), blogData);
         }
 
         // DELETE api/values/5

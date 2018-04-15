@@ -10,10 +10,12 @@ namespace WebApplication1.Data.Queries
     public struct UpdateBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<Blog>>>
     {
         private Blog blog;
+        private readonly Blog newValues;
 
-        public UpdateBlog(Blog blog)
+        public UpdateBlog(Blog originalEntity, Blog newValues)
         {
-            this.blog = blog;
+            blog = originalEntity;
+            this.newValues = newValues;
         }
 
         public Task<InternalRunnerWrapper<Blog>> Run(BloggingContext arg)
