@@ -20,7 +20,8 @@ namespace WebApplication1.Test.Controllers
         ITaskRunner runner;
 
         [TestInitialize]
-        public void TestInit() {
+        public void TestInit()
+        {
             runner = A.Fake<ITaskRunner>(options => options.Wrapping(new ExecutionStrategyRunner()));
             blogController = new BlogController(runner, null);
         }
@@ -85,7 +86,7 @@ namespace WebApplication1.Test.Controllers
                     activeStories.ActiveStory = "3";
                     var fakeBlogs = new Collection<Blog> { new Blog() };
 
-                    A.CallTo(runner).Where(x=>true).
+                    A.CallTo(runner).Where(x => true).
                         WithReturnType<Task<InternalRunnerWrapper<IEnumerable<Blog>>>>().
                         Returns(Task.FromResult(fakeBlogs.AsEnumerable().ToWrapper()));
 
@@ -224,7 +225,7 @@ namespace WebApplication1.Test.Controllers
             public async Task ReturnsBadRequestWhenNullInStories()
             {
                 //this would be better with test cases
-                var stories = new string[] { "7", "8", "9"};
+                var stories = new string[] { "7", "8", "9" };
                 foreach (var story in stories)
                 {
                     activeStories.ActiveStory = story;
@@ -253,7 +254,7 @@ namespace WebApplication1.Test.Controllers
 
                     Assert.IsInstanceOfType(result, typeof(StatusCodeResult));
                     Assert.AreEqual(result.StatusCode, StatusCodes.Status409Conflict);
-                    getByIdCall.MustHaveHappened(expectedCount++,Times.Exactly);
+                    getByIdCall.MustHaveHappened(expectedCount++, Times.Exactly);
                 }
             }
 
@@ -270,7 +271,7 @@ namespace WebApplication1.Test.Controllers
                     var getByIdCall = A.CallTo(() => runner.Run(getById));
                     getByIdCall.Returns(Task.FromResult(((Blog)null).ToWrapper()));
 
-                    if(story == "9")
+                    if (story == "9")
                     {
                         var createBlog = new CreateBlog(blog).ToRunner(dbSet);
                         A.CallTo(() => runner.Run(createBlog)).Returns(0.ToWrapper());
@@ -304,6 +305,91 @@ namespace WebApplication1.Test.Controllers
                 );
 
                 Assert.AreSame(expected, actual);
+            }
+        }
+
+        [TestClass]
+        public class Put : BlogControllerTest
+        {
+            private FakeActiveStoryFactory activeStories;
+            private StoryOverrideRunner runnerWrapper;
+            private BlogDbSetRunner dbSet;
+
+            [TestInitialize]
+            public void TestInitialize()
+            {
+                dbSet = A.Fake<BlogDbSetRunner>();
+                activeStories = new FakeActiveStoryFactory();
+                runnerWrapper = new StoryOverrideRunner(runner, activeStories);
+                blogController = new BlogController(runnerWrapper, dbSet);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFound()
+            {
+                var response = await blogController.Put(0, null);
+
+                Assert.IsInstanceOfType(response, typeof(NotFoundResult));
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFoundWhenIdIsNotFound()
+            {
+                foreach (var story in new string[] { "10", "11" })
+                {
+                    activeStories.ActiveStory = story;
+
+                    var id = 999;
+
+                    var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
+                    A.CallTo(() => runner.Run(getById)).
+                        Returns(Task.FromResult(((Blog)null).ToWrapper()));
+
+                    var response = await blogController.Put(id, null);
+                    Assert.IsInstanceOfType(response, typeof(NotFoundResult));
+                }
+            }
+
+            [TestMethod]
+            public async Task ReturnsOKWhenIdIsFound()
+            {
+                activeStories.ActiveStory = "10";
+
+                var id = 321;
+
+                var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
+                A.CallTo(() => runner.Run(getById)).
+                    Returns(Task.FromResult((new Blog()).ToWrapper()));
+
+                var response = await blogController.Put(id, null);
+
+                Assert.IsInstanceOfType(response, typeof(OkResult));
+            }
+
+            [TestMethod]
+            public async Task UpdatesFoundId()
+            {
+                activeStories.ActiveStory = "11";
+
+                var id = 4513242;
+                var putArg = new Blog();
+                var editBlog = new Blog() { Id = id };
+                var expectedBlog = new Blog();
+
+                var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
+                A.CallTo(() => runner.Run(getById)).
+                    Returns(Task.FromResult(editBlog.ToWrapper()));
+                var updateBlog = new UpdateBlog(putArg).ToRunner(dbSet);
+                A.CallTo(() => runner.Run(updateBlog))
+                    .Invokes(()=> {
+                        Assert.AreEqual(id, putArg.Id);
+                    })
+                    .Returns(Task.FromResult(expectedBlog.ToWrapper()));
+
+                var response = await blogController.Put(id, putArg);
+
+                Assert.IsInstanceOfType(response, typeof(OkObjectResult));
+                Assert.AreSame(expectedBlog, ((OkObjectResult) response).Value);
             }
         }
     }

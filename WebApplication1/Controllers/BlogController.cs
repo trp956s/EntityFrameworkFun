@@ -165,8 +165,43 @@ namespace WebApplication1.Controllers
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public async Task<ActionResult> Put(int id, [FromBody]Blog blog)
         {
+            var find = new StoryFunctionRunner<Task<ActionResult>>(() => Find(id), "10", "11");
+
+            var response = await runner.Run(new StoryOverrideFunctionRunner<Task<ActionResult>>(
+                () => Task.FromResult<ActionResult>(NotFound()),
+                find.Run
+            ));
+
+            if(response is OkResult)
+            {
+                var update = new StoryFunctionRunner<Task<ActionResult>>(() => Update(id, blog), "11");
+                return await runner.Run(new StoryOverrideFunctionRunner<Task<ActionResult>>(
+                    () => Task.FromResult(response),
+                    update.Run
+                ));
+            }
+
+            return response;
+        }
+
+        private async Task<ActionResult> Update(int id, Blog blog)
+        {
+            blog.Id = id;
+            var updatedBlog = await runner.Run(new UpdateBlog(blog), blogData);
+
+            return Ok(updatedBlog);
+        }
+
+        private async Task<ActionResult> Find(int id)
+        {
+            if(null == await runner.Run(new GetAllById<Blog>(id), blogData))
+            {
+                return NotFound();
+            }
+
+            return Ok();
         }
 
         // DELETE api/values/5
