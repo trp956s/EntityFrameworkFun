@@ -202,18 +202,28 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var defaultDeleteFunction = new StoryOverrideFunctionRunner<Task<Blog>>(
+            var defaultFindFunction = new StoryOverrideFunctionRunner<Task<Blog>>(
                 () => Task.FromResult<Blog>(null)
             );
 
-            defaultDeleteFunction.AddOverride(() => Find(id), "12");
+            defaultFindFunction.AddOverride(() => Find(id), "12", "13");
 
-            var foundBlog = await runner.Run(defaultDeleteFunction);
+            var foundBlog = await runner.Run(defaultFindFunction);
 
             if (foundBlog == null)
             {
                 return NotFound();
             }
+
+            var defaultDeleteFunction = new StoryOverrideFunctionRunner<Task<int>>(
+                () => Task.FromResult(0)
+            );
+
+            defaultDeleteFunction.AddOverride(() => 
+                runner.Run(new DeleteAllById<Blog>(id), blogData), 
+            "13");
+
+            await runner.Run(defaultDeleteFunction);
 
             return Ok();
         }

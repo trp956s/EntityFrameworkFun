@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using WebApplication1.Data.Queries;
 using Microsoft.AspNetCore.Http;
+using System;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -415,10 +416,10 @@ namespace WebApplication1.Test.Controllers
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
             }
 
-            public async Task ReturnsNotFoundAfterLookup()
+            public async Task ReturnsNotFoundAfterLookupFails()
             {
                 var deleteId = 4325;
-                foreach (var story in new string[] { null, "12" })
+                foreach (var story in new string[] { null, "12", "13" })
                 {
                     activeStories.ActiveStory = story;
                     A.CallTo(() => runner.Run(
@@ -431,20 +432,62 @@ namespace WebApplication1.Test.Controllers
                 }
             }
 
-
             [TestMethod]
             public async Task ReturnsOkWhenIdFound()
             {
                 var deleteId = 3421;
 
-                activeStories.ActiveStory = "12";
+                foreach (var story in new string[] { "12" })
+                {
+                    activeStories.ActiveStory = story;
+                    A.CallTo(() => runner.Run(
+                        new GetAllById<Blog>(deleteId).ToRunner(dbSet))
+                    ).Returns(new Blog().ToWrapper());
+
+                    var result = await blogController.Delete(deleteId);
+
+                    Assert.IsInstanceOfType(result, typeof(OkResult));
+                }
+            }
+
+            [TestMethod]
+            public async Task ReturnsOkWhenIdFoundAndDeleteSuccess()
+            {
+                var deleteId = 3421;
+
+                foreach (var story in new string[] { "12" })
+                {
+                    activeStories.ActiveStory = story;
+                    A.CallTo(() => runner.Run(
+                        new GetAllById<Blog>(deleteId).ToRunner(dbSet))
+                    ).Returns(new Blog().ToWrapper());
+                    A.CallTo(() => runner.Run(
+                        new DeleteAllById<Blog>(deleteId).ToRunner(dbSet))
+                    ).Returns(0.ToWrapper());
+
+                    var result = await blogController.Delete(deleteId);
+
+                    Assert.IsInstanceOfType(result, typeof(OkResult));
+                }
+            }
+
+
+            [TestMethod]
+            public async Task ReturnsErrorWhenDeleteBlowsUp()
+            {
+                var deleteId = 546;
+                var expectedException = new Exception("Test");
+                activeStories.ActiveStory = "13";
                 A.CallTo(() => runner.Run(
                     new GetAllById<Blog>(deleteId).ToRunner(dbSet))
                 ).Returns(new Blog().ToWrapper());
+                A.CallTo(() => runner.Run(
+                    new DeleteAllById<Blog>(deleteId).ToRunner(dbSet))
+                ).Throws(expectedException);
 
-                var result = await blogController.Delete(deleteId);
+                var excptionThrown = await Assert.ThrowsExceptionAsync<Exception>(() => blogController.Delete(deleteId));
 
-                Assert.IsInstanceOfType(result, typeof(OkResult));
+                Assert.AreSame(excptionThrown, expectedException);
             }
         }
     }
