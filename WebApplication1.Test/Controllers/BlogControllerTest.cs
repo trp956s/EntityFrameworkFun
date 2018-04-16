@@ -374,19 +374,19 @@ namespace WebApplication1.Test.Controllers
                 var id = 4513242;
                 var putArg = new Blog();
                 var editBlog = new Blog() { Id = id };
-                var expectedBlog = new Blog();
+                var expected = 876;
 
                 var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(getById)).
                     Returns(Task.FromResult(editBlog.ToWrapper()));
                 var updateBlog = new UpdateBlog(editBlog, putArg).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(updateBlog))
-                    .Returns(Task.FromResult(expectedBlog.ToWrapper()));
+                    .Returns(Task.FromResult(expected.ToWrapper()));
 
                 var response = await blogController.Put(id, putArg);
 
                 Assert.IsInstanceOfType(response, typeof(OkObjectResult));
-                Assert.AreSame(expectedBlog, ((OkObjectResult) response).Value);
+                Assert.AreEqual(expected, ((OkObjectResult) response).Value);
             }
         }
     }

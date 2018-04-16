@@ -7,20 +7,24 @@ using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct UpdateBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<Blog>>>
+    public struct UpdateBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<int>>>
     {
-        private Blog blog;
+        private readonly Blog originalEntity;
         private readonly Blog newValues;
 
         public UpdateBlog(Blog originalEntity, Blog newValues)
         {
-            blog = originalEntity;
+            this.originalEntity = originalEntity;
             this.newValues = newValues;
         }
 
-        public Task<InternalRunnerWrapper<Blog>> Run(BloggingContext arg)
+        public async Task<InternalRunnerWrapper<int>> Run(BloggingContext context)
         {
-            throw new NotImplementedException();
+            newValues.Id = originalEntity.Id;
+            context.Entry(originalEntity).CurrentValues.SetValues(newValues);
+            var returnValue = await context.SaveChangesAsync();
+
+            return returnValue.ToWrapper();
         }
     }
 }
