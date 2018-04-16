@@ -200,8 +200,22 @@ namespace WebApplication1.Controllers
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
+            var defaultDeleteFunction = new StoryOverrideFunctionRunner<Task<Blog>>(
+                () => Task.FromResult<Blog>(null)
+            );
+
+            defaultDeleteFunction.AddOverride(() => Find(id), "12");
+
+            var foundBlog = await runner.Run(defaultDeleteFunction);
+
+            if (foundBlog == null)
+            {
+                return NotFound();
+            }
+
+            return Ok();
         }
     }
 }

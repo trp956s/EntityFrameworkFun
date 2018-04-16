@@ -386,7 +386,65 @@ namespace WebApplication1.Test.Controllers
                 var response = await blogController.Put(id, putArg);
 
                 Assert.IsInstanceOfType(response, typeof(OkObjectResult));
-                Assert.AreEqual(expected, ((OkObjectResult) response).Value);
+                Assert.AreEqual(expected, ((OkObjectResult)response).Value);
+            }
+        }
+
+        [TestClass]
+        public class Delete : BlogControllerTest
+        {
+            private FakeActiveStoryFactory activeStories;
+            private StoryOverrideRunner runnerWrapper;
+            private BlogDbSetRunner dbSet;
+
+            [TestInitialize]
+            public void TestInitialize()
+            {
+                dbSet = A.Fake<BlogDbSetRunner>();
+                activeStories = new FakeActiveStoryFactory();
+                runnerWrapper = new StoryOverrideRunner(runner, activeStories);
+                blogController = new BlogController(runnerWrapper, dbSet);
+            }
+
+            [TestMethod]
+            public async Task ReturnsNotFound()
+            {
+                var deleteId = 897;
+                var result = await blogController.Delete(deleteId);
+
+                Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+            }
+
+            public async Task ReturnsNotFoundAfterLookup()
+            {
+                var deleteId = 4325;
+                foreach (var story in new string[] { null, "12" })
+                {
+                    activeStories.ActiveStory = story;
+                    A.CallTo(() => runner.Run(
+                        new GetAllById<Blog>(deleteId).ToRunner(dbSet))
+                    ).Returns(((Blog)null).ToWrapper());
+
+                    var result = await blogController.Delete(deleteId);
+
+                    Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+                }
+            }
+
+
+            [TestMethod]
+            public async Task ReturnsOkWhenIdFound()
+            {
+                var deleteId = 3421;
+
+                activeStories.ActiveStory = "12";
+                A.CallTo(() => runner.Run(
+                    new GetAllById<Blog>(deleteId).ToRunner(dbSet))
+                ).Returns(new Blog().ToWrapper());
+
+                var result = await blogController.Delete(deleteId);
+
+                Assert.IsInstanceOfType(result, typeof(OkResult));
             }
         }
     }
@@ -396,6 +454,11 @@ namespace WebApplication1.Test.Controllers
         public string ActiveStory {get;set;}
         public ActiveStories Run()
         {
+            if(ActiveStory == null)
+            {
+                return new ActiveStories(new string[] { });
+            }
+
             return new ActiveStories(new string[] { ActiveStory });
         }
     }
