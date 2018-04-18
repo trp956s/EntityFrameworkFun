@@ -13,7 +13,7 @@ using WebApplication1.Data.Test.Helpers;
 namespace WebApplication1.Data.Test.Queries
 {
     [TestClass]
-    public class DeleteAllTest
+    public class DeleteBlogTest
     {
         ExecutionStrategyRunner runner;
         IRunner<BloggingContext> dbFake;
@@ -36,14 +36,14 @@ namespace WebApplication1.Data.Test.Queries
         }
 
         [TestClass]
-        public class Run : DeleteAllTest
+        public class Run : DeleteBlogTest
         {
             [TestMethod]
             public async Task RemovesTheRightRecord()
             {
                 var oldValues = bloggingContext.Blogs.ToArray();
                 var deleteBlog = oldValues.First();
-                var deleter = new DeleteAllById<Blog>(deleteBlog);
+                var deleter = new DeleteBlog(deleteBlog);
 
                 await deleter.Run(bloggingContext);
 

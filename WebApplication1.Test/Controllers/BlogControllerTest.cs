@@ -462,7 +462,7 @@ namespace WebApplication1.Test.Controllers
                         new GetAllById<Blog>(deleteId).ToRunner(dbSet))
                     ).Returns(deleteEntity.ToWrapper());
                     A.CallTo(() => runner.Run(
-                        new DeleteAllById<Blog>(deleteEntity).ToRunner(dbSet))
+                        new DeleteBlog(deleteEntity).ToRunner(dbSet))
                     ).Returns(0.ToWrapper());
 
                     var result = await blogController.Delete(deleteId);
@@ -483,7 +483,7 @@ namespace WebApplication1.Test.Controllers
                     new GetAllById<Blog>(deleteId).ToRunner(dbSet))
                 ).Returns(deleteEntity.ToWrapper());
                 A.CallTo(() => runner.Run(
-                    new DeleteAllById<Blog>(deleteEntity).ToRunner(dbSet))
+                    new DeleteBlog(deleteEntity).ToRunner(dbSet))
                 ).Throws(expectedException);
 
                 var excptionThrown = await Assert.ThrowsExceptionAsync<Exception>(() => blogController.Delete(deleteId));

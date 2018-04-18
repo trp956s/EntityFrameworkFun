@@ -3,22 +3,22 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct DeleteAllById<T> : IMapper<BloggingContext, Task<InternalRunnerWrapper<int>>>
-    where T : class
+    public struct DeleteBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<int>>>
     {
-        private readonly T deleteEntity;
+        private readonly Blog deleteEntity;
 
-        public DeleteAllById(T deleteEntity)
+        public DeleteBlog(Blog deleteEntity)
         {
             this.deleteEntity = deleteEntity;
         }
 
         public async Task<InternalRunnerWrapper<int>> Run(BloggingContext bloggingContext)
         {
-            bloggingContext.Remove(deleteEntity);
+            bloggingContext.Blogs.Remove(deleteEntity);
             var result = await bloggingContext.SaveChangesAsync();
             return result.ToWrapper();
         }
