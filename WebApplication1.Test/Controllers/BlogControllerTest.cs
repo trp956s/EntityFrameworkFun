@@ -454,15 +454,15 @@ namespace WebApplication1.Test.Controllers
             public async Task ReturnsOkWhenIdFoundAndDeleteSuccess()
             {
                 var deleteId = 3421;
-
+                var deleteEntity = new Blog();
                 foreach (var story in new string[] { "12" })
                 {
                     activeStories.ActiveStory = story;
                     A.CallTo(() => runner.Run(
                         new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                    ).Returns(new Blog().ToWrapper());
+                    ).Returns(deleteEntity.ToWrapper());
                     A.CallTo(() => runner.Run(
-                        new DeleteAllById<Blog>(deleteId).ToRunner(dbSet))
+                        new DeleteAllById<Blog>(deleteEntity).ToRunner(dbSet))
                     ).Returns(0.ToWrapper());
 
                     var result = await blogController.Delete(deleteId);
@@ -476,13 +476,14 @@ namespace WebApplication1.Test.Controllers
             public async Task ReturnsErrorWhenDeleteBlowsUp()
             {
                 var deleteId = 546;
+                var deleteEntity = new Blog();
                 var expectedException = new Exception("Test");
                 activeStories.ActiveStory = "13";
                 A.CallTo(() => runner.Run(
                     new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                ).Returns(new Blog().ToWrapper());
+                ).Returns(deleteEntity.ToWrapper());
                 A.CallTo(() => runner.Run(
-                    new DeleteAllById<Blog>(deleteId).ToRunner(dbSet))
+                    new DeleteAllById<Blog>(deleteEntity).ToRunner(dbSet))
                 ).Throws(expectedException);
 
                 var excptionThrown = await Assert.ThrowsExceptionAsync<Exception>(() => blogController.Delete(deleteId));

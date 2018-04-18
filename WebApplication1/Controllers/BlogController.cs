@@ -220,7 +220,7 @@ namespace WebApplication1.Controllers
             );
 
             defaultDeleteFunction.AddOverride(() => 
-                runner.Run(new DeleteAllById<Blog>(id), blogData), 
+                runner.Run(new DeleteAllById<Blog>(foundBlog), blogData), 
             "13");
 
             await runner.Run(defaultDeleteFunction);

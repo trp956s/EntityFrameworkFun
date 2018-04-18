@@ -7,17 +7,20 @@ using System.Threading.Tasks;
 namespace WebApplication1.Data.Queries
 {
     public struct DeleteAllById<T> : IMapper<BloggingContext, Task<InternalRunnerWrapper<int>>>
+    where T : class
     {
-        private int deleteId;
+        private readonly T deleteEntity;
 
-        public DeleteAllById(int deleteId)
+        public DeleteAllById(T deleteEntity)
         {
-            this.deleteId = deleteId;
+            this.deleteEntity = deleteEntity;
         }
 
-        public Task<InternalRunnerWrapper<int>> Run(BloggingContext arg)
+        public async Task<InternalRunnerWrapper<int>> Run(BloggingContext bloggingContext)
         {
-            throw new NotImplementedException();
+            bloggingContext.Remove(deleteEntity);
+            var result = await bloggingContext.SaveChangesAsync();
+            return result.ToWrapper();
         }
     }
 }
