@@ -7,7 +7,7 @@ using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct CreateBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<int>>>
+    public struct CreateBlog : IMapper<BloggingContext, Task<InternalValueCache<int>>>
     {
         private Blog blog;
 
@@ -16,7 +16,7 @@ namespace WebApplication1.Data.Queries
             this.blog = blog;
         }
 
-        public async Task<InternalRunnerWrapper<int>> Run(BloggingContext bloggingContext)
+        public async Task<InternalValueCache<int>> Run(BloggingContext bloggingContext)
         {
             bloggingContext.Blogs.Add(blog);
             var count = await bloggingContext.SaveChangesAsync();

@@ -18,7 +18,7 @@ namespace WebApplication1.Data.Queries
             this.id = id;
         }
 
-        public async Task<InternalRunnerWrapper<T>> Run(IQueryable<T> dbSet)
+        public async Task<InternalValueCache<T>> Run(IQueryable<T> dbSet)
         {
             var searchId = id;
             var match = await dbSet.FirstOrDefaultAsync(x=>x.Id == searchId);

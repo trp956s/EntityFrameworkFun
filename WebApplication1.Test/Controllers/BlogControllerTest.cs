@@ -88,7 +88,7 @@ namespace WebApplication1.Test.Controllers
                     var fakeBlogs = new Collection<Blog> { new Blog() };
 
                     A.CallTo(runner).Where(x => true).
-                        WithReturnType<Task<InternalRunnerWrapper<IEnumerable<Blog>>>>().
+                        WithReturnType<Task<InternalValueCache<IEnumerable<Blog>>>>().
                         Returns(Task.FromResult(fakeBlogs.AsEnumerable().ToWrapper()));
 
                     var getResult = await blogController.Get();

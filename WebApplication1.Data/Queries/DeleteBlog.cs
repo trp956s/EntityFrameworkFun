@@ -7,7 +7,7 @@ using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct DeleteBlog : IMapper<BloggingContext, Task<InternalRunnerWrapper<int>>>
+    public struct DeleteBlog : IMapper<BloggingContext, Task<InternalValueCache<int>>>
     {
         private readonly Blog deleteEntity;
 
@@ -16,7 +16,7 @@ namespace WebApplication1.Data.Queries
             this.deleteEntity = deleteEntity;
         }
 
-        public async Task<InternalRunnerWrapper<int>> Run(BloggingContext bloggingContext)
+        public async Task<InternalValueCache<int>> Run(BloggingContext bloggingContext)
         {
             bloggingContext.Blogs.Remove(deleteEntity);
             var result = await bloggingContext.SaveChangesAsync();

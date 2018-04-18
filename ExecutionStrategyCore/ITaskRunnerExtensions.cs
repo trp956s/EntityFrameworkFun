@@ -9,6 +9,11 @@ namespace ExecutionStrategyCore
             return runner.Run(internalWrapper.Runner);
         }
 
+        public static T Run<T>(this ITaskRunner runner, InternalValueCache<T> internalValueCache)
+        {
+            return runner.Run(new InternalValueCacheUnwrapper<T>(internalValueCache));
+        }
+
         public static async Task<T> Run<T>(this ITaskRunner runner, IRunner<Task<InternalRunnerWrapper<T>>> internalWrapperTask)
         {
             var internalWrapper = await runner.Run(internalWrapperTask);
@@ -16,12 +21,12 @@ namespace ExecutionStrategyCore
         }
 
         public static async Task<ReturnType> Run<ParameterType, ReturnType>(this ITaskRunner runner,
-            IMapper<ParameterType, Task<InternalRunnerWrapper<ReturnType>>> mapper, IRunner<ParameterType> parameterWrapper)
+            IMapper<ParameterType, Task<InternalValueCache<ReturnType>>> mapper, IRunner<ParameterType> parameterWrapper)
         {
-            IRunner<Task<InternalRunnerWrapper<ReturnType>>> map = new MapperRunner<ParameterType, InternalRunnerWrapper<ReturnType>>(mapper, parameterWrapper);
+            IRunner<Task<InternalValueCache<ReturnType>>> map = new MapperRunner<ParameterType, InternalValueCache<ReturnType>>(mapper, parameterWrapper);
 
             var internalWrapper = await runner.Run(map);
-            return runner.Run(internalWrapper.Runner);
+            return runner.Run(internalWrapper);
         }
 
         public static MapperRunner<ParameterType, ReturnType> ToRunner<ParameterType, ReturnType>(
@@ -31,9 +36,9 @@ namespace ExecutionStrategyCore
             return new MapperRunner<ParameterType, ReturnType>(mapper, parameter);
         }
 
-        public static InternalRunnerWrapper<T> ToWrapper<T>(this T value)
+        public static InternalValueCache<T> ToWrapper<T>(this T value)
         {
-            return new InternalRunnerWrapper<T>(new ValueCacheRunner<T>(value));
+            return new InternalValueCache<T>(value);
         }
     }
 }

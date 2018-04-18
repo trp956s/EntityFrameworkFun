@@ -12,7 +12,7 @@ namespace WebApplication1.Data.Queries
     where T : class
     {
         //todo: support pageing
-        public async Task<InternalRunnerWrapper<IEnumerable<T>>> Run(IQueryable<T> dbSet)
+        public async Task<InternalValueCache<IEnumerable<T>>> Run(IQueryable<T> dbSet)
         {
             var all = await dbSet.ToArrayAsync();
             return all.ToWrapper<IEnumerable<T>>();
