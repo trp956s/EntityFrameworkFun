@@ -96,7 +96,7 @@ namespace WebApplication1.Controllers
             var story5 = new StoryFunctionRunner<Task<ActionResult>>(() => GetBlog(id), "5");
             var story6 = new StoryFunctionRunner<Task<ActionResult>>(() => GetBlog(id), "6");
             return await runner.Run(new StoryOverrideFunctionRunner<Task<ActionResult>>(
-                () => runner.Run(ExecutionStrategy.Create<ActionResult>(() => NotFound())),                
+                () => Task.FromResult<ActionResult>(NotFound()),
                 story5.Run,
                 story6.Run
             ));

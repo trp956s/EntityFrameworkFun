@@ -5,7 +5,7 @@
         private readonly ActiveStories activeStories;
 
         public ActiveStoryFactory(ActiveStories stories) {
-            this.activeStories = stories;
+            activeStories = stories;
         }
 
         public ActiveStories Run()
