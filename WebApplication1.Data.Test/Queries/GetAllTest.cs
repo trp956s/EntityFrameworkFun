@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WebApplication1.Data.Queries;
+using WebApplication1.Data.Test.Helpers;
 
 namespace WebApplication1.Data.Test.Queries
 {
@@ -31,7 +32,7 @@ namespace WebApplication1.Data.Test.Queries
             public async Task ReturnsNothingAsynchronouslyWhenListEmpty()
             {
                 var testList = new Collection<object>();
-                var queryableEntity = CreateFakeIAsyncEnum(testList, testList.AsQueryable());
+                var queryableEntity = FakeIAsyncEnumFactory.CreateFakeIAsyncEnum(testList, testList.AsQueryable());
 
                 var result = runner.Run(await getAllOfAnything.Run(queryableEntity));
 
@@ -42,40 +43,15 @@ namespace WebApplication1.Data.Test.Queries
             public async Task ReturnsAllOfQuerySourceInOrder()
             {
                 var testList = new Collection<object> { new object(), new object(), new object() };
-                var queryableEntity = CreateFakeIAsyncEnum(testList, testList.AsQueryable());
+                var queryableEntity = FakeIAsyncEnumFactory.CreateFakeIAsyncEnum(testList, testList.AsQueryable());
 
                 var result = runner.Run(await getAllOfAnything.Run(queryableEntity));
 
                 CollectionAssert.AreEquivalent(testList, new Collection<object>(result.ToList()));
-                for(var i = 0; i < testList.Count(); i++) {
+                for (var i = 0; i < testList.Count(); i++)
+                {
                     Assert.AreEqual(testList.ElementAt(i), result.ElementAt(i));
                 }
-            }
-
-            private FakeType CreateFakeIAsyncEnum<T, FakeType>(IEnumerable<T> dataToWrap, FakeType fakeToWrap)
-            {
-                var dataEnum = dataToWrap.GetEnumerator();
-                var fake = A.Fake<FakeType>(optionsBuilder =>
-                {
-                    optionsBuilder.Implements<IAsyncEnumerable<object>>();
-                    optionsBuilder.Wrapping(fakeToWrap);
-                }
-                );
-                var asyncEnum = A.Fake<IAsyncEnumerator<object>>();
-                A.CallTo(fake).Where(call => call.Method.Name == "GetEnumerator").
-                    WithReturnType<IAsyncEnumerator<object>>().
-                    Returns(asyncEnum);
-                A.CallTo(asyncEnum).Where(call => call.Method.Name == "MoveNext").
-                    WithReturnType<Task<System.Boolean>>().
-                    ReturnsLazily(c =>
-                        Task.FromResult(dataEnum.MoveNext())
-                    );
-                A.CallTo(() => asyncEnum.Current).
-                    ReturnsLazily(c =>
-                        dataEnum.Current
-                    );
-
-                return fake;
             }
         }
     }
