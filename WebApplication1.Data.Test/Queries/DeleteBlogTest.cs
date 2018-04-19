@@ -51,6 +51,8 @@ namespace WebApplication1.Data.Test.Queries
                 var hasChanges = bloggingContext.ChangeTracker.HasChanges();
 
                 Assert.AreEqual(3, oldValues.Count());
+                Assert.AreEqual(deleteBlog, oldValues.Single(deleteBlog.Equals));
+                Assert.IsNull(newValues.FirstOrDefault(deleteBlog.Equals));
                 Assert.AreEqual(2, newValues.Count());
                 Assert.IsFalse(hasChanges);
             }

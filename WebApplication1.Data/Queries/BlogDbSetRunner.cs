@@ -1,5 +1,4 @@
 ﻿using ExecutionStrategyCore;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using WebApplication1.Data.Models;
 
