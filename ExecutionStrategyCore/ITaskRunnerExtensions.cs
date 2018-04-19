@@ -23,14 +23,13 @@ namespace ExecutionStrategyCore
         public static async Task<ReturnType> Run<ParameterType, ReturnType>(this ITaskRunner runner,
             IMapper<ParameterType, Task<InternalValueCache<ReturnType>>> mapper, IRunner<ParameterType> parameterWrapper)
         {
-            IRunner<Task<InternalValueCache<ReturnType>>> map = new MapperRunner<ParameterType, InternalValueCache<ReturnType>>(mapper, parameterWrapper);
+            var map = new MapperRunner<ParameterType, ReturnType>(mapper, parameterWrapper);
 
-            var internalWrapper = await runner.Run(map);
-            return runner.Run(internalWrapper);
+            return await runner.Run(map);
         }
 
         public static MapperRunner<ParameterType, ReturnType> ToRunner<ParameterType, ReturnType>(
-            this IMapper<ParameterType, Task<ReturnType>> mapper, IRunner<ParameterType> parameter
+            this IMapper<ParameterType, Task<InternalValueCache<ReturnType>>> mapper, IRunner<ParameterType> parameter
         )
         {
             return new MapperRunner<ParameterType, ReturnType>(mapper, parameter);

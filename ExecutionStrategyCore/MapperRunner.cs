@@ -4,10 +4,10 @@ namespace ExecutionStrategyCore
 {
     public struct MapperRunner<MapParameters, MapResultType> : IRunner<Task<MapResultType>>
     {
-        private readonly IMapper<MapParameters, Task<MapResultType>> ga;
+        private readonly IMapper<MapParameters, Task<InternalValueCache<MapResultType>>> ga;
         private readonly IRunner<MapParameters> parameters;
 
-        public MapperRunner(IMapper<MapParameters, Task<MapResultType>> ga, IRunner<MapParameters> parameters)
+        public MapperRunner(IMapper<MapParameters, Task<InternalValueCache<MapResultType>>> ga, IRunner<MapParameters> parameters)
         {
             this.ga = ga;
             this.parameters = parameters;
@@ -15,7 +15,8 @@ namespace ExecutionStrategyCore
 
         public async Task<MapResultType> Run()
         {
-            return await ga.Run(parameters.Run());
+            var valueWrapper = await ga.Run(parameters.Run());
+            return valueWrapper.Value;
         }
     }
 }

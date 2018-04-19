@@ -88,8 +88,8 @@ namespace WebApplication1.Test.Controllers
                     var fakeBlogs = new Collection<Blog> { new Blog() };
 
                     A.CallTo(runner).Where(x => true).
-                        WithReturnType<Task<InternalValueCache<IEnumerable<Blog>>>>().
-                        Returns(Task.FromResult(fakeBlogs.AsEnumerable().ToWrapper()));
+                        WithReturnType<Task<IEnumerable<Blog>>>().
+                        Returns(Task.FromResult(fakeBlogs.AsEnumerable()));
 
                     var getResult = await blogController.Get();
 
@@ -108,7 +108,7 @@ namespace WebApplication1.Test.Controllers
                     var getAll = new GetAll<Blog>();
                     var getAllRunner = getAll.ToRunner(dbSet);
                     A.CallTo(() => runner.Run(getAllRunner)).
-                        Returns(Task.FromResult(fakeBlogs.AsEnumerable().ToWrapper()));
+                        Returns(Task.FromResult(fakeBlogs.AsEnumerable()));
 
                     var getResult = await blogController.Get();
 
@@ -126,7 +126,7 @@ namespace WebApplication1.Test.Controllers
                     var getAll = new GetAll<Blog>();
                     var getAllRunner = getAll.ToRunner(dbSet);
                     A.CallTo(() => runner.Run(getAllRunner)).
-                        Returns(Task.FromResult(Enumerable.Empty<Blog>().ToWrapper()));
+                        Returns(Task.FromResult(Enumerable.Empty<Blog>()));
 
                     var getResult = await blogController.Get();
 
@@ -166,7 +166,7 @@ namespace WebApplication1.Test.Controllers
             public async Task ReturnsNotFoundWhenDbEmpty()
             {
                 var id = 99;
-                var mockDbResponse = Task.FromResult(((Blog)null).ToWrapper());
+                var mockDbResponse = Task.FromResult(((Blog)null));
                 activeStories.ActiveStory = "5";
 
                 var getAllRunner = new GetAllById<Blog>(id).ToRunner(dbSet);
@@ -189,7 +189,7 @@ namespace WebApplication1.Test.Controllers
 
                 var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(getById)).
-                    Returns(Task.FromResult(expectedBlog.ToWrapper()));
+                    Returns(Task.FromResult(expectedBlog));
 
                 var getResult = await blogController.Get(id);
 
@@ -249,7 +249,7 @@ namespace WebApplication1.Test.Controllers
 
                     var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
                     var getByIdCall = A.CallTo(() => runner.Run(getById));
-                    getByIdCall.Returns(Task.FromResult(blog.ToWrapper()));
+                    getByIdCall.Returns(Task.FromResult(blog));
 
                     var result = await blogController.Post(blog);
 
@@ -270,12 +270,12 @@ namespace WebApplication1.Test.Controllers
                     activeStories.ActiveStory = story;
                     var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
                     var getByIdCall = A.CallTo(() => runner.Run(getById));
-                    getByIdCall.Returns(Task.FromResult(((Blog)null).ToWrapper()));
+                    getByIdCall.Returns(Task.FromResult(((Blog)null)));
 
                     if (story == "9")
                     {
                         var createBlog = new CreateBlog(blog).ToRunner(dbSet);
-                        A.CallTo(() => runner.Run(createBlog)).Returns(0.ToWrapper());
+                        A.CallTo(() => runner.Run(createBlog)).Returns(0);
                     }
 
                     var result = await blogController.Post(blog);
@@ -295,7 +295,7 @@ namespace WebApplication1.Test.Controllers
                 var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
                 var createBlog = new CreateBlog(blog).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(getById)).Returns(
-                    Task.FromResult(((Blog)null).ToWrapper())
+                    Task.FromResult(((Blog)null))
                 );
                 A.CallTo(() => runner.Run(createBlog)).Throws(
                     expected
@@ -344,7 +344,7 @@ namespace WebApplication1.Test.Controllers
 
                     var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
                     A.CallTo(() => runner.Run(getById)).
-                        Returns(Task.FromResult(((Blog)null).ToWrapper()));
+                        Returns(Task.FromResult(((Blog)null)));
 
                     var response = await blogController.Put(id, null);
                     Assert.IsInstanceOfType(response, typeof(NotFoundResult));
@@ -360,7 +360,7 @@ namespace WebApplication1.Test.Controllers
 
                 var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(getById)).
-                    Returns(Task.FromResult((new Blog()).ToWrapper()));
+                    Returns(Task.FromResult((new Blog())));
 
                 var response = await blogController.Put(id, null);
 
@@ -379,10 +379,10 @@ namespace WebApplication1.Test.Controllers
 
                 var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(getById)).
-                    Returns(Task.FromResult(editBlog.ToWrapper()));
+                    Returns(Task.FromResult(editBlog));
                 var updateBlog = new UpdateBlog(editBlog, putArg).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(updateBlog))
-                    .Returns(Task.FromResult(expected.ToWrapper()));
+                    .Returns(Task.FromResult(expected));
 
                 var response = await blogController.Put(id, putArg);
 
@@ -424,7 +424,7 @@ namespace WebApplication1.Test.Controllers
                     activeStories.ActiveStory = story;
                     A.CallTo(() => runner.Run(
                         new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                    ).Returns(((Blog)null).ToWrapper());
+                    ).Returns(((Blog)null));
 
                     var result = await blogController.Delete(deleteId);
 
@@ -442,7 +442,7 @@ namespace WebApplication1.Test.Controllers
                     activeStories.ActiveStory = story;
                     A.CallTo(() => runner.Run(
                         new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                    ).Returns(new Blog().ToWrapper());
+                    ).Returns(new Blog());
 
                     var result = await blogController.Delete(deleteId);
 
@@ -460,10 +460,10 @@ namespace WebApplication1.Test.Controllers
                     activeStories.ActiveStory = story;
                     A.CallTo(() => runner.Run(
                         new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                    ).Returns(deleteEntity.ToWrapper());
+                    ).Returns(deleteEntity);
                     A.CallTo(() => runner.Run(
                         new DeleteBlog(deleteEntity).ToRunner(dbSet))
-                    ).Returns(0.ToWrapper());
+                    ).Returns(0);
 
                     var result = await blogController.Delete(deleteId);
 
@@ -481,7 +481,7 @@ namespace WebApplication1.Test.Controllers
                 activeStories.ActiveStory = "13";
                 A.CallTo(() => runner.Run(
                     new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                ).Returns(deleteEntity.ToWrapper());
+                ).Returns(deleteEntity);
                 A.CallTo(() => runner.Run(
                     new DeleteBlog(deleteEntity).ToRunner(dbSet))
                 ).Throws(expectedException);
