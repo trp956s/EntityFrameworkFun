@@ -416,6 +416,7 @@ namespace WebApplication1.Test.Controllers
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
             }
 
+            [TestMethod]
             public async Task ReturnsNotFoundAfterLookupFails()
             {
                 var deleteId = 4325;
