@@ -215,6 +215,16 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
+            //IStoryOverrideRunner<int> v = runner.CreateActiveStoriesFilterRunner("12", "13");
+
+            //if (runner.Run((IRunner<bool>)v))
+            //{
+            //    runner.Run(v, () =>
+            //        new DeleteBlog(foundBlog).ToRunner(blogData)
+            //    ); //this extension will create an empty value runner OR a special function runner with an override property and pass that to the runner
+            //}
+
+
             var defaultDeleteFunction = new StoryOverrideFunctionRunner<Task<int>>(
                 () => Task.FromResult(0)
             );
