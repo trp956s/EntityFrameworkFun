@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using WebApplication1.Data.Queries;
 using Microsoft.AspNetCore.Http;
 using System;
+using WebApplication1.Data;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -490,6 +491,51 @@ namespace WebApplication1.Test.Controllers
                 var excptionThrown = await Assert.ThrowsExceptionAsync<Exception>(() => blogController.Delete(deleteId));
 
                 Assert.AreSame(excptionThrown, expectedException);
+            }
+        }
+
+        [TestClass]
+        public class Delete2 : BlogControllerTest
+        {
+            private FakeActiveStoryFactory activeStories;
+            private StoryOverrideRunner runnerWrapper;
+            private BlogDbSetRunner dbSet;
+
+            [TestInitialize]
+            public void TestInitialize()
+            {
+                dbSet = A.Fake<BlogDbSetRunner>();
+                activeStories = new FakeActiveStoryFactory();
+                runnerWrapper = new StoryOverrideRunner(runner, activeStories);
+                blogController = new BlogController(runnerWrapper, dbSet);
+            }
+
+            public void plan()
+            {
+                //first mock out any mapRunner sent to the taskRunner to return value
+                var mapRunner = new AsyncCreateMapRunner<DeleteBlog, BloggingContext, int>();
+
+                //then add an expect to match the mock by type
+
+                //then add a mock runner to mock any runner.Run(of any type of InternalValueCacheUnwrapper<ITaskRunner>) to return fakeRunner
+
+                //then expect that the mocked Async map runner matches the exact object
+
+                //this is how it would be called in the code
+                var map = runner.XAsync<DeleteBlog, BloggingContext, int>(null, null);
+            }
+
+            [TestMethod]
+            public async Task NotFoundReturnedWhenGetByIdReturnsNull()
+            {
+                Blog noBlog = null;
+                var lookupBlogById = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>>.Ignored));
+                lookupBlogById.Returns(noBlog);
+
+                var result = await blogController.Delete2();
+
+                Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+                lookupBlogById.MustHaveHappenedOnceExactly();
             }
         }
     }

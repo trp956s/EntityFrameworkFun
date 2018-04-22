@@ -8,7 +8,9 @@ using System.Linq;
 
 namespace WebApplication1.Data.Queries
 {
-    public struct GetAllById<T> : IDbSetQuery<T, T>
+    public struct GetAllById<T> : IDbSetQuery<T, T>,
+        IRunner<GetAllById<T>> //TODO: make all IDbSetQuery also inherit IRunner<IDbSetQuery<T, T>>
+        //AND use in and out params to allow IRunner<thisType>
     where T : class, IHasId
     {
         private readonly int id;
@@ -23,6 +25,11 @@ namespace WebApplication1.Data.Queries
             var searchId = id;
             var match = await dbSet.FirstOrDefaultAsync(x=>x.Id == searchId);
             return match.ToWrapper();
+        }
+
+        public GetAllById<T> Run()
+        {
+            return this;
         }
     }
 }

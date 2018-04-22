@@ -64,66 +64,119 @@ namespace ExecutionStrategyCore
         //{
         //    return null;
         //}
-        
+
         ////
-        public static async Task<ReturnType> XAsync<ParameterType, ReturnType>(this ITaskRunner runner, IRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>> mapWrapper, IRunner<ParameterType> parameterWrapper)
+        public static async Task<ReturnType> XAsync<T, ParameterType, ReturnType>(this ITaskRunner runner, IRunner<T> mapWrapper, IRunner<ParameterType> parameterWrapper)
+        where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
         {
-            // todo wrap this in a runner constructor
-            var mapRunner = runner.CreateMapRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType>(
-                mapWrapper, parameterWrapper);
-            var value = await runner.Run(mapRunner);
-            return runner.Run(value);
+            var mapRunner = new AsyncCreateMapRunner<T, ParameterType, ReturnType>(runner.Wrap(), mapWrapper, parameterWrapper);
+            return await runner.Run(mapRunner);
         }
 
-        public static IAsyncMapperRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType> CreateMapRunner<T, ParameterType, ReturnType>(this ITaskRunner runner, IRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>> mapper, IRunner<ParameterType> parameterWrapper)
+        public static IRunner<ITaskRunner> Wrap(this ITaskRunner runner)
         {
-            //todo wrap this in a runner constructor OR use the factory?
-            var factory = runner.Run(new AsyncMapperRunnerFactory()); // you can mock this factory and subsequently mock the create runner
-            return factory.CreateRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType>(
-                mapper, parameterWrapper, new ValueCacheRunner<ITaskRunner>(runner)
-            );
+            return new InternalValueCacheUnwrapper<ITaskRunner>(new InternalValueCache<ITaskRunner>(runner));
         }
+
+        //public static IAsyncMapperRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType> CreateMapRunner<T, ParameterType, ReturnType>(this ITaskRunner runner, IRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>> mapper, IRunner<ParameterType> parameterWrapper)
+        //{
+        //    return runner.Run(new CreateMapRunner<ParameterType, ReturnType>(runner, mapper, parameterWrapper));
+        //}
     }
 
     public class AsyncMapperRunnerFactory : IAsyncMapperRunnerFactory, IRunner<IAsyncMapperRunnerFactory>
     {
+        private ValueCacheRunner<ITaskRunner> runnerWrapper;
+
+        public AsyncMapperRunnerFactory(ValueCacheRunner<ITaskRunner> runnerWrapper)
+        {
+            this.runnerWrapper = runnerWrapper;
+        }
+
         public IAsyncMapperRunnerFactory Run()
         {
             return this;
         }
 
-        public IAsyncMapperRunner<T, ParameterType, ReturnType> CreateRunner<T, ParameterType, ReturnType>(IRunner<T> mapper, IRunner<ParameterType> parameter, IRunner<ITaskRunner> runner)
+        public IAsyncMapperRunner<T, ParameterType, ReturnType> CreateRunner<T, ParameterType, ReturnType>(IRunner<T> mapper, IRunner<ParameterType> parameter)
         where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
         {
-            return new AsyncMapperRunner<T, ParameterType, ReturnType>(mapper, parameter, runner);
+            return new AsyncMapperRunner<T, ParameterType, ReturnType>(mapper, parameter, runnerWrapper);
         }
     }
 
     public interface IAsyncMapperRunnerFactory
     {
-        IAsyncMapperRunner<T, ParameterType, ReturnType> CreateRunner<T, ParameterType, ReturnType>(IRunner<T> mapper, IRunner<ParameterType> parameter, IRunner<ITaskRunner> runner)
-            where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>;
+        IAsyncMapperRunner<T, ParameterType, ReturnType> CreateRunner<T, ParameterType, ReturnType>(IRunner<T> mapper, IRunner<ParameterType> parameter)
+        where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>;
     }
 
     public interface IAsyncMapperRunner<T, ParameterType, ReturnType> : IRunner<Task<InternalValueCache<ReturnType>>>
-        where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
+    where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
     {
     }
 
     public class AsyncMapperRunner<T, ParameterType, ReturnType> : IAsyncMapperRunner<T, ParameterType, ReturnType>
         where T: IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
     {
-        private IRunner<ITaskRunner> runner;
+        private readonly IRunner<T> mapperWrapper;
+        private readonly IRunner<ParameterType> parameterWrapper;
+        private IRunner<ITaskRunner> runnerWrapper;
 
-        public AsyncMapperRunner(IRunner<T> mapper, IRunner<ParameterType> parameter, IRunner<ITaskRunner> runner)
+        public AsyncMapperRunner(IRunner<T> mapperWrapper, IRunner<ParameterType> parameterWrapper, IRunner<ITaskRunner> runnerWrapper)
         {
-            this.runner = runner;
+            this.mapperWrapper = mapperWrapper;
+            this.parameterWrapper = parameterWrapper;
+            this.runnerWrapper = runnerWrapper;
         }
 
-        public Task<InternalValueCache<ReturnType>> Run()
+        public async Task<InternalValueCache<ReturnType>> Run()
         {
-            throw new NotImplementedException();
+            var runner = runnerWrapper.Run();
+            var parameter = runner.Run(parameterWrapper);
+            var mapper = runner.Run(mapperWrapper);
+
+            return await mapper.Run(parameter);
         }
+    }
+
+    public interface IAsyncCreateMapRunner<in T, ParameterType, ReturnType>
+        : IRunner<Task<ReturnType>>
+    where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
+    {
+    }
+
+    public struct AsyncCreateMapRunner<T, ParameterType, ReturnType> :
+        IAsyncCreateMapRunner<T, ParameterType, ReturnType>
+        where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
+    {
+        private ITaskRunner runner;
+        private IRunner<T> mapper;
+        private IRunner<ParameterType> parameterWrapper;
+
+        public AsyncCreateMapRunner(IRunner<ITaskRunner> runnerWrapper, IRunner<T> mapper, IRunner<ParameterType> parameterWrapper)
+        {
+            this.runner = runnerWrapper.Run();
+            this.mapper = mapper;
+            this.parameterWrapper = parameterWrapper;
+        }
+
+        public async Task<ReturnType> Run()
+        {
+            var map = runner.Run(mapper);
+            var parameter = runner.Run(parameterWrapper);
+            var cache = await map.Run(parameter);
+
+            return runner.Run(cache);
+        }
+
+        //public IAsyncMapperRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType> Run()
+        //{
+        //    var factory = runner.Run(new AsyncMapperRunnerFactory(new ValueCacheRunner<ITaskRunner>(runner))); // you can mock this factory and subsequently mock the create runner
+        //    return factory.CreateRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType>(
+        //        mapper, parameterWrapper
+        //    );
+        //}
     }
 
     //public class Thing2

@@ -237,5 +237,11 @@ namespace WebApplication1.Controllers
 
             return Ok();
         }
+
+        public async Task<ActionResult> Delete2()
+        {
+            await runner.XAsync<GetAllById<Blog>, IQueryable<Blog>, Blog>(new GetAllById<Blog>(), null);
+            return NotFound();
+        }
     }
 }

@@ -26,13 +26,7 @@ namespace WebApplication1.Data.Queries
 
         public IMapper<BloggingContext, Task<InternalValueCache<int>>> Run()
         {
-            var v = new ExecutionStrategyRunner().CreateMapRunner<DeleteBlog, BloggingContext, int>(this, null);
-            var x = new ExecutionStrategyRunner().Run(v);
-            return this; //mock this on run by type, then mock the Run method
-
-            //or runner.Run(runner.Run(new MapperRunnerFactory()).CreateRunner<IMapper<DeleteBlog>>(thisThing,params,runner));
-            //I can intercept the Factory and mock it, then I can expect and or mock the CreateRunner method and mock it
-            //I could alternatively expect and mock any IMapRunner<DeleteBlogs,T> and do my thing there 
+            return this; 
         }
     }
 }
