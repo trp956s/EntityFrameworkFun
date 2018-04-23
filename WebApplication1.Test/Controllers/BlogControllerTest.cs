@@ -497,46 +497,73 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Delete2 : BlogControllerTest
         {
-            private FakeActiveStoryFactory activeStories;
-            private StoryOverrideRunner runnerWrapper;
+            private FakeItEasy.Configuration.IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private BlogDbSetRunner dbSet;
 
             [TestInitialize]
             public void TestInitialize()
             {
+                lookupBlogByIdMock = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>>.Ignored));
                 dbSet = A.Fake<BlogDbSetRunner>();
-                activeStories = new FakeActiveStoryFactory();
-                runnerWrapper = new StoryOverrideRunner(runner, activeStories);
-                blogController = new BlogController(runnerWrapper, dbSet);
-            }
-
-            public void plan()
-            {
-                //first mock out any mapRunner sent to the taskRunner to return value
-                var mapRunner = new AsyncCreateMapRunner<DeleteBlog, BloggingContext, int>();
-
-                //then add an expect to match the mock by type
-
-                //then add a mock runner to mock any runner.Run(of any type of InternalValueCacheUnwrapper<ITaskRunner>) to return fakeRunner
-
-                //then expect that the mocked Async map runner matches the exact object
-
-                //this is how it would be called in the code
-                var map = runner.XAsync<DeleteBlog, BloggingContext, int>(null, null);
+                blogController = new BlogController(runner, dbSet);
             }
 
             [TestMethod]
             public async Task NotFoundReturnedWhenGetByIdReturnsNull()
             {
+                var deleteId = 99;
                 Blog noBlog = null;
-                var lookupBlogById = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>>.Ignored));
-                lookupBlogById.Returns(noBlog);
+                lookupBlogByIdMock.Returns(noBlog);
 
-                var result = await blogController.Delete2();
+                var result = await blogController.Delete2(deleteId);
 
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
-                lookupBlogById.MustHaveHappenedOnceExactly();
+                lookupBlogByIdMock.MustHaveHappenedOnceExactly();
+                lookupBlogByIdMock.WhenArgumentsMatch(a => {
+                    var asyncCreateMapRunner = a[0] as IAsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>;
+                    var isGetAllByIdEqual = new GetAllById<Blog>(deleteId).Equals(asyncCreateMapRunner.Mapper);
+                    var dbSetIsCorrect = asyncCreateMapRunner.ParameterWrapper.Equals(dbSet);
+
+                    return isGetAllByIdEqual && dbSetIsCorrect;
+                }).MustHaveHappenedOnceExactly();
             }
+
+            [TestMethod]
+            public async Task OKReturnedWhenGetByIdReturnsBlogAndDelteSuccessful()
+            {
+                var mockedBlogFoundById = new Blog();
+                var deleteBlogMock = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner<DeleteBlog, BloggingContext, int>>.Ignored));
+                lookupBlogByIdMock.Returns(mockedBlogFoundById);
+                deleteBlogMock.Returns(0);
+
+                var result = await blogController.Delete2(0);
+
+                Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+                deleteBlogMock.MustHaveHappenedOnceExactly();
+                deleteBlogMock.WhenArgumentsMatch(a => {
+                    var asyncCreateMapRunner = a[0] as IAsyncCreateMapRunner<DeleteBlog, BloggingContext, int>;
+                    var deleteIsCorrect = asyncCreateMapRunner.Mapper.Equals(new DeleteBlog(mockedBlogFoundById));
+                    var dbSetIsCorrect = asyncCreateMapRunner.ParameterWrapper.Equals(dbSet);
+                    return dbSetIsCorrect && deleteIsCorrect;
+                }).MustHaveHappenedOnceExactly();
+            }
+
+            [TestMethod]
+            public async Task ThrowsWhenDeleteBlogThrows()
+            {
+                var fakeException = new Exception();
+                var deleteBlog = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner<DeleteBlog, BloggingContext, int>>.Ignored));
+                lookupBlogByIdMock.Returns(new Blog());
+                deleteBlog.Throws(fakeException);
+
+                var result = await Assert.ThrowsExceptionAsync<Exception>(() =>
+                   blogController.Delete2(0)
+                );
+
+                Assert.AreSame(result, fakeException);
+            }
+
+
         }
     }
 

@@ -8,7 +8,7 @@ using WebApplication1.Data.Models;
 namespace WebApplication1.Data.Queries
 {
     public struct DeleteBlog : IMapper<BloggingContext, Task<InternalValueCache<int>>>,
-        IRunner<IMapper<BloggingContext, Task<InternalValueCache<int>>>>
+        IRunner<DeleteBlog>
     {
         private readonly Blog deleteEntity;
 
@@ -24,7 +24,7 @@ namespace WebApplication1.Data.Queries
             return result.ToWrapper();
         }
 
-        public IMapper<BloggingContext, Task<InternalValueCache<int>>> Run()
+        public DeleteBlog Run()
         {
             return this; 
         }

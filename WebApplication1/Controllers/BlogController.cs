@@ -9,9 +9,11 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using WebApplication1.Data;
 
 namespace WebApplication1.Controllers
 {
+    //...
     //todo: clean up code, consolidate stories 1-3, reduce test code
     //todo: get by id.. 9-11 are post, put, and delete
     //todo: 9,  10, 11: test drive the rest of this class keeping blogs simple
@@ -238,10 +240,17 @@ namespace WebApplication1.Controllers
             return Ok();
         }
 
-        public async Task<ActionResult> Delete2()
+        public async Task<ActionResult> Delete2(int id)
         {
-            await runner.XAsync<GetAllById<Blog>, IQueryable<Blog>, Blog>(new GetAllById<Blog>(), null);
-            return NotFound();
+            var blogFoundById = await runner.XAsync<GetAllById<Blog>, IQueryable<Blog>, Blog>(new GetAllById<Blog>(id), blogData);
+            if (blogFoundById == null)
+            {
+                return NotFound();
+            }
+
+            await runner.XAsync<DeleteBlog, BloggingContext, int>(new DeleteBlog(blogFoundById), blogData);
+
+            return Ok(null);
         }
     }
 }

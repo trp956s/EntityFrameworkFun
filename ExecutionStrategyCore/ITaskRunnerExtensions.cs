@@ -140,10 +140,12 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public interface IAsyncCreateMapRunner<in T, ParameterType, ReturnType>
+    public interface IAsyncCreateMapRunner<out T, ParameterType, ReturnType>
         : IRunner<Task<ReturnType>>
     where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
     {
+        T Mapper { get; }
+        IRunner<ParameterType> ParameterWrapper { get; }
     }
 
     public struct AsyncCreateMapRunner<T, ParameterType, ReturnType> :
@@ -151,32 +153,25 @@ namespace ExecutionStrategyCore
         where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
     {
         private ITaskRunner runner;
-        private IRunner<T> mapper;
-        private IRunner<ParameterType> parameterWrapper;
+        private IRunner<T> mapperWrapper;
 
-        public AsyncCreateMapRunner(IRunner<ITaskRunner> runnerWrapper, IRunner<T> mapper, IRunner<ParameterType> parameterWrapper)
+        public AsyncCreateMapRunner(IRunner<ITaskRunner> runnerWrapper, IRunner<T> mapperWrapper, IRunner<ParameterType> parameterWrapper)
         {
             this.runner = runnerWrapper.Run();
-            this.mapper = mapper;
-            this.parameterWrapper = parameterWrapper;
+            this.mapperWrapper = mapperWrapper;
+            this.ParameterWrapper = parameterWrapper;
         }
 
         public async Task<ReturnType> Run()
         {
-            var map = runner.Run(mapper);
-            var parameter = runner.Run(parameterWrapper);
-            var cache = await map.Run(parameter);
+            var parameter = runner.Run(ParameterWrapper);
+            var cache = await Mapper.Run(parameter);
 
             return runner.Run(cache);
         }
 
-        //public IAsyncMapperRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType> Run()
-        //{
-        //    var factory = runner.Run(new AsyncMapperRunnerFactory(new ValueCacheRunner<ITaskRunner>(runner))); // you can mock this factory and subsequently mock the create runner
-        //    return factory.CreateRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType>(
-        //        mapper, parameterWrapper
-        //    );
-        //}
+        public T Mapper { get { return runner.Run(mapperWrapper); } }
+        public IRunner<ParameterType> ParameterWrapper { get; }
     }
 
     //public class Thing2
