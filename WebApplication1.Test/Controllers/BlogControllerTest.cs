@@ -12,6 +12,7 @@ using WebApplication1.Data.Queries;
 using Microsoft.AspNetCore.Http;
 using System;
 using WebApplication1.Data;
+using FakeItEasy.Configuration;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -497,7 +498,7 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Delete2 : BlogControllerTest
         {
-            private FakeItEasy.Configuration.IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
+            private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private BlogDbSetRunner dbSet;
 
             [TestInitialize]
@@ -519,13 +520,11 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
-                lookupBlogByIdMock.WhenArgumentsMatch(a => {
-                    var asyncCreateMapRunner = a[0] as IAsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>;
-                    var isGetAllByIdEqual = new GetAllById<Blog>(deleteId).Equals(asyncCreateMapRunner.Mapper);
-                    var dbSetIsCorrect = asyncCreateMapRunner.ParameterWrapper.Equals(dbSet);
-
-                    return isGetAllByIdEqual && dbSetIsCorrect;
-                }).MustHaveHappenedOnceExactly();
+                lookupBlogByIdMock.MustHaveHappenedANumberOfTimesMatching(a =>
+                    a.ElementAt(0) as IAsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>,
+                    x => new GetAllById<Blog>(deleteId).Equals(x.Mapper),
+                    x => x.ParameterWrapper.Equals(dbSet)
+                );
             }
 
             [TestMethod]
@@ -540,12 +539,11 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
                 deleteBlogMock.MustHaveHappenedOnceExactly();
-                deleteBlogMock.WhenArgumentsMatch(a => {
-                    var asyncCreateMapRunner = a[0] as IAsyncCreateMapRunner<DeleteBlog, BloggingContext, int>;
-                    var deleteIsCorrect = asyncCreateMapRunner.Mapper.Equals(new DeleteBlog(mockedBlogFoundById));
-                    var dbSetIsCorrect = asyncCreateMapRunner.ParameterWrapper.Equals(dbSet);
-                    return dbSetIsCorrect && deleteIsCorrect;
-                }).MustHaveHappenedOnceExactly();
+                deleteBlogMock.MustHaveHappenedANumberOfTimesMatching(a => 
+                    a.ElementAt(0) as IAsyncCreateMapRunner<DeleteBlog, BloggingContext, int>, 
+                    x => x.Mapper.Equals(new DeleteBlog(mockedBlogFoundById)),
+                    x => x.ParameterWrapper.Equals(dbSet)
+                );
             }
 
             [TestMethod]
@@ -562,8 +560,26 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.AreSame(result, fakeException);
             }
+        }
+    }
 
-
+    public static class SomeExtensions
+    {
+        public static void MustHaveHappenedANumberOfTimesMatching<T1, T2>(
+            this IReturnValueArgumentValidationConfiguration<T1> config,
+            Func<ArgumentCollection, T2> arg, params Func<T2, bool>[] isValid)
+        {
+            MustHaveHappenedANumberOfTimesMatching(config, 1, arg, isValid);
+        }
+        public static void MustHaveHappenedANumberOfTimesMatching<T1,T2>(this IReturnValueArgumentValidationConfiguration<T1> config,
+            int count, Func<ArgumentCollection, T2> arg, params Func<T2, bool>[] isValid)
+        {
+            foreach (var valid in isValid)
+                config.WhenArgumentsMatch(a =>
+                    valid(arg(a))
+                ).MustHaveHappenedANumberOfTimesMatching(x=>
+                    x==count
+                );
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿namespace ExecutionStrategyCore
 {
+    //todo: make a static method
     public class StoryOverrideRunner : ITaskRunner
     {
         private readonly ITaskRunner wrappedRunner;

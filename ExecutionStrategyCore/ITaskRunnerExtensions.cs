@@ -65,7 +65,7 @@ namespace ExecutionStrategyCore
         //    return null;
         //}
 
-        ////
+        //rename this method!
         public static async Task<ReturnType> XAsync<T, ParameterType, ReturnType>(this ITaskRunner runner, IRunner<T> mapWrapper, IRunner<ParameterType> parameterWrapper)
         where T : IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>
         {
@@ -77,11 +77,6 @@ namespace ExecutionStrategyCore
         {
             return new InternalValueCacheUnwrapper<ITaskRunner>(new InternalValueCache<ITaskRunner>(runner));
         }
-
-        //public static IAsyncMapperRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>, ParameterType, ReturnType> CreateMapRunner<T, ParameterType, ReturnType>(this ITaskRunner runner, IRunner<IMapper<ParameterType, Task<InternalValueCache<ReturnType>>>> mapper, IRunner<ParameterType> parameterWrapper)
-        //{
-        //    return runner.Run(new CreateMapRunner<ParameterType, ReturnType>(runner, mapper, parameterWrapper));
-        //}
     }
 
     public class AsyncMapperRunnerFactory : IAsyncMapperRunnerFactory, IRunner<IAsyncMapperRunnerFactory>
