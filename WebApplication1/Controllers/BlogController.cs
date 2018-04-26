@@ -208,27 +208,22 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             Blog foundBlog = null;
-            if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "12", "13"))
             {
-                foundBlog = await runner.Run(storyDefinitionFilter, () => Find(id));
+                if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "12", "13"))
+                {
+                    foundBlog = await runner.Run(storyDefinitionFilter, () => Find(id));
+                }
             }
 
-            if (foundBlog == null)
+            if (foundBlog != null)
             {
-                return NotFound();
+                if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "13"))
+                {
+                    await runner.Run(storyDefinitionFilter, () => runner.Run(new DeleteBlog(foundBlog), blogData));
+                }
+                return Ok();
             }
-
-            var defaultDeleteFunction = new StoryOverrideFunctionRunner<Task<int>>(
-                () => Task.FromResult(0)
-            );
-
-            defaultDeleteFunction.AddOverride(() => 
-                runner.Run(new DeleteBlog(foundBlog), blogData), 
-            "13");
-
-            await runner.Run(defaultDeleteFunction);
-
-            return Ok();
+            return NotFound();
         }
 
         public async Task<ActionResult> Delete2(int id)
