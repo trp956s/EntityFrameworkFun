@@ -172,23 +172,23 @@ namespace WebApplication1.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromBody]Blog blog)
         {
-            var blogFound = await runner.Run(new StoryOverrideFunctionRunner<Task<Blog>>(
-                () => Task.FromResult<Blog>(null),
-                new StoryFunctionRunner<Task<Blog>>(() => 
-                    Find(id), "10", "11"
-                ).Run
-            ));
+            if (!runner.IsStoryOverrideActive(out var story10Or11, "10", "11"))
+            {
+                return NotFound();
+            }
 
+            var blogFound = await runner.Run(story10Or11, () => Find(id));
             if (blogFound == null)
             {
                 return NotFound();
             }
 
-            var update = new StoryFunctionRunner<Task<ActionResult>>(() => Update(blogFound, blog), "11");
-            return await runner.Run(new StoryOverrideFunctionRunner<Task<ActionResult>>(
-                () => Task.FromResult<ActionResult>(Ok()),
-                update.Run
-            ));
+            if (!runner.IsStoryOverrideActive(out var story11, "11"))
+            {
+                return Ok();
+            }
+
+            return await runner.Run(story11, () => Update(blogFound, blog));
         }
 
         private async Task<ActionResult> Update(Blog existingBlog, Blog newBlogValues)
