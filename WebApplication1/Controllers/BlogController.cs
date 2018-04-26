@@ -151,13 +151,17 @@ namespace WebApplication1.Controllers
 
         private async Task<StatusCodeResult> CheckForConflict(Blog matchingPostId, Blog postBlog)
         {
-            if(matchingPostId != null)
+            if (matchingPostId != null)
+            {
                 return StatusCode(StatusCodes.Status409Conflict);
-            var story9 = new StoryFunctionRunner<Task<StatusCodeResult>>(() => CreateNew(postBlog), "9");
-            return await runner.Run(new StoryOverrideFunctionRunner<Task<StatusCodeResult>>(
-                () => Task.FromResult(StatusCode(StatusCodes.Status201Created)),
-                story9.Run
-            ));
+            }
+
+            if(!runner.IsStoryOverrideActive(out var story9, "9"))
+            {
+                return StatusCode(StatusCodes.Status201Created);
+            }
+
+            return await runner.Run(story9, () => CreateNew(postBlog));
         }
 
         private async Task<StatusCodeResult> CreateNew(Blog postBlog)
@@ -165,8 +169,6 @@ namespace WebApplication1.Controllers
             await runner.Run(new CreateBlog(postBlog), blogData);
             return StatusCode(StatusCodes.Status201Created);
         }
-
-
 
         // PUT api/values/5
         [HttpPut("{id}")]
@@ -208,16 +210,14 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             Blog foundBlog = null;
+            if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "12", "13"))
             {
-                if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "12", "13"))
-                {
-                    foundBlog = await runner.Run(storyDefinitionFilter, () => Find(id));
-                }
+                foundBlog = await runner.Run(storyDefinitionFilter, () => Find(id));
             }
 
             if (foundBlog != null)
             {
-                if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "13"))
+                if (runner.IsStoryOverrideActive(out storyDefinitionFilter, "13"))
                 {
                     await runner.Run(storyDefinitionFilter, () => runner.Run(new DeleteBlog(foundBlog), blogData));
                 }
