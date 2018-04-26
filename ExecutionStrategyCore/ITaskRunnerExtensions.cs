@@ -41,29 +41,42 @@ namespace ExecutionStrategyCore
             return new InternalValueCache<T>(value);
         }
 
-        //public static void StoryOverride(this ITaskRunner runner, params Func<Thing>[] assignOverrides)
-        //{
+        public static bool IsStoryOverrideActive(this ITaskRunner runner, out IStoryOverride storyDefinitionFilter, params string[] stories)
+        {
+            var potentialStoryDefinitionFilter = runner.Run(new EmptyStoryOverride(stories));
+            if(potentialStoryDefinitionFilter.AnyStoriesActive())
+            {
+                storyDefinitionFilter = potentialStoryDefinitionFilter;
+            }
+            else
+            {
+                storyDefinitionFilter = null;
+            }
 
-        //}
+            return potentialStoryDefinitionFilter.AnyStoriesActive();
+        }
 
-        //public static IRunner<Task<T>> RunnerStoryActiveAsync<T>(this Thing2 t, Func<IRunner<Task<T>>> overrideFunction)
-        //{
-        //    //if null thiniggy does something else or does nothing
-        //    var t2 = new Thing2();
-        //    overrideFunction();
+        public static T Run<T>(this ITaskRunner runner, IStoryOverride storyOverride, Func<T> storyOverrideFunc)
+        {
+            if(storyOverride == null || storyOverrideFunc == null || !storyOverride.AnyStoriesActive())
+            {
+                return default(T);
+            }
 
-        //    return null;
-        //}
+            var overrideFunction = storyOverride.CreateOverride<T>(storyOverrideFunc);
 
-        //public static bool AnyActive(this Thing2 thing)
-        //{
-        //    //won't do null
-        //    return false;
-        //}
-        //public static Thing2 ForStories(this ITaskRunner runner, params string[] stories)
-        //{
-        //    return null;
-        //}
+            if(overrideFunction == null)
+            {
+                return default(T);
+            }
+
+            return runner.Run(overrideFunction);
+        }
+
+        public static IRunner<T> CreateOverride<T>(IStoryOverride storyOverride, Func<T> storyOverrideFunction)
+        {
+            return new ValueCacheRunner<T>();
+        }
 
         //rename this method!
         public static async Task<ReturnType> XAsync<T, ParameterType, ReturnType>(this ITaskRunner runner, IRunner<T> mapWrapper, IRunner<ParameterType> parameterWrapper)
@@ -76,6 +89,81 @@ namespace ExecutionStrategyCore
         public static IRunner<ITaskRunner> Wrap(this ITaskRunner runner)
         {
             return new InternalValueCacheUnwrapper<ITaskRunner>(new InternalValueCache<ITaskRunner>(runner));
+        }
+    }
+
+    public interface IStoryOverride
+    {
+        bool AnyStoriesActive();
+        IRunner<T> CreateOverride<T>(Func<T> storyOverrideFunction);
+    }
+
+    public struct EmptyStoryOverride : IStoryOverride, IMapper<IRunner<ActiveStories>, IStoryOverride>, IRunner<IStoryOverride>
+    {
+        private readonly string[] stories;
+        internal EmptyStoryOverride(string[] stories) {
+            this.stories = stories;
+        }
+
+        public bool AnyStoriesActive()
+        {
+            return false;
+        }
+
+        //the overridden ITaskRunner with story overrides calls this method
+        public IStoryOverride Run(IRunner<ActiveStories> activeStories)
+        {
+            var activeFilteredStoryOverride = new ActiveFilteredStoryOverride(stories, activeStories);
+            if (activeFilteredStoryOverride.AnyStoriesActive())
+            {
+                return activeFilteredStoryOverride;
+            }
+
+            return this;
+        }
+
+        public IStoryOverride Run()
+        {
+            return this;
+        }
+
+        public IRunner<T> CreateOverride<T>(Func<T> storyOverrideFunction)
+        {
+            return new ValueCacheRunner<T>();
+        }
+    }
+
+    public struct ActiveFilteredStoryOverride : IStoryOverride
+    {
+        private string[] stories;
+        private IRunner<ActiveStories> activeStories;
+        //todo: add ITaskRunner jto constructor
+
+        internal ActiveFilteredStoryOverride(string[] stories, IRunner<ActiveStories> activeStories)
+        {
+            this.stories = stories;
+            this.activeStories = activeStories;
+        }
+
+        public bool AnyStoriesActive()
+        {
+            if(activeStories == null)
+            {
+                return false;
+            }
+
+            var unwrappedActiveStories = activeStories.Run();
+
+            return unwrappedActiveStories != null && unwrappedActiveStories.Any() && unwrappedActiveStories.AnyMatching(stories);
+        }
+
+        public IRunner<T> CreateOverride<T>(Func<T> storyOverrideFunction)
+        {
+            if(!AnyStoriesActive())
+            {
+                return new ValueCacheRunner<T>();
+            }
+            return new FunctionRunner<T>(storyOverrideFunction);
         }
     }
 
@@ -168,9 +256,4 @@ namespace ExecutionStrategyCore
         public T Mapper { get { return runner.Run(mapperWrapper); } }
         public IRunner<ParameterType> ParameterWrapper { get; }
     }
-
-    //public class Thing2
-    //{
-    //    public void ActiveStories(params string[] storyNumbers) { }
-    //}
 }

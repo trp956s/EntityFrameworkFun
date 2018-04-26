@@ -13,6 +13,19 @@
 
         public T Run<T>(IRunner<T> executionStrategy)
         {
+            if(executionStrategy is IRunner<IStoryOverride>)
+            {
+                var storyOverride = executionStrategy.Run() as EmptyStoryOverride?;
+                if(storyOverride.HasValue)
+                {
+                    var filteredActiveStoryOverrider = storyOverride.Value.Run(storiesGetter);
+                    if (filteredActiveStoryOverrider.AnyStoriesActive())
+                    {
+                        return (T)filteredActiveStoryOverrider;
+                    }
+                }
+            }
+
             if(typeof(StoryOverrideFunctionRunner<T>).IsInstanceOfType(executionStrategy))
             {
                 var funcRunner = ((StoryOverrideFunctionRunner<T>)executionStrategy);

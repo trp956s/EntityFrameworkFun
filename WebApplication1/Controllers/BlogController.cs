@@ -13,7 +13,10 @@ using WebApplication1.Data;
 
 namespace WebApplication1.Controllers
 {
-    //...
+    //todo: rewrite story overrides
+    //todo: rewrite Mapper (and runner) to follow command pattern DataInteraction : IInternalDataInteraction { internal T Act(){...}; public InternalExecutionStrategyRunner AsRunner(){return new InternalExecutionStrategyRunner(new InternalDataInteraction(this))**;} };
+    //todo: rename Execution Strategy to follow command pattern names
+    //todo: **internal helper this.ToInternalRunner()
     //todo: clean up code, consolidate stories 1-3, reduce test code
     //todo: get by id.. 9-11 are post, put, and delete
     //todo: 9,  10, 11: test drive the rest of this class keeping blogs simple
@@ -204,28 +207,16 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var defaultFindFunction = new StoryOverrideFunctionRunner<Task<Blog>>(
-                () => Task.FromResult<Blog>(null)
-            );
-
-            defaultFindFunction.AddOverride(() => Find(id), "12", "13");
-
-            var foundBlog = await runner.Run(defaultFindFunction);
+            Blog foundBlog = null;
+            if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "12", "13"))
+            {
+                foundBlog = await runner.Run(storyDefinitionFilter, () => Find(id));
+            }
 
             if (foundBlog == null)
             {
                 return NotFound();
             }
-
-            //IStoryOverrideRunner<int> v = runner.CreateActiveStoriesFilterRunner("12", "13");
-
-            //if (runner.Run((IRunner<bool>)v))
-            //{
-            //    runner.Run(v, () =>
-            //        new DeleteBlog(foundBlog).ToRunner(blogData)
-            //    ); //this extension will create an empty value runner OR a special function runner with an override property and pass that to the runner
-            //}
-
 
             var defaultDeleteFunction = new StoryOverrideFunctionRunner<Task<int>>(
                 () => Task.FromResult(0)
