@@ -56,6 +56,7 @@ namespace ExecutionStrategyCore
             return potentialStoryDefinitionFilter.AnyStoriesActive();
         }
 
+        //TODO: accept the default as an argument here
         public static T Run<T>(this ITaskRunner runner, IStoryOverride storyOverride, Func<T> storyOverrideFunc)
         {
             if(storyOverride == null || storyOverrideFunc == null || !storyOverride.AnyStoriesActive())
