@@ -39,53 +39,27 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            Func<Task<ActionResult>> notFoundFunc = () => Task.FromResult((ActionResult)NotFound());
-            var strategyToggle = new StoryOverrideFunctionRunner<Task<ActionResult>>(
-                notFoundFunc,
-                GetAllBlogs,
-                GetAllBlogs2,
-                GetAllBlogs3,
-                GetAllBlogs4
-            );
-            return await runner.Run(strategyToggle);
-        }
-
-        [Story("1")]
-        private async Task<ActionResult> GetAllBlogs()
-        {
-            return await Task.FromResult(Ok(new Blog[] { }));
-        }
-
-        [Story("2")]
-        private async Task<ActionResult> GetAllBlogs2()
-        {
-            return await Task.FromResult(Ok(new Blog[] {
-                new Blog()
-            }));
-        }
-
-        [Story("3")]
-        private async Task<ActionResult> GetAllBlogs3()
-        {
-            return await GetAllBlogsFromDb("3");
-        }
-
-        [Story("4")]
-        private async Task<ActionResult> GetAllBlogs4()
-        {
-            return await GetAllBlogsFromDb("4");
-        }
-
-        private async Task<ActionResult> GetAllBlogsFromDb(string story)
-        {
-            var queryResult = await GetAllBlogsFromDb();
-
-            if(story == "4" && !queryResult.Any())
+            if (runner.IsStoryOverrideActive(out var story, "1"))
             {
-                return NotFound();
+                return await Task.FromResult(Ok(new Blog[] { }));
+            }
+            else if (runner.IsStoryOverrideActive(out story, "2"))
+            {
+                return await Task.FromResult(Ok(new Blog[] {
+                    new Blog()
+                }));
+            }
+            else if (runner.IsStoryOverrideActive(out story, "3", "4"))
+            {
+                var queryResult = await GetAllBlogsFromDb();
+                if (runner.IsStoryOverrideActive(out story, "4") && queryResult.Count() == 0)
+                {
+                    return NotFound();
+                }
+                return Ok(queryResult);
             }
 
-            return Ok(queryResult);
+            return NotFound();
         }
 
         private async Task<IEnumerable<Blog>> GetAllBlogsFromDb()
