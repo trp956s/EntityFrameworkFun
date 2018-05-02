@@ -21,7 +21,7 @@ namespace WebApplication1.Data.Queries
 
         BloggingContext IRunner<BloggingContext>.Run()
         {
-            throw new System.NotImplementedException();
+            return this.context.Run();
         }
     }
 }

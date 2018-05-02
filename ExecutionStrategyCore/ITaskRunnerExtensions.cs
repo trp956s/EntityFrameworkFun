@@ -87,6 +87,14 @@ namespace ExecutionStrategyCore
             return await runner.Run(mapRunner);
         }
 
+        //rename this method!
+        public static async Task<ReturnType> XAsync2<T, ParameterType, ReturnType>(this ITaskRunner runner, T mapWrapper, IRunner<ParameterType> parameterWrapper)
+        where T : IRunner<InternalValueCache<IMapper<ParameterType, Task<ReturnType>>>>
+        {
+            var mapRunner = new AsyncCreateMapRunner2<T, ParameterType, ReturnType>(runner.Wrap(), mapWrapper, parameterWrapper);
+            return await runner.Run(mapRunner);
+        }
+
         public static IRunner<ITaskRunner> Wrap(this ITaskRunner runner)
         {
             return new InternalValueCacheUnwrapper<ITaskRunner>(new InternalValueCache<ITaskRunner>(runner));
@@ -221,6 +229,31 @@ namespace ExecutionStrategyCore
             var mapper = runner.Run(mapperWrapper);
 
             return await mapper.Run(parameter);
+        }
+    }
+
+    public struct AsyncCreateMapRunner2<T, ParameterType, ReturnType>:IRunner<Task<ReturnType>>
+    where T : IRunner<InternalValueCache<IMapper<ParameterType, Task<ReturnType>>>>
+    {
+        private ITaskRunner runner;
+        private T mapperWrapper;
+        private readonly IRunner<ParameterType> parameterWrapper;
+
+        public AsyncCreateMapRunner2(IRunner<ITaskRunner> runnerWrapper, T mapperWrapper, IRunner<ParameterType> parameterWrapper)
+        {
+            this.runner = runnerWrapper.Run();
+            this.mapperWrapper = mapperWrapper;
+            this.parameterWrapper = parameterWrapper;
+        }
+
+        public async Task<ReturnType> Run()
+        {
+            var parameter = runner.Run(parameterWrapper);
+            throw new NotImplementedException();
+            //var mapperCache = runner.Run(mapWrapper);
+            //var mapper = new InternalValueCacheUnwrapper<T>(mapperCache);
+
+            //            return await Mapper.Run(parameter);
         }
     }
 

@@ -531,7 +531,7 @@ namespace WebApplication1.Test.Controllers
             public async Task OKReturnedWhenGetByIdReturnsBlogAndDelteSuccessful()
             {
                 var mockedBlogFoundById = new Blog();
-                var deleteBlogMock = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner<DeleteBlog, BloggingContext, int>>.Ignored));
+                var deleteBlogMock = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>>.Ignored));
                 lookupBlogByIdMock.Returns(mockedBlogFoundById);
                 deleteBlogMock.Returns(0);
 
@@ -550,7 +550,7 @@ namespace WebApplication1.Test.Controllers
             public async Task ThrowsWhenDeleteBlogThrows()
             {
                 var fakeException = new Exception();
-                var deleteBlog = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner<DeleteBlog, BloggingContext, int>>.Ignored));
+                var deleteBlog = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>>.Ignored));
                 lookupBlogByIdMock.Returns(new Blog());
                 deleteBlog.Throws(fakeException);
 

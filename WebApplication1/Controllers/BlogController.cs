@@ -13,7 +13,6 @@ using WebApplication1.Data;
 
 namespace WebApplication1.Controllers
 {
-    //todo: rewrite story overrides
     //todo: rewrite Mapper (and runner) to follow command pattern DataInteraction : IInternalDataInteraction { internal T Act(){...}; public InternalExecutionStrategyRunner AsRunner(){return new InternalExecutionStrategyRunner(new InternalDataInteraction(this))**;} };
     //todo: rename Execution Strategy to follow command pattern names
     //todo: **internal helper this.ToInternalRunner()
@@ -210,7 +209,7 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            await runner.XAsync<DeleteBlog, BloggingContext, int>(new DeleteBlog(blogFoundById), blogData);
+            await runner.XAsync2<DeleteBlog2, BloggingContext, int>(new DeleteBlog2(blogFoundById), blogData);
 
             return Ok(null);
         }
