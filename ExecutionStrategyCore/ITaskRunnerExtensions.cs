@@ -236,25 +236,33 @@ namespace ExecutionStrategyCore
     where T : IRunner<InternalValueCache<IMapper<ParameterType, Task<ReturnType>>>>
     {
         private ITaskRunner runner;
-        private T mapperWrapper;
-        private readonly IRunner<ParameterType> parameterWrapper;
 
         public AsyncCreateMapRunner2(IRunner<ITaskRunner> runnerWrapper, T mapperWrapper, IRunner<ParameterType> parameterWrapper)
         {
             this.runner = runnerWrapper.Run();
-            this.mapperWrapper = mapperWrapper;
-            this.parameterWrapper = parameterWrapper;
+            this.MapperWrapper = mapperWrapper;
+            this.ParameterWrapper = parameterWrapper;
         }
 
         public async Task<ReturnType> Run()
         {
-            var parameter = runner.Run(parameterWrapper);
             throw new NotImplementedException();
+            //var parameter = runner.Run(ParameterWrapper);
             //var mapperCache = runner.Run(mapWrapper);
             //var mapper = new InternalValueCacheUnwrapper<T>(mapperCache);
 
             //            return await Mapper.Run(parameter);
         }
+
+        public T MapperWrapper { get; }
+
+        private IMapper<ParameterType, Task<ReturnType>> GetMapper()
+        {
+            var cache = runner.Run(MapperWrapper);
+            return cache.Value;
+        }
+
+        public IRunner<ParameterType> ParameterWrapper { get; }
     }
 
     public interface IAsyncCreateMapRunner<out T, ParameterType, ReturnType>

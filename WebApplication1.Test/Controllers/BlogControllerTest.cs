@@ -520,7 +520,7 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
-                lookupBlogByIdMock.MustHaveHappenedANumberOfTimesMatching(a =>
+                lookupBlogByIdMock.MustHaveHappenedANumberOfTimesMatching2(a =>
                     a.ElementAt(0) as IAsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>,
                     x => new GetAllById<Blog>(deleteId).Equals(x.Mapper),
                     x => x.ParameterWrapper.Equals(dbSet)
@@ -539,10 +539,12 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
                 deleteBlogMock.MustHaveHappenedOnceExactly();
-                deleteBlogMock.MustHaveHappenedANumberOfTimesMatching(a => 
-                    a.ElementAt(0) as IAsyncCreateMapRunner<DeleteBlog, BloggingContext, int>, 
-                    x => x.Mapper.Equals(new DeleteBlog(mockedBlogFoundById)),
-                    x => x.ParameterWrapper.Equals(dbSet)
+                deleteBlogMock.MustHaveHappenedANumberOfTimesMatching2(a =>
+                    a.ElementAt(0) as AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>?, 
+                    x => 
+                        x.Value.MapperWrapper.Equals(new DeleteBlog2(mockedBlogFoundById)),
+                    x => 
+                        x.Value.ParameterWrapper.Equals(dbSet)
                 );
             }
 
@@ -565,13 +567,13 @@ namespace WebApplication1.Test.Controllers
 
     public static class SomeExtensions
     {
-        public static void MustHaveHappenedANumberOfTimesMatching<T1, T2>(
+        public static void MustHaveHappenedANumberOfTimesMatching2<T1, T2>(
             this IReturnValueArgumentValidationConfiguration<T1> config,
             Func<ArgumentCollection, T2> arg, params Func<T2, bool>[] isValid)
         {
-            MustHaveHappenedANumberOfTimesMatching(config, 1, arg, isValid);
+            MustHaveHappenedANumberOfTimesMatching2(config, 1, arg, isValid);
         }
-        public static void MustHaveHappenedANumberOfTimesMatching<T1,T2>(this IReturnValueArgumentValidationConfiguration<T1> config,
+        public static void MustHaveHappenedANumberOfTimesMatching2<T1,T2>(this IReturnValueArgumentValidationConfiguration<T1> config,
             int count, Func<ArgumentCollection, T2> arg, params Func<T2, bool>[] isValid)
         {
             foreach (var valid in isValid)
