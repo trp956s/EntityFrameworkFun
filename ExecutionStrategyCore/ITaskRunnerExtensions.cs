@@ -246,12 +246,9 @@ namespace ExecutionStrategyCore
 
         public async Task<ReturnType> Run()
         {
-            throw new NotImplementedException();
-            //var parameter = runner.Run(ParameterWrapper);
-            //var mapperCache = runner.Run(mapWrapper);
-            //var mapper = new InternalValueCacheUnwrapper<T>(mapperCache);
-
-            //            return await Mapper.Run(parameter);
+            var parameter = runner.Run(ParameterWrapper);
+            var mapper = GetMapper();
+            return await mapper.Run(parameter);
         }
 
         public T MapperWrapper { get; }
