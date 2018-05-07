@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Data.GeneralInterfaces
 {
-    internal class InternalRunnerWrapper<T1, T2> : IMapper<T1, T2>
+    internal class InternalRunnerWrapper<T, T1, T2> : IMapper<T1, T2>
+        where T : IInternalRunner<T1, T2>
     {
-        private readonly IInternalRunner<T1, T2> internalRunner;
+        private readonly T internalRunner;
 
-        internal InternalRunnerWrapper(IInternalRunner<T1, T2> internalRunner)
+        internal InternalRunnerWrapper(T internalRunner)
         {
             this.internalRunner = internalRunner;
         }

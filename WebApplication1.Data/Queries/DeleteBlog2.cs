@@ -17,7 +17,7 @@ namespace WebApplication1.Data.Queries
 
         public InternalValueCache<IMapper<BloggingContext, Task<int>>> Run()
         {
-            return new InternalValueCache<IMapper<BloggingContext, Task<int>>>(new InternalRunnerWrapper<BloggingContext, Task<int>>(this));
+            return new InternalValueCache<IMapper<BloggingContext, Task<int>>>(new InternalRunnerWrapper<DeleteBlog2, BloggingContext, Task<int>>(this));
         }
 
         async Task<int> IInternalRunner<BloggingContext, Task<int>>.Run(BloggingContext bloggingContext)
