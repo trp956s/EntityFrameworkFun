@@ -9,6 +9,10 @@ namespace WebApplication1.Data.GeneralInterfaces
     internal class InternalRunnerWrapper<T, T1, T2> : IMapper<T1, T2>
         where T : IInternalRunner<T1, T2>
     {
+        public static InternalValueCache<IMapper<T1, T2>> Wrap(T wrapTarget)
+        {
+            return new InternalValueCache<IMapper<T1, T2>>(new InternalRunnerWrapper<T, T1, T2>(wrapTarget));
+        }
         private readonly T internalRunner;
 
         internal InternalRunnerWrapper(T internalRunner)
