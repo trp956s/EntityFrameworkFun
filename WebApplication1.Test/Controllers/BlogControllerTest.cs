@@ -499,14 +499,21 @@ namespace WebApplication1.Test.Controllers
         public class Delete2 : BlogControllerTest
         {
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
+            private IReturnValueArgumentValidationConfiguration<Task<int>> deleteBlogMock;
+            private ArgumentConstraint<AsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>> withBlogQuery = new ArgumentConstraint<AsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>>();
+            private ArgumentConstraint<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>> withDeleteAsyncMapRunner = new ArgumentConstraint<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>>();
             private BlogDbSetRunner dbSet;
 
             [TestInitialize]
             public void TestInitialize()
             {
-                lookupBlogByIdMock = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>>.Ignored));
+                lookupBlogByIdMock = A.CallTo(() => runner.Run(withBlogQuery.Ignored));
+                deleteBlogMock = A.CallTo(() => runner.Run(withDeleteAsyncMapRunner.Ignored));
                 dbSet = A.Fake<BlogDbSetRunner>();
-                blogController = new BlogController(runner, dbSet);
+                var activeStories = new FakeActiveStoryFactory();
+                activeStories.ActiveStory = "14";
+                var runnerWrapper = new StoryOverrideRunner(runner, activeStories);
+                blogController = new BlogController(runnerWrapper, dbSet);
             }
 
             [TestMethod]
@@ -516,48 +523,47 @@ namespace WebApplication1.Test.Controllers
                 Blog noBlog = null;
                 lookupBlogByIdMock.Returns(noBlog);
 
-                var result = await blogController.Delete2(deleteId);
+                var result = await blogController.Delete(deleteId);
 
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
-                lookupBlogByIdMock.MustHaveHappenedANumberOfTimesMatching2(a =>
-                    a.ElementAt(0) as IAsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>,
-                    x => new GetAllById<Blog>(deleteId).Equals(x.Mapper),
+                A.CallTo(() => runner.Run(withBlogQuery.That.Matches(
+                    x => new GetAllById<Blog>(deleteId).Equals(x.Mapper)
+                ))).MustHaveHappenedOnceExactly();
+                A.CallTo(() => runner.Run(withBlogQuery.That.Matches(
                     x => x.ParameterWrapper.Equals(dbSet)
-                );
+                ))).MustHaveHappenedOnceExactly();
             }
 
             [TestMethod]
             public async Task OKReturnedWhenGetByIdReturnsBlogAndDelteSuccessful()
             {
                 var mockedBlogFoundById = new Blog();
-                var deleteBlogMock = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>>.Ignored));
                 lookupBlogByIdMock.Returns(mockedBlogFoundById);
                 deleteBlogMock.Returns(0);
 
-                var result = await blogController.Delete2(0);
+                var result = await blogController.Delete(0);
 
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
-                deleteBlogMock.MustHaveHappenedOnceExactly();
-                deleteBlogMock.MustHaveHappenedANumberOfTimesMatching2(a =>
-                    a.ElementAt(0) as AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>?, 
-                    x => 
-                        x.Value.MapperWrapper.Equals(new DeleteBlog2(mockedBlogFoundById)),
-                    x => 
-                        x.Value.ParameterWrapper.Equals(dbSet)
-                );
+
+                A.CallTo(() => runner.Run(withDeleteAsyncMapRunner.That.Matches(x =>
+                    x.MapperWrapper.Equals(new DeleteBlog2(mockedBlogFoundById))
+                ))).MustHaveHappenedOnceExactly();
+                A.CallTo(() => runner.Run(withDeleteAsyncMapRunner.That.Matches(x =>
+                    x.ParameterWrapper.Equals(dbSet)
+                ))).MustHaveHappenedOnceExactly();
+                A.CallTo(() => runner.Run(withDeleteAsyncMapRunner.Ignored)).MustHaveHappenedOnceExactly();
             }
 
             [TestMethod]
             public async Task ThrowsWhenDeleteBlogThrows()
             {
                 var fakeException = new Exception();
-                var deleteBlog = A.CallTo(() => runner.Run(A<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>>.Ignored));
                 lookupBlogByIdMock.Returns(new Blog());
-                deleteBlog.Throws(fakeException);
+                deleteBlogMock.Throws(fakeException);
 
                 var result = await Assert.ThrowsExceptionAsync<Exception>(() =>
-                   blogController.Delete2(0)
+                   blogController.Delete(0)
                 );
 
                 Assert.AreSame(result, fakeException);
@@ -565,23 +571,22 @@ namespace WebApplication1.Test.Controllers
         }
     }
 
-    public static class SomeExtensions
+    public class ArgumentConstraint<T>
     {
-        public static void MustHaveHappenedANumberOfTimesMatching2<T1, T2>(
-            this IReturnValueArgumentValidationConfiguration<T1> config,
-            Func<ArgumentCollection, T2> arg, params Func<T2, bool>[] isValid)
+        public T Ignored
         {
-            MustHaveHappenedANumberOfTimesMatching2(config, 1, arg, isValid);
+            get
+            {
+                return A<T>.Ignored;
+            }
         }
-        public static void MustHaveHappenedANumberOfTimesMatching2<T1,T2>(this IReturnValueArgumentValidationConfiguration<T1> config,
-            int count, Func<ArgumentCollection, T2> arg, params Func<T2, bool>[] isValid)
+
+        public INegatableArgumentConstraintManager<T> That
         {
-            foreach (var valid in isValid)
-                config.WhenArgumentsMatch(a =>
-                    valid(arg(a))
-                ).MustHaveHappenedANumberOfTimesMatching(x=>
-                    x==count
-                );
+            get
+            {
+                return A<T>.That;
+            }
         }
     }
 

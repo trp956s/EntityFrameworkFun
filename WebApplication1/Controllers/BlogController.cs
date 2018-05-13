@@ -184,8 +184,14 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
+            //write a test for this
+            if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "14"))
+            {
+                return await Delete2(id);
+            }
+
             Blog foundBlog = null;
-            if (runner.IsStoryOverrideActive(out var storyDefinitionFilter, "12", "13"))
+            if (runner.IsStoryOverrideActive(out storyDefinitionFilter, "12", "13"))
             {
                 foundBlog = await runner.Run(storyDefinitionFilter, () => Find(id));
             }
@@ -201,7 +207,7 @@ namespace WebApplication1.Controllers
             return NotFound();
         }
 
-        public async Task<ActionResult> Delete2(int id)
+        private async Task<ActionResult> Delete2(int id)
         {
             var blogFoundById = await runner.XAsync<GetAllById<Blog>, IQueryable<Blog>, Blog>(new GetAllById<Blog>(id), blogData);
             if (blogFoundById == null)
