@@ -396,108 +396,6 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Delete : BlogControllerTest
         {
-            private FakeActiveStoryFactory activeStories;
-            private StoryOverrideRunner runnerWrapper;
-            private BlogDbSetRunner dbSet;
-
-            [TestInitialize]
-            public void TestInitialize()
-            {
-                dbSet = A.Fake<BlogDbSetRunner>();
-                activeStories = new FakeActiveStoryFactory();
-                runnerWrapper = new StoryOverrideRunner(runner, activeStories);
-                blogController = new BlogController(runnerWrapper, dbSet);
-            }
-
-            [TestMethod]
-            public async Task ReturnsNotFound()
-            {
-                var deleteId = 897;
-                var result = await blogController.Delete(deleteId);
-
-                Assert.IsInstanceOfType(result, typeof(NotFoundResult));
-            }
-
-            [TestMethod]
-            public async Task ReturnsNotFoundAfterLookupFails()
-            {
-                var deleteId = 4325;
-                foreach (var story in new string[] { null, "12", "13" })
-                {
-                    activeStories.ActiveStory = story;
-                    A.CallTo(() => runner.Run(
-                        new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                    ).Returns(((Blog)null));
-
-                    var result = await blogController.Delete(deleteId);
-
-                    Assert.IsInstanceOfType(result, typeof(NotFoundResult));
-                }
-            }
-
-            [TestMethod]
-            public async Task ReturnsOkWhenIdFound()
-            {
-                var deleteId = 3421;
-
-                foreach (var story in new string[] { "12" })
-                {
-                    activeStories.ActiveStory = story;
-                    A.CallTo(() => runner.Run(
-                        new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                    ).Returns(new Blog());
-
-                    var result = await blogController.Delete(deleteId);
-
-                    Assert.IsInstanceOfType(result, typeof(OkResult));
-                }
-            }
-
-            [TestMethod]
-            public async Task ReturnsOkWhenIdFoundAndDeleteSuccess()
-            {
-                var deleteId = 3421;
-                var deleteEntity = new Blog();
-                foreach (var story in new string[] { "12" })
-                {
-                    activeStories.ActiveStory = story;
-                    A.CallTo(() => runner.Run(
-                        new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                    ).Returns(deleteEntity);
-                    A.CallTo(() => runner.Run(
-                        new DeleteBlog(deleteEntity).ToRunner(dbSet))
-                    ).Returns(0);
-
-                    var result = await blogController.Delete(deleteId);
-
-                    Assert.IsInstanceOfType(result, typeof(OkResult));
-                }
-            }
-
-
-            [TestMethod]
-            public async Task ReturnsErrorWhenDeleteBlowsUp()
-            {
-                var deleteId = 546;
-                var deleteEntity = new Blog();
-                var expectedException = new Exception("Test");
-                activeStories.ActiveStory = "13";
-                A.CallTo(() => runner.Run(
-                    new GetAllById<Blog>(deleteId).ToRunner(dbSet))
-                ).Returns(deleteEntity);
-                A.CallTo(() => runner.Run(
-                    new DeleteBlog(deleteEntity).ToRunner(dbSet))
-                ).Throws(expectedException);
-
-                var excptionThrown = await Assert.ThrowsExceptionAsync<Exception>(() => blogController.Delete(deleteId));
-
-                Assert.AreSame(excptionThrown, expectedException);
-            }
-        }
-
-        [TestClass]
-        public class Delete2 : BlogControllerTest
-        {
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private IReturnValueArgumentValidationConfiguration<Task<int>> deleteBlogMock;
             private ArgumentConstraint<AsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>> withBlogQuery = new ArgumentConstraint<AsyncCreateMapRunner<GetAllById<Blog>, IQueryable<Blog>, Blog>>();
@@ -510,10 +408,7 @@ namespace WebApplication1.Test.Controllers
                 lookupBlogByIdMock = A.CallTo(() => runner.Run(withBlogQuery.Ignored));
                 deleteBlogMock = A.CallTo(() => runner.Run(withDeleteAsyncMapRunner.Ignored));
                 dbSet = A.Fake<BlogDbSetRunner>();
-                var activeStories = new FakeActiveStoryFactory();
-                activeStories.ActiveStory = "14";
-                var runnerWrapper = new StoryOverrideRunner(runner, activeStories);
-                blogController = new BlogController(runnerWrapper, dbSet);
+                blogController = new BlogController(runner, dbSet);
             }
 
             [TestMethod]
