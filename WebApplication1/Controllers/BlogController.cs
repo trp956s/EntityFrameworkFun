@@ -13,6 +13,7 @@ using WebApplication1.Data;
 
 namespace WebApplication1.Controllers
 {
+    //todo: test the GetAllById2 and DeleteBlog2 classes
     //todo: rewrite Mapper (and runner) to follow command pattern DataInteraction : IInternalDataInteraction { internal T Act(){...}; public InternalExecutionStrategyRunner AsRunner(){return new InternalExecutionStrategyRunner(new InternalDataInteraction(this))**;} };
     //todo: rename Execution Strategy to follow command pattern names
     //todo: **internal helper this.ToInternalRunner()
@@ -184,7 +185,7 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var blogFoundById = await runner.XAsync<GetAllById2<Blog>, IQueryable<Blog>, Blog>(new GetAllById2<Blog>(id), blogData);
+            var blogFoundById = await runner.XAsync2<GetAllById2<Blog>, IQueryable<Blog>, Blog>(new GetAllById2<Blog>(id), blogData);
             if (blogFoundById == null)
             {
                 return NotFound();
