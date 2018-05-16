@@ -12,7 +12,6 @@ namespace WebApplication1.Data.Queries
             this.context = context;
         }
 
-
         //todo refactor IRunner to use Run<T> so that explicit overrides are not necessary
         public IQueryable<Blog> Run()
         {
