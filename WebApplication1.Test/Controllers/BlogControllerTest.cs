@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using WebApplication1.Data;
 using FakeItEasy.Configuration;
+using WebApplication1.Data.GeneralInterfaces;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -398,7 +399,7 @@ namespace WebApplication1.Test.Controllers
         {
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private IReturnValueArgumentValidationConfiguration<Task<int>> deleteBlogMock;
-            private ArgumentConstraint<AsyncCreateMapRunner2<GetAllById2<Blog>, IQueryable<Blog>, Blog>> withBlogQuery = new ArgumentConstraint<AsyncCreateMapRunner2<GetAllById2<Blog>, IQueryable<Blog>, Blog>>();
+            private ArgumentConstraint<AsyncCreateMapRunner2<IAsyncQuerySingleFactory<Blog>, IQueryable<Blog>, Blog>> withBlogQuery = new ArgumentConstraint<AsyncCreateMapRunner2<IAsyncQuerySingleFactory<Blog>, IQueryable<Blog>, Blog>>();
             private ArgumentConstraint<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>> withDeleteAsyncMapRunner = new ArgumentConstraint<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>>();
             private BlogDbSetRunner dbSet;
 
@@ -422,6 +423,10 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
+                A.CallTo(() => runner.Run(withBlogQuery.That.Matches(
+                    x => typeof(GetAllById2<Blog>).IsInstanceOfType(x.MapperWrapper)
+                ))).MustHaveHappenedOnceExactly();
+
                 A.CallTo(() => runner.Run(withBlogQuery.That.Matches(
                     x => new GetAllById2<Blog>(deleteId).Equals(x.MapperWrapper)
                 ))).MustHaveHappenedOnceExactly();

@@ -9,7 +9,7 @@ namespace WebApplication1.Data.GeneralInterfaces
         public static async Task<ReturnType> QuerySingleAsync<T, ReturnType>(this ITaskRunner runner, T mapWrapper, IRunner<IQueryable<ReturnType>> parameterWrapper)
         where T : IAsyncQuerySingleFactory<ReturnType>
         {
-            return await runner.XAsync2<T, IQueryable<ReturnType>, ReturnType>(mapWrapper, parameterWrapper);
+            return await runner.XAsync2<IAsyncQuerySingleFactory<ReturnType>, IQueryable<ReturnType>, ReturnType>(mapWrapper, parameterWrapper);
         }
     }
 }
