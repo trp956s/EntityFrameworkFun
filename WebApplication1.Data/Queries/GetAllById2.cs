@@ -10,7 +10,7 @@ namespace WebApplication1.Data.Queries
 {
     public struct GetAllById2<T> :
         IInternalRunner<IQueryable<T>, Task<T>>,
-        IRunner<InternalValueCache<IMapper<IQueryable<T>, Task<T>>>>
+        IAsyncQuerySingleFactory<T>
 
         //TODO: make all IDbSetQuery also inherit the IRunner used
         // in this class
