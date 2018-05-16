@@ -10,14 +10,17 @@ namespace WebApplication1.Data.GeneralInterfaces
         {
             var querySingleAsyncFactory = new QuerySingleAsync<ReturnType>(mapWrapper, parameterWrapper);
             var query = runner.Run(querySingleAsyncFactory);
-
+            
             return await query.Run(runner);
         }
     }
 
-    public struct QuerySingleAsync<ReturnType> : 
-        IRunner<IMapper<ITaskRunner, Task<ReturnType>>>,
+    public interface IQuerySingleAsync<ReturnType> :
+        IRunner<IQuerySingleAsync<ReturnType>>,
         IMapper<ITaskRunner, Task<ReturnType>>
+    { }
+
+    public struct QuerySingleAsync<ReturnType> : IQuerySingleAsync<ReturnType>
     {
         private IAsyncQuerySingleFactory<ReturnType> mapWrapper;
         private IRunner<IQueryable<ReturnType>> parameterWrapper;
@@ -28,7 +31,7 @@ namespace WebApplication1.Data.GeneralInterfaces
             this.parameterWrapper = parameterWrapper;
         }
 
-        public IMapper<ITaskRunner, Task<ReturnType>> Run()
+        public IQuerySingleAsync<ReturnType> Run()
         {
             return this;
         }
