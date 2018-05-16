@@ -399,14 +399,16 @@ namespace WebApplication1.Test.Controllers
         {
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private IReturnValueArgumentValidationConfiguration<Task<int>> deleteBlogMock;
-            private ArgumentConstraint<AsyncCreateMapRunner2<IAsyncQuerySingleFactory<Blog>, IQueryable<Blog>, Blog>> withBlogQuery = new ArgumentConstraint<AsyncCreateMapRunner2<IAsyncQuerySingleFactory<Blog>, IQueryable<Blog>, Blog>>();
+            private ArgumentConstraint<IQuerySingleAsync<Blog>> withBlogQuery = new ArgumentConstraint<IQuerySingleAsync<Blog>>();
             private ArgumentConstraint<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>> withDeleteAsyncMapRunner = new ArgumentConstraint<AsyncCreateMapRunner2<DeleteBlog2, BloggingContext, int>>();
             private BlogDbSetRunner dbSet;
 
             [TestInitialize]
             public void TestInitialize()
             {
-                lookupBlogByIdMock = A.CallTo(() => runner.Run(withBlogQuery.Ignored));
+                var fakeBlogByIdFactory = A.Fake<IQuerySingleAsync<Blog>>();
+                A.CallTo(() => runner.Run(withBlogQuery.Ignored)).Returns(fakeBlogByIdFactory);
+                lookupBlogByIdMock = A.CallTo(() => fakeBlogByIdFactory.Run(A<ITaskRunner>.Ignored));
                 deleteBlogMock = A.CallTo(() => runner.Run(withDeleteAsyncMapRunner.Ignored));
                 dbSet = A.Fake<BlogDbSetRunner>();
                 blogController = new BlogController(runner, dbSet);
@@ -424,14 +426,11 @@ namespace WebApplication1.Test.Controllers
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
                 A.CallTo(() => runner.Run(withBlogQuery.That.Matches(
-                    x => typeof(GetAllById2<Blog>).IsInstanceOfType(x.MapperWrapper)
+                    x => typeof(QuerySingleAsync<Blog>).IsInstanceOfType(x)
                 ))).MustHaveHappenedOnceExactly();
 
                 A.CallTo(() => runner.Run(withBlogQuery.That.Matches(
-                    x => new GetAllById2<Blog>(deleteId).Equals(x.MapperWrapper)
-                ))).MustHaveHappenedOnceExactly();
-                A.CallTo(() => runner.Run(withBlogQuery.That.Matches(
-                    x => x.ParameterWrapper.Equals(dbSet)
+                    x => new QuerySingleAsync<Blog>(new GetAllById2<Blog>(deleteId), dbSet).Equals(x)
                 ))).MustHaveHappenedOnceExactly();
             }
 
