@@ -1,4 +1,5 @@
 ﻿using ExecutionStrategyCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,11 +16,11 @@ namespace WebApplication1.Data.GeneralInterfaces
             return await runner.RunMapper(query);
         }
 
-        //todo: replace bloggingcontent with T : DbContent out
-        public static async Task<int> DeleteSingleAsync<T>(this ITaskRunner runner, T mapWrapper, IRunner<BloggingContext> parameterWrapper)
-            where T : IRunner<InternalValueCache<IMapper<BloggingContext, Task<int>>>>
+        public static async Task<int> DeleteSingleAsync<T, DbContextType>(this ITaskRunner runner, T mapWrapper, IRunner<DbContextType> parameterWrapper)
+            where T : IRunner<InternalValueCache<IMapper<DbContextType, Task<int>>>>
+            where DbContextType : DbContext
         {
-            var deleteSingleAsyncFactory = new DeleteSingleAsync<T>(mapWrapper, parameterWrapper);
+            var deleteSingleAsyncFactory = new DeleteSingleAsync<T, DbContextType>(mapWrapper, parameterWrapper);
             var delete = runner.Run(deleteSingleAsyncFactory);
 
             return await runner.RunMapper(delete);
@@ -94,13 +95,13 @@ namespace WebApplication1.Data.GeneralInterfaces
         IMapper<ITaskRunner, Task<int>>
     { }
 
-    public struct DeleteSingleAsync<T> : IDeleteSingleAsync
-        where T : IRunner<InternalValueCache<IMapper<BloggingContext, Task<int>>>>
+    public struct DeleteSingleAsync<T, DbContextType> : IDeleteSingleAsync
+        where T : IRunner<InternalValueCache<IMapper<DbContextType, Task<int>>>>
     {
         private T mapWrapper;
-        private IRunner<BloggingContext> parameterWrapper;
+        private IRunner<DbContextType> parameterWrapper;
 
-        public DeleteSingleAsync(T mapWrapper, IRunner<BloggingContext> parameterWrapper)
+        public DeleteSingleAsync(T mapWrapper, IRunner<DbContextType> parameterWrapper)
         {
             this.mapWrapper = mapWrapper;
             this.parameterWrapper = parameterWrapper;
@@ -113,7 +114,7 @@ namespace WebApplication1.Data.GeneralInterfaces
 
         public async Task<int> Run(ITaskRunner runner)
         {
-            return await runner.XAsync2<T, BloggingContext, int>(mapWrapper, parameterWrapper);
+            return await runner.XAsync2<T, DbContextType, int>(mapWrapper, parameterWrapper);
         }
     }
 }

@@ -442,7 +442,7 @@ namespace WebApplication1.Test.Controllers
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
 
                 A.CallTo(() => fakeTaskMapRunner.RunAsync(
-                    new DeleteSingleAsync<DeleteBlog2>(
+                    new DeleteSingleAsync<DeleteBlog2, BloggingContext>(
                         new DeleteBlog2(mockedBlogFoundById),
                         dbSet)
                     )

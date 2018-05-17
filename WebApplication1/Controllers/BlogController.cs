@@ -192,7 +192,7 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            await runner.DeleteSingleAsync(new DeleteBlog2(blogFoundById), blogData);
+            await runner.DeleteSingleAsync<DeleteBlog2, BloggingContext>(new DeleteBlog2(blogFoundById), blogData);
 
             return Ok(null);
         }
