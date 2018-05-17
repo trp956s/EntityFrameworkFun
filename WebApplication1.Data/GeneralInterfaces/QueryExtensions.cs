@@ -1,4 +1,5 @@
 ﻿using ExecutionStrategyCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace WebApplication1.Data.GeneralInterfaces
             var querySingleAsyncFactory = new QuerySingleAsync<ReturnType>(mapWrapper, parameterWrapper);
             var query = runner.Run(querySingleAsyncFactory);
 
-            return await query.Run(runner);
+            return await runner.RunMapper(query);
         }
 
         //todo: replace bloggingcontent with T : DbContent out
@@ -21,7 +22,38 @@ namespace WebApplication1.Data.GeneralInterfaces
             var deleteSingleAsyncFactory = new DeleteSingleAsync<T>(mapWrapper, parameterWrapper);
             var delete = runner.Run(deleteSingleAsyncFactory);
 
-            return await delete.Run(runner);
+            return await runner.RunMapper(delete);
+        }
+
+        //todo: move
+        public static async Task<ReturnType> RunMapper<ReturnType>(this ITaskRunner runner, IMapper<ITaskRunner, Task<ReturnType>> mapper)
+        {
+            return await new TaskMapRunner<ReturnType>(runner).Run(mapper);
+        }
+    }
+
+    //todo: move
+    public interface ITaskMapRunner<ReturnType> : IMapper<IMapper<ITaskRunner, Task<ReturnType>>, Task<ReturnType>>
+    { }
+
+    //todo: move
+    public class TaskMapRunner<ReturnType> : ITaskMapRunner<ReturnType>, IRunner<ITaskMapRunner<ReturnType>>
+    {
+        private ITaskRunner runner;
+
+        public TaskMapRunner(ITaskRunner runner)
+        {
+            this.runner = runner;
+        }
+
+        public async Task<ReturnType> Run(IMapper<ITaskRunner, Task<ReturnType>> mapper)
+        {
+            return await mapper.Run(runner);
+        }
+
+        public ITaskMapRunner<ReturnType> Run()
+        {
+            return this;
         }
     }
 
@@ -53,8 +85,8 @@ namespace WebApplication1.Data.GeneralInterfaces
     }
 
     public interface IDeleteSingleAsync :
-    IRunner<IDeleteSingleAsync>,
-    IMapper<ITaskRunner, Task<int>>
+        IRunner<IDeleteSingleAsync>,
+        IMapper<ITaskRunner, Task<int>>
     { }
 
     public struct DeleteSingleAsync<T> : IDeleteSingleAsync
