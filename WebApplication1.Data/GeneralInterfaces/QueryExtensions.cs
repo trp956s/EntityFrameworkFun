@@ -28,16 +28,21 @@ namespace WebApplication1.Data.GeneralInterfaces
         //todo: move
         public static async Task<ReturnType> RunMapper<ReturnType>(this ITaskRunner runner, IMapper<ITaskRunner, Task<ReturnType>> mapper)
         {
-            return await new TaskMapRunner<ReturnType>(runner).Run(mapper);
+            var taskMapFactory = new TaskMapRunner(runner);
+            var taskMapRunner = runner.Run(taskMapFactory);
+            
+            return await taskMapRunner.RunAsync(mapper);
         }
     }
 
     //todo: move
-    public interface ITaskMapRunner<ReturnType> : IMapper<IMapper<ITaskRunner, Task<ReturnType>>, Task<ReturnType>>
-    { }
+    public interface ITaskMapRunner : IRunner<ITaskMapRunner>
+    {
+        Task<ReturnType> RunAsync<ReturnType>(IMapper<ITaskRunner, Task<ReturnType>> mapper);
+    }
 
     //todo: move
-    public class TaskMapRunner<ReturnType> : ITaskMapRunner<ReturnType>, IRunner<ITaskMapRunner<ReturnType>>
+    public class TaskMapRunner : ITaskMapRunner
     {
         private ITaskRunner runner;
 
@@ -46,12 +51,12 @@ namespace WebApplication1.Data.GeneralInterfaces
             this.runner = runner;
         }
 
-        public async Task<ReturnType> Run(IMapper<ITaskRunner, Task<ReturnType>> mapper)
+        public async Task<ReturnType> RunAsync<ReturnType>(IMapper<ITaskRunner, Task<ReturnType>> mapper)
         {
             return await mapper.Run(runner);
         }
 
-        public ITaskMapRunner<ReturnType> Run()
+        public ITaskMapRunner Run()
         {
             return this;
         }
