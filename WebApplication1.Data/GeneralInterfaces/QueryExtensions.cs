@@ -8,31 +8,38 @@ namespace WebApplication1.Data.GeneralInterfaces
 {
     public static class QueryExtensions
     {
-        public static async Task<ReturnType> QuerySingleAsync<ReturnType>(this ITaskRunner runner, IAsyncQuerySingleFactory<ReturnType> mapWrapper, IRunner<IQueryable<ReturnType>> parameterWrapper)
+        public static IQuerySingleAsync<ReturnType> CreateSingleAsyncQuery<ReturnType>(this ITaskRunner runner, IAsyncQuerySingleFactory<ReturnType> mapWrapper, IRunner<IQueryable<ReturnType>> parameterWrapper)
         {
             var querySingleAsyncFactory = new QuerySingleAsync<ReturnType>(mapWrapper, parameterWrapper);
-            var query = runner.Run(querySingleAsyncFactory);
-
-            return await runner.RunMapper(query);
+            return runner.Run(querySingleAsyncFactory);
         }
 
-        public static async Task<int> DeleteSingleAsync<T, DbContextType>(this ITaskRunner runner, T mapWrapper, IRunner<DbContextType> parameterWrapper)
+        public static IDeleteSingleAsync CreateDeleteSingleAsync<T, DbContextType>(this ITaskRunner runner, T mapWrapper, IRunner<DbContextType> parameterWrapper)
             where T : IRunner<InternalValueCache<IMapper<DbContextType, Task<int>>>>
             where DbContextType : DbContext
         {
             var deleteSingleAsyncFactory = new DeleteSingleAsync<T, DbContextType>(mapWrapper, parameterWrapper);
-            var delete = runner.Run(deleteSingleAsyncFactory);
+            return runner.Run(deleteSingleAsyncFactory);
+        }
 
-            return await runner.RunMapper(delete);
+        public static IMapper<ITaskRunner, Task<ReturnType>> AsCommand<ReturnType>(this IMapper<ITaskRunner, Task<ReturnType>> mapper)
+        {
+            return mapper;
         }
 
         //todo: move
-        public static async Task<ReturnType> RunMapper<ReturnType>(this ITaskRunner runner, IMapper<ITaskRunner, Task<ReturnType>> mapper)
+        public static async Task<ReturnType> Run<ReturnType>(this ITaskRunner runner, IMapper<ITaskRunner, Task<ReturnType>> mapper)
         {
             var taskMapFactory = new TaskMapRunner(runner);
             var taskMapRunner = runner.Run(taskMapFactory);
             
-            return await taskMapRunner.RunAsync(mapper);
+            return await taskMapRunner.RunMapper(mapper);
+        }
+
+        //todo: move
+        public static async Task<ReturnType> RunMapper<ReturnType>(this ITaskMapRunner runner, IMapper<ITaskRunner, Task<ReturnType>> mapper)
+        {
+            return await runner.RunAsync(mapper);
         }
     }
 
@@ -63,6 +70,7 @@ namespace WebApplication1.Data.GeneralInterfaces
         }
     }
 
+    //todo: rename to ISingleAsyncQuery<ReturnType> 
     public interface IQuerySingleAsync<ReturnType> :
         IRunner<IQuerySingleAsync<ReturnType>>,
         IMapper<ITaskRunner, Task<ReturnType>>

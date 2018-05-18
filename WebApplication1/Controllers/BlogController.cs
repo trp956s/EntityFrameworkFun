@@ -186,13 +186,23 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var blogFoundById = await runner.QuerySingleAsync(new GetAllById2<Blog>(id), blogData);
+            var findBlogById = runner.CreateSingleAsyncQuery(
+                new GetAllById2<Blog>(id), blogData
+            );
+
+            var blogFoundById = await runner.Run(findBlogById.AsCommand());
+
             if (blogFoundById == null)
             {
                 return NotFound();
             }
 
-            await runner.DeleteSingleAsync<DeleteBlog2, BloggingContext>(new DeleteBlog2(blogFoundById), blogData);
+            var delete = runner.CreateDeleteSingleAsync(
+                new DeleteBlog2(blogFoundById), 
+                blogData as IRunner<BloggingContext>
+            );
+
+            await runner.Run(delete.AsCommand());
 
             return Ok(null);
         }

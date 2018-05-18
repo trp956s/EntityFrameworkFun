@@ -399,8 +399,6 @@ namespace WebApplication1.Test.Controllers
         {
             private ITaskMapRunner fakeTaskMapRunner = A.Fake<ITaskMapRunner>();
             private BlogDbSetRunner dbSet = A.Fake<BlogDbSetRunner>();
-            private ArgumentConstraint<IQuerySingleAsync<Blog>> withBlogQuery = new ArgumentConstraint<IQuerySingleAsync<Blog>>();
-            private ArgumentConstraint<IDeleteSingleAsync> withDeleteAsyncMapRunner = new ArgumentConstraint<IDeleteSingleAsync>();
 
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private IReturnValueArgumentValidationConfiguration<Task<int>> deleteBlogMock;
@@ -409,8 +407,8 @@ namespace WebApplication1.Test.Controllers
             public void TestInitialize()
             {
                 A.CallTo(() => runner.Run(A<ITaskMapRunner>.Ignored)).Returns(fakeTaskMapRunner);
-                lookupBlogByIdMock = A.CallTo(() => fakeTaskMapRunner.RunAsync(withBlogQuery.Ignored));
-                deleteBlogMock = A.CallTo(() => fakeTaskMapRunner.RunAsync(withDeleteAsyncMapRunner.Ignored));
+                lookupBlogByIdMock = A.CallTo(() => fakeTaskMapRunner.RunAsync(A<IQuerySingleAsync<Blog>>.Ignored));
+                deleteBlogMock = A.CallTo(() => fakeTaskMapRunner.RunAsync(A<IDeleteSingleAsync>.Ignored));
                 blogController = new BlogController(runner, dbSet);
             }
 
@@ -424,9 +422,15 @@ namespace WebApplication1.Test.Controllers
                 var result = await blogController.Delete(deleteId);
 
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
+
+                var findBlogById = runner.CreateSingleAsyncQuery(
+                    new GetAllById2<Blog>(deleteId), dbSet
+                );
+
                 A.CallTo(()=> fakeTaskMapRunner.RunAsync(
-                    new QuerySingleAsync<Blog>(new GetAllById2<Blog>(deleteId), dbSet)
+                    findBlogById
                 )).MustHaveHappenedOnceExactly();
             }
 
@@ -441,11 +445,13 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
 
-                A.CallTo(() => fakeTaskMapRunner.RunAsync(
-                    new DeleteSingleAsync<DeleteBlog2, BloggingContext>(
-                        new DeleteBlog2(mockedBlogFoundById),
-                        dbSet)
-                    )
+                var delete = runner.CreateDeleteSingleAsync(
+                    new DeleteBlog2(mockedBlogFoundById),
+                    dbSet as IRunner<BloggingContext>
+                );
+
+                A.CallTo(() => 
+                    fakeTaskMapRunner.RunAsync(delete)
                 ).MustHaveHappenedOnceExactly();
             }
 

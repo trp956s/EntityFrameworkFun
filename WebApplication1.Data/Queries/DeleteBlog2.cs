@@ -6,6 +6,7 @@ using WebApplication1.Data.Models;
 namespace WebApplication1.Data.Queries
 {
     //todo: make delete<T> where T is the datacontext type
+    //todo: consider a static extension to run the delete passing only the id
     public struct DeleteBlog2 : IInternalRunner<BloggingContext, Task<int>>,
         IRunner<InternalValueCache<IMapper<BloggingContext, Task<int>>>>
     {

@@ -4,6 +4,7 @@ using WebApplication1.Data.Models;
 
 namespace WebApplication1.Data.Queries
 {
+    //todo: avoid boxing and unboxing types
     public class BlogDbSetRunner : IRunner<IQueryable<Blog>>, IRunner<BloggingContext>
     {
         private readonly IRunner<BloggingContext> context;
@@ -12,7 +13,6 @@ namespace WebApplication1.Data.Queries
             this.context = context;
         }
 
-        //todo refactor IRunner to use Run<T> so that explicit overrides are not necessary
         public IQueryable<Blog> Run()
         {
             return context.Run().Blogs;
