@@ -5,7 +5,7 @@ namespace ExecutionStrategyCore
 {
     public static class WrappedParameterExtensions
     {
-        private const string NULL_MESSAGE= "Wrapped Parameters are only provided " +
+        private const string NULL_MESSAGE = "Wrapped Parameters are only provided " +
             "within the context of a runner.Run / runner.RunAsync extension " +
             "method.  There is no other way to get an instance of " +
             "WrappedParameter or a WrappedMapValues";
@@ -72,50 +72,70 @@ namespace ExecutionStrategyCore
         //this method passes responsiblity for producing the value back from  to TaskMapRunner2
         public async Task<ReturnType> RunAsync<ReturnType>(IMapper<ITaskRunner, Task<ReturnType>> mapper)
         {
-            var adaptor = new AnotherAdaptor2<ReturnType>(mapper);
-            return await RunAsync(adaptor);
+            var tFacotry = new TaskMapRunner4<ITaskRunner, ReturnType>(runner);
+            return await tFacotry.RunAsync(mapper);
         }
 
         //this method passes responsiblity for producing the value back from  to TaskMapRunner2
         public async Task<T> RunAsync<T>(IAsyncMapper2<ITaskRunner, T> mapper)
         {
-            var factory = new TaskMapRunner2(runner);
-            var mapRunner2 = runner.Run(factory);
-
-            return await mapRunner2.RunAsync(mapper);
+            var tFacotry = new TaskMapRunner4<ITaskRunner, T>(runner);
+            var adaptor = new AnotherAdaptor<ITaskRunner, T>(mapper);
+            return await tFacotry.RunAsync(adaptor);
         }
     }
 
-    public class TaskMapRunner2 : ITaskMapRunner2
+    public class AnotherAdaptor<ParameterType, ReturnType> : IMapper<ITaskRunner, Task<ReturnType>>
     {
-        private ITaskRunner runner;
+        private IAsyncMapper2<ITaskRunner, ReturnType> mapper;
 
-        public TaskMapRunner2(ITaskRunner runner)
+        public AnotherAdaptor(IAsyncMapper2<ITaskRunner, ReturnType> mapper)
         {
-            this.runner = runner;
+            this.mapper = mapper;
         }
 
-        public ITaskMapRunner2 Run()
+        public async Task<ReturnType> Run(ITaskRunner arg)
         {
-            return this;
-        }
+            var v = arg.CreateMapRunner();
+            var x = await v.RunAsync(mapper);
 
-        //this method is the signally point of responsiblity for running MapAsync
-        public async Task<T> RunAsync<T>(IAsyncMapper2<ITaskRunner, T> mapper)
-        {
-            var cache = await mapper.MapAsync(new WrappedParameter<ITaskRunner>(runner));
-            return runner.Run(new InternalValueCacheUnwrapper<T>(cache));
+            return x;
         }
-    }
-
-    public interface ITaskMapRunner2 : IRunner<ITaskMapRunner2>
-    {
-        Task<T> RunAsync<T>(IAsyncMapper2<ITaskRunner, T> mapper);
     }
 
     public interface IAsyncMapper2<T1, T2>
     {
         Task<InternalValueCache<T2>> MapAsync(WrappedParameter<T1> wrappedParameter);
+    }
+
+    public interface ITaskMapRunner4<ParameterType, ReturnType>
+         : IRunner<ITaskMapRunner4<ParameterType, ReturnType>>
+    {
+        Task<ReturnType> RunAsync<T>(T mapper)
+            where T : IMapper<ParameterType, Task<ReturnType>>;
+    }
+
+    public class TaskMapRunner4<ParameterType, ReturnType>
+        : ITaskMapRunner4<ParameterType, ReturnType>
+    {
+        private ParameterType runner;
+
+        public TaskMapRunner4(ParameterType runner)
+        {
+            this.runner = runner;
+        }
+
+        public ITaskMapRunner4<ParameterType, ReturnType> Run()
+        {
+            return this;
+        }
+
+        //this method is the signally point of responsiblity for running MapAsync
+        public async Task<ReturnType> RunAsync<T>(T mapper)
+            where T : IMapper<ParameterType, Task<ReturnType>>
+        {
+            return await mapper.Run(runner);
+        }
     }
 
     public class WrappedParameter<T>
