@@ -23,51 +23,14 @@ namespace ExecutionStrategyCore
             return wrappedParameter.Value;
         }
 
-        public static ITaskMapRunner2 CreateMapRunner(this ITaskRunner runner)
+        public static ITaskMapRunner3 CreateMapRunner(this ITaskRunner runner)
         {
-            var taskMapFactory = new TaskMapRunner2(runner);
+            var taskMapFactory = new TaskMapRunner3(runner);
             return runner.Run(taskMapFactory);
         }
-
-        public static ITaskMapRunner3 CreateMapRunnerAdaptor(this ITaskRunner runner)
-        {
-            var baseRunner = CreateMapRunner(runner);
-            var factory = new TaskMapRunnerAdaptor(baseRunner);
-
-            return runner.Run(factory);
-        }
-
-        //        public static async Task<ReturnType> RunAsync<ReturnType>(this ITaskMapRunner2 runner, IMapper<ITaskRunner, Task<ReturnType>> mapper)
-        //        {
-        //            throw new Exception();
-        //            var adaptor = new TaskMapRunnerAdaptor<ReturnType>().Create;
-        ////            return await runner.Run().RunAsync();
-        //        }
     }
 
-    //always fake the ITaskMapRunner3 and make better names, also to track this is what you would look for in the runner
-    public class TaskMapRunnerAdaptor : ITaskMapRunner3
-    {
-        private ITaskMapRunner2 taskMapRunner2;
-
-        public TaskMapRunnerAdaptor(ITaskMapRunner2 taskMapRunner2)
-        {
-            this.taskMapRunner2 = taskMapRunner2;
-        }
-
-        //todo: consider an empty interface that says 'wrap me in a value wrapper runner class and then get me OR mock me there!'
-        public ITaskMapRunner3 Run()
-        {
-            return this;
-        }
-
-        public async Task<ReturnType> RunAsync<ReturnType>(IMapper<ITaskRunner, Task<ReturnType>> mapper)
-        {
-            return await taskMapRunner2.RunAsync(new AnotherAdaptor<ReturnType>(mapper));
-        }
-    }
-
-    internal class AnotherAdaptor<ReturnType> : IAsyncMapper2<ITaskRunner, ReturnType>
+    public class AnotherAdaptor<ReturnType> : IAsyncMapper2<ITaskRunner, ReturnType>
     {
         private IMapper<ITaskRunner, Task<ReturnType>> mapper;
 
@@ -76,6 +39,7 @@ namespace ExecutionStrategyCore
             this.mapper = mapper;
         }
 
+        //this method is the signally point of responsiblity for running MapAsync
         public async Task<InternalValueCache<ReturnType>> MapAsync(WrappedParameter<ITaskRunner> wrappedParameter)
         {
             var value = await mapper.Run(wrappedParameter.GetValue());
@@ -83,24 +47,37 @@ namespace ExecutionStrategyCore
         }
     }
 
-    //todo: move
+    public class AnotherAdaptor2<T> : IAsyncMapper2<ITaskRunner, T>
+    {
+        private IMapper<ITaskRunner, Task<T>> mapper;
+
+        public AnotherAdaptor2(IMapper<ITaskRunner, Task<T>> mapper)
+        {
+            this.mapper = mapper;
+        }
+
+        public async Task<InternalValueCache<T>> MapAsync(WrappedParameter<ITaskRunner> wrappedParameter)
+        {
+            var value = await mapper.Run(wrappedParameter.GetValue());
+            return new InternalValueCache<T>(value);
+        }
+    }
+
     public interface ITaskMapRunner3 : IRunner<ITaskMapRunner3>
     {
         Task<ReturnType> RunAsync<ReturnType>(IMapper<ITaskRunner, Task<ReturnType>> mapper);
+        Task<T> RunAsync<T>(IAsyncMapper2<ITaskRunner, T> mapper);
     }
 
     public class TaskMapRunner3 : ITaskMapRunner3
     {
+        //generate a type to do everything so that can be the thing that gets mocked!  That can also be the thing that gets replaced
         private ITaskRunner runner;
 
+        //todo: consider an empty interface that says 'wrap me in a value wrapper runner class and then get me OR mock me there!'
         public TaskMapRunner3(ITaskRunner runner)
         {
             this.runner = runner;
-        }
-
-        public async Task<ReturnType> RunAsync<ReturnType>(IMapper<ITaskRunner, Task<ReturnType>> mapper)
-        {
-            return await mapper.Run(runner);
         }
 
         public ITaskMapRunner3 Run()
@@ -108,6 +85,21 @@ namespace ExecutionStrategyCore
             return this;
         }
 
+        //this method passes responsiblity for producing the value back from  to TaskMapRunner2
+        public async Task<ReturnType> RunAsync<ReturnType>(IMapper<ITaskRunner, Task<ReturnType>> mapper)
+        {
+            var adaptor = new AnotherAdaptor2<ReturnType>(mapper);
+            return await RunAsync(adaptor);
+        }
+
+        //this method passes responsiblity for producing the value back from  to TaskMapRunner2
+        public async Task<T> RunAsync<T>(IAsyncMapper2<ITaskRunner, T> mapper)
+        {
+            var factory = new TaskMapRunner2(runner);
+            var mapRunner2 = runner.Run(factory);
+
+            return await mapRunner2.RunAsync(mapper);
+        }
     }
 
 
@@ -132,8 +124,7 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public interface ITaskMapRunner2 :
-        IRunner<ITaskMapRunner2>
+    public interface ITaskMapRunner2 : IRunner<ITaskMapRunner2>
     {
         Task<T> RunAsync<T>(IAsyncMapper2<ITaskRunner, T> mapper);
     }

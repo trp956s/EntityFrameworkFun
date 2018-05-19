@@ -72,9 +72,8 @@ namespace WebApplication1.Data.GeneralInterfaces
 
     public interface ISingleAsyncQuery<ReturnType> :
         IRunner<ISingleAsyncQuery<ReturnType>>,
-        IMapper<ITaskRunner, Task<ReturnType>>
-        //,
-        //IAsyncMapper2<ITaskRunner, ReturnType>
+        //IMapper<ITaskRunner, Task<ReturnType>>,
+        IAsyncMapper2<ITaskRunner, ReturnType>
     { }
 
     public struct SingleAsyncQuery<ReturnType> : ISingleAsyncQuery<ReturnType>
@@ -89,18 +88,18 @@ namespace WebApplication1.Data.GeneralInterfaces
         }
 
         //can only be called through pipeline
-        //public async Task<InternalValueCache<ReturnType>> MapAsync(WrappedParameter<ITaskRunner> wrappedParameter)
-        //{
-        //    var val = await Run(wrappedParameter.GetValue());
-        //    return new InternalValueCache<ReturnType>(val);
-        //}
+        public async Task<InternalValueCache<ReturnType>> MapAsync(WrappedParameter<ITaskRunner> wrappedParameter)
+        {
+            var val = await Run(wrappedParameter.GetValue());
+            return new InternalValueCache<ReturnType>(val);
+        }
 
         public ISingleAsyncQuery<ReturnType> Run()
         {
             return this;
         }
 
-        public async Task<ReturnType> Run(ITaskRunner runner)
+        private async Task<ReturnType> Run(ITaskRunner runner)
         {
             return await runner.XAsync2<IAsyncQuerySingleFactory<ReturnType>, IQueryable<ReturnType>, ReturnType>(mapWrapper, parameterWrapper);
         }
