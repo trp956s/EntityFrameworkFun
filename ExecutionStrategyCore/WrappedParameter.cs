@@ -30,23 +30,6 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public class AnotherAdaptor<ReturnType> : IAsyncMapper2<ITaskRunner, ReturnType>
-    {
-        private IMapper<ITaskRunner, Task<ReturnType>> mapper;
-
-        public AnotherAdaptor(IMapper<ITaskRunner, Task<ReturnType>> mapper)
-        {
-            this.mapper = mapper;
-        }
-
-        //this method is the signally point of responsiblity for running MapAsync
-        public async Task<InternalValueCache<ReturnType>> MapAsync(WrappedParameter<ITaskRunner> wrappedParameter)
-        {
-            var value = await mapper.Run(wrappedParameter.GetValue());
-            return new InternalValueCache<ReturnType>(value);
-        }
-    }
-
     public class AnotherAdaptor2<T> : IAsyncMapper2<ITaskRunner, T>
     {
         private IMapper<ITaskRunner, Task<T>> mapper;
@@ -56,6 +39,7 @@ namespace ExecutionStrategyCore
             this.mapper = mapper;
         }
 
+        //this method is what allows 3s to execute 2s
         public async Task<InternalValueCache<T>> MapAsync(WrappedParameter<ITaskRunner> wrappedParameter)
         {
             var value = await mapper.Run(wrappedParameter.GetValue());
@@ -102,7 +86,6 @@ namespace ExecutionStrategyCore
         }
     }
 
-
     public class TaskMapRunner2 : ITaskMapRunner2
     {
         private ITaskRunner runner;
@@ -117,6 +100,7 @@ namespace ExecutionStrategyCore
             return this;
         }
 
+        //this method is the signally point of responsiblity for running MapAsync
         public async Task<T> RunAsync<T>(IAsyncMapper2<ITaskRunner, T> mapper)
         {
             var cache = await mapper.MapAsync(new WrappedParameter<ITaskRunner>(runner));
