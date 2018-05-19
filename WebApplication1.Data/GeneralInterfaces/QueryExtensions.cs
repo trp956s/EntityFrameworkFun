@@ -8,9 +8,9 @@ namespace WebApplication1.Data.GeneralInterfaces
 {
     public static class QueryExtensions
     {
-        public static IQuerySingleAsync<ReturnType> CreateSingleAsyncQuery<ReturnType>(this ITaskRunner runner, IAsyncQuerySingleFactory<ReturnType> mapWrapper, IRunner<IQueryable<ReturnType>> parameterWrapper)
+        public static ISingleAsyncQuery<ReturnType> CreateSingleAsyncQuery<ReturnType>(this ITaskRunner runner, IAsyncQuerySingleFactory<ReturnType> mapWrapper, IRunner<IQueryable<ReturnType>> parameterWrapper)
         {
-            var querySingleAsyncFactory = new QuerySingleAsync<ReturnType>(mapWrapper, parameterWrapper);
+            var querySingleAsyncFactory = new SingleAsyncQuery<ReturnType>(mapWrapper, parameterWrapper);
             return runner.Run(querySingleAsyncFactory);
         }
 
@@ -70,24 +70,32 @@ namespace WebApplication1.Data.GeneralInterfaces
         }
     }
 
-    //todo: rename to ISingleAsyncQuery<ReturnType> 
-    public interface IQuerySingleAsync<ReturnType> :
-        IRunner<IQuerySingleAsync<ReturnType>>,
+    public interface ISingleAsyncQuery<ReturnType> :
+        IRunner<ISingleAsyncQuery<ReturnType>>,
         IMapper<ITaskRunner, Task<ReturnType>>
+        //,
+        //IAsyncMapper2<ITaskRunner, ReturnType>
     { }
 
-    public struct QuerySingleAsync<ReturnType> : IQuerySingleAsync<ReturnType>
+    public struct SingleAsyncQuery<ReturnType> : ISingleAsyncQuery<ReturnType>
     {
         private IAsyncQuerySingleFactory<ReturnType> mapWrapper;
         private IRunner<IQueryable<ReturnType>> parameterWrapper;
 
-        public QuerySingleAsync(IAsyncQuerySingleFactory<ReturnType> mapWrapper, IRunner<IQueryable<ReturnType>> parameterWrapper)
+        public SingleAsyncQuery(IAsyncQuerySingleFactory<ReturnType> mapWrapper, IRunner<IQueryable<ReturnType>> parameterWrapper)
         {
             this.mapWrapper = mapWrapper;
             this.parameterWrapper = parameterWrapper;
         }
 
-        public IQuerySingleAsync<ReturnType> Run()
+        //can only be called through pipeline
+        //public async Task<InternalValueCache<ReturnType>> MapAsync(WrappedParameter<ITaskRunner> wrappedParameter)
+        //{
+        //    var val = await Run(wrappedParameter.GetValue());
+        //    return new InternalValueCache<ReturnType>(val);
+        //}
+
+        public ISingleAsyncQuery<ReturnType> Run()
         {
             return this;
         }

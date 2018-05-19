@@ -186,11 +186,12 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
+            var runner2 = runner.CreateMapRunnerAdaptor();
             var findBlogById = runner.CreateSingleAsyncQuery(
                 new GetAllById2<Blog>(id), blogData
             );
 
-            var blogFoundById = await runner.Run(findBlogById.AsCommand());
+            var blogFoundById = await runner2.RunAsync(findBlogById);
 
             if (blogFoundById == null)
             {
@@ -202,7 +203,7 @@ namespace WebApplication1.Controllers
                 blogData as IRunner<BloggingContext>
             );
 
-            await runner.Run(delete.AsCommand());
+            await runner2.RunAsync(delete.AsCommand());
 
             return Ok(null);
         }
