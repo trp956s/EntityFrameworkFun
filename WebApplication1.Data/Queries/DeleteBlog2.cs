@@ -28,4 +28,39 @@ namespace WebApplication1.Data.Queries
             return await bloggingContext.SaveChangesAsync();
         }
     }
+
+    public struct DeleteBlog3 : IMapper<BloggingContext, Task<int>>
+    {
+        private readonly Blog deleteEntity;
+
+        public DeleteBlog3(Blog deleteEntity)
+        {
+            this.deleteEntity = deleteEntity;
+        }
+
+        public async Task<int> Run(BloggingContext bloggingContext)
+        {
+            bloggingContext.Blogs.Remove(deleteEntity);
+            return await bloggingContext.SaveChangesAsync();
+        }
+    }
+
+    public struct DeleteBlog4 : IMapper<WrappedParameter<BloggingContext>, Task<int>>
+    {
+        private readonly Blog deleteEntity;
+
+        public DeleteBlog4(Blog deleteEntity)
+        {
+            this.deleteEntity = deleteEntity;
+        }
+
+        public async Task<int> Run(WrappedParameter<BloggingContext> wrappedBloggingContext)
+        {
+            var bloggingContext = wrappedBloggingContext.GetValue();
+            bloggingContext.Blogs.Remove(deleteEntity);
+            return await bloggingContext.SaveChangesAsync();
+        }
+    }
+
+
 }

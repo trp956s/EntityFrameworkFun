@@ -397,7 +397,7 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Delete : BlogControllerTest
         {
-            private ITaskMapRunner3 fakeTaskMapRunner = A.Fake<ITaskMapRunner3>();
+            private ITaskMapRunner3<int> fakeTaskMapRunner = A.Fake<ITaskMapRunner3<int>>();
             private BlogDbSetRunner dbSet = A.Fake<BlogDbSetRunner>();
 
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
@@ -406,7 +406,7 @@ namespace WebApplication1.Test.Controllers
             [TestInitialize]
             public void TestInitialize()
             {
-                A.CallTo(() => runner.Run(A<ITaskMapRunner3>.Ignored)).Returns(fakeTaskMapRunner);
+                A.CallTo(() => runner.Run(A<ITaskMapRunner3<int>>.Ignored)).Returns(fakeTaskMapRunner);
                 lookupBlogByIdMock = A.CallTo(() => fakeTaskMapRunner.RunAsync(A<ISingleAsyncQuery<Blog>>.Ignored));
                 deleteBlogMock = A.CallTo(() => fakeTaskMapRunner.RunAsync(A<IDeleteSingleAsync>.Ignored));
                 blogController = new BlogController(runner, dbSet);
