@@ -31,9 +31,16 @@ namespace ExecutionStrategyCore
 
         public static TaskMapRunner5 CreateAsyncMapRuner(
             this ITaskRunner runner
-            )
+        )
         {
-            return new TaskMapRunner5(runner);
+            return runner.Run(new TaskMapRunner5(runner));
+        }
+
+        public static ITaskMapRunner12 CreateAsyncMapRuner2(
+            this ITaskRunner runner
+        )
+        {
+            return runner.Run(new TaskMapRunner12());
         }
 
         public static ITaskMapRunner6And7<IAsyncMapper2<ITaskRunner, ReturnType>, ReturnType> For6<ReturnType>(this TaskMapRunner5 runner)
@@ -46,14 +53,14 @@ namespace ExecutionStrategyCore
             return new TaskMapRunner7<ReturnType>(runner); //todo: actualy pass 5 so 5 will process mapper and 6
         }
 
-        public static TaskMapRunner8<ReturnType> For8<ReturnType>(this TaskMapRunner5 runner)
+        public static TaskMapRunner8<ReturnType> For8<ReturnType>(this ITaskRunner runner)
         {
             return new TaskMapRunner8<ReturnType>(runner); //todo: actualy pass 5 so 5 will process mapper and 6
         }
 
-        public static TaskMapRunner9<ReturnType> For9<ReturnType>(this TaskMapRunner5 runner)
+        public static TaskMapRunner9<ReturnType> For9<ReturnType>(this ITaskRunner runner)
         {
-            return new TaskMapRunner9<ReturnType>(runner.For8<ReturnType>()); //todo: actualy pass 5 so 5 will process mapper and 6
+            return new TaskMapRunner9<ReturnType>(runner); //todo: actualy pass 5 so 5 will process mapper and 6
         }
     }
 
@@ -83,18 +90,18 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public struct TaskMapRunner8<ReturnType>
+    public struct TaskMapRunner11<ParameterType, ReturnType>
     {
-        private TaskMapRunner5 runner;
+        private ITaskRunner runner;
+        private readonly IRunner<ParameterType> parameterFactory;
 
-        public TaskMapRunner8(TaskMapRunner5 runner)
+        internal TaskMapRunner11(ITaskRunner runner, IRunner<ParameterType> parameterFactory)
         {
             this.runner = runner;
+            this.parameterFactory = parameterFactory;
         }
 
-        public async Task<ReturnType> Run2<T, ParameterType>(
-            T arg, IRunner<ParameterType> parameterFactory
-        )
+        internal async Task<ReturnType> Run5<T>(T arg)
             where T : IMapper<ParameterType, Task<ReturnType>>
         {
             var parameter = runner.Run(parameterFactory);
@@ -102,28 +109,71 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public struct TaskMapRunner9<ReturnType>
+    public interface ITaskMapRunner12 : IRunner<ITaskMapRunner12>
     {
-        private TaskMapRunner8<ReturnType> runner;
+        Task<ReturnType> Run6<ParameterType, T, ReturnType>(
+                    T arg,
+                    TaskMapRunner11<ParameterType, ReturnType> taskRunner11
+                )
+                    where T : IMapper<ParameterType, Task<ReturnType>>
+        ;
+    }
 
-        public TaskMapRunner9(TaskMapRunner8<ReturnType> runner)
+    public struct TaskMapRunner12 : ITaskMapRunner12
+    {
+        public ITaskMapRunner12 Run()
+        {
+            return this;
+        }
+
+        public async Task<ReturnType> Run6<ParameterType, T, ReturnType>(
+            T arg,
+            TaskMapRunner11<ParameterType, ReturnType> taskRunner11
+        )
+            where T : IMapper<ParameterType, Task<ReturnType>>
+        {
+            return await taskRunner11.Run5(arg);
+        }
+    }
+
+    public struct TaskMapRunner8<ReturnType>
+    {
+        private ITaskRunner runner;
+
+        internal TaskMapRunner8(ITaskRunner runner)
         {
             this.runner = runner;
         }
 
-        public async Task<ReturnType> Run3<T, ParameterType>(
-            T arg, IRunner<ParameterType> parameterFactory
+        public TaskMapRunner11<ParameterType, ReturnType> CreateRunner<ParameterType>(
+            IRunner<ParameterType> parameterFactory
         )
-            where T : IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>
         {
-            //todo: use the runner to get the parameter from the factory...
-            var parameter = parameterFactory.Run();
-            var wrappedParameter = new WrappedParameter<ParameterType>(parameter);
-            var newParameterFactory = new ValueCacheRunner<WrappedParameter<ParameterType>>(wrappedParameter);
-            return await runner.Run2(arg, newParameterFactory);
+            return new TaskMapRunner11<ParameterType, ReturnType>(runner, parameterFactory);
         }
     }
 
+    public struct TaskMapRunner9<ReturnType>
+    {
+        private ITaskRunner runner;
+
+        internal TaskMapRunner9(ITaskRunner runner)
+        {
+            this.runner = runner;
+        }
+
+        public TaskMapRunner11<WrappedParameter<ParameterType>, ReturnType> CreateRunner<ParameterType>(
+            IRunner<ParameterType> parameterFactory
+        )
+        {
+            //TODO: encapsulate the next 2 lines into their own mockable factory class
+            var parameter = runner.Run(parameterFactory);
+            var wrappedParameter = new WrappedParameter<ParameterType>(parameter);
+
+            var newParameterFactory = new ValueCacheRunner<WrappedParameter<ParameterType>>(wrappedParameter);
+            return new TaskMapRunner11<WrappedParameter<ParameterType>, ReturnType>(runner, newParameterFactory);
+        }
+    }
 
     public interface ITaskMapRunner6And7<T, ReturnType>
     {
@@ -148,7 +198,7 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public struct TaskMapRunner5 : ITaskRunner
+    public struct TaskMapRunner5 : ITaskRunner, IRunner<TaskMapRunner5>
     {
         private ITaskRunner runner;
 
@@ -162,14 +212,11 @@ namespace ExecutionStrategyCore
             return runner.Run(wrapper);
         }
 
-        internal async Task<ResultType> RunAsync<T, ResultType>(T action, TaskMapRunner6<ResultType> mapper)
+        public TaskMapRunner5 Run()
         {
-            //todo use runner
-            throw new Exception();
-//            return await mapper.Run(action);
+            return this;
         }
     }
-
 
     public class AnotherAdaptor2<T> : IAsyncMapper2<ITaskRunner, T>
     {

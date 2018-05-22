@@ -186,35 +186,15 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
+            var y = runner.CreateAsyncMapRuner2();
 
-            ///it works like this: 4 things:
-            ///1. A High level runnerFactory
-            ///   this is the starting point 
-            ///2. A scope level runner instance
-            ///   always create one of these 
-            ///   first and use this one instance
-            ///   to do anything / everything
-            ///3. A command like the SingleAsyncQuery
-            ///   it can usually be a IAsyncMapper2
-            ///   or an IMapper.  This is the logic
-            ///   we are interested in or the domain
-            ///   under test
-            ///4. A command to actually run the command
-            ///   this is seperated so that different 
-            ///   types can be handled differently while 
-            ///   using the same scope level runner
-            ///   for mocking, wrapping, messaging, etc
-
-            var x = runner.CreateAsyncMapRuner();
-
-            var runner2 = runner.CreateMapRunner();
-            var findBlogById = runner.CreateSingleAsyncQuery(
-                new GetAllById2<Blog>(id), blogData
+            var searchForBlogById = runner.For9<Blog>().
+                CreateRunner(blogData as IRunner<IQueryable<Blog>>
             );
 
-            //todo: put 
-            var blogFoundById = await x.For6<Blog>().Run(
-                findBlogById
+            var blogFoundById = await y.Run6(
+                new GetAllById4<Blog>(id),
+                searchForBlogById
             );
 
             if (blogFoundById == null)
@@ -222,38 +202,26 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            var delete = runner.CreateDeleteSingleAsync(
-                new DeleteBlog2(blogFoundById), 
-                blogData as IRunner<BloggingContext>
+            var delete = runner.For9<int>().
+                CreateRunner(blogData as IRunner<BloggingContext>
             );
 
-
-            //OH MY GOD IT WORKS!!!
-
-            //TODO: something about the blogData 'as'
-            var a = await x.For8<int>().Run2(
-                new DeleteBlog3(blogFoundById), 
-                blogData as IRunner<BloggingContext>
-            );
-
-            var b = await x.For8<Blog>().Run2(
-                new GetAllById3<Blog>(id),
-                blogData as IRunner<IQueryable<Blog>>
-            );
-
-            var c = await x.For9<int>().Run3(
-                new DeleteBlog4(blogFoundById),
-                blogData as IRunner<BloggingContext>
-            );
-
-            var d = await x.For9<Blog>().Run3(
-                new GetAllById4<Blog>(id),
-                blogData as IRunner<IQueryable<Blog>>
-            );
-
-            await x.For7<int>().Run(delete);
+            await y.Run6(new DeleteBlog4(blogFoundById), delete);
 
             return Ok(null);
+
+            //OH MY GOD IT WORKS!!! 
+
+            //TODO: something about the blogData 'as'
+            //var a = await x.For8<int>().Run2(
+            //    new DeleteBlog3(blogFoundById), 
+            //    blogData as IRunner<BloggingContext>
+            //);
+
+            //var b = await x.For8<Blog>().Run2(
+            //    new GetAllById3<Blog>(id),
+            //    blogData as IRunner<IQueryable<Blog>>
+            //);
         }
     }
 }
