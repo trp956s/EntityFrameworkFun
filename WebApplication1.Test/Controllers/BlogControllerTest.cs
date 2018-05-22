@@ -413,10 +413,10 @@ namespace WebApplication1.Test.Controllers
 
                 A.CallTo(() => runner.Run(A<TaskMapRunner12>.Ignored)).Returns(fakeTaskMapRunner);
                 lookupBlogByIdMock = A.CallTo(() => fakeTaskMapRunner.Run6(
-                    A<GetAllById4<Blog>>.Ignored,
+                    A<GetAllById3<Blog>>.Ignored,
 
                     //TODO: SIMPLIFY THIS TYPE
-                    A<TaskMapRunner11<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
+                    A<TaskMapRunner11<IQueryable<Blog>, Blog>>.Ignored
                 ));
                 deleteBlogMock = A.CallTo(() => fakeTaskMapRunner.Run6(
                     A<DeleteBlog4>.Ignored,
@@ -442,8 +442,8 @@ namespace WebApplication1.Test.Controllers
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
 
                 A.CallTo(() => fakeTaskMapRunner.Run6(
-                     new GetAllById4<Blog>(deleteId),
-                    A<TaskMapRunner11<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
+                     new GetAllById3<Blog>(deleteId),
+                    A<TaskMapRunner11<IQueryable<Blog>, Blog>>.Ignored
                 )).MustHaveHappenedOnceExactly();
             }
 
