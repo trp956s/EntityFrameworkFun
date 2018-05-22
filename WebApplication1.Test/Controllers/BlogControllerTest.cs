@@ -406,7 +406,11 @@ namespace WebApplication1.Test.Controllers
             [TestInitialize]
             public void TestInitialize()
             {
+
+                //TODO:VERIFY THAT THE CORRECT dbset is used
+                A.CallTo(() => runner.Run(dbSet as IRunner<BloggingContext>)).Returns(null);
                 A.CallTo(() => runner.Run(dbSet as IRunner<IQueryable<Blog>>)).Returns(null);
+
                 A.CallTo(() => runner.Run(A<TaskMapRunner12>.Ignored)).Returns(fakeTaskMapRunner);
                 lookupBlogByIdMock = A.CallTo(() => fakeTaskMapRunner.Run6(
                     A<GetAllById4<Blog>>.Ignored,
@@ -454,14 +458,10 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
 
-                var delete = runner.CreateDeleteSingleAsync(
-                    new DeleteBlog2(mockedBlogFoundById),
-                    dbSet as IRunner<BloggingContext>
-                );
-
-                //A.CallTo(() => 
-                //    fakeTaskMapRunner.RunAsync(delete)
-                //).MustHaveHappenedOnceExactly();
+                A.CallTo(()=> fakeTaskMapRunner.Run6(
+                    new DeleteBlog4(mockedBlogFoundById),
+                    A<TaskMapRunner11<WrappedParameter<BloggingContext>, int>>.Ignored
+                )).MustHaveHappenedOnceExactly();
             }
 
             [TestMethod]
