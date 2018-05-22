@@ -188,25 +188,25 @@ namespace WebApplication1.Controllers
         {
             var y = runner.CreateAsyncMapRuner2();
 
-            var searchForBlogById = runner.For9<Blog>().
-                CreateRunner(blogData as IRunner<IQueryable<Blog>>
-            );
+            var blogFoundById = await runner.
+                For13(
+                    blogData as IRunner<IQueryable<Blog>>
+                ).Run7<Blog>().Run8(
+                    new GetAllById4<Blog>(id)
+                );
 
-            var blogFoundById = await y.Run6(
-                new GetAllById4<Blog>(id),
-                searchForBlogById
-            );
 
             if (blogFoundById == null)
             {
                 return NotFound();
             }
 
-            var delete = runner.For9<int>().
-                CreateRunner(blogData as IRunner<BloggingContext>
-            );
-
-            await y.Run6(new DeleteBlog4(blogFoundById), delete);
+            await runner.
+                For13(
+                    blogData as IRunner<BloggingContext>
+                ).Run7<int>().Run8(
+                    new DeleteBlog4(blogFoundById)
+                );
 
             return Ok(null);
 

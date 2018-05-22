@@ -418,6 +418,7 @@ namespace WebApplication1.Test.Controllers
                     //TODO: SIMPLIFY THIS TYPE
                     A<TaskMapRunner11<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
                 ));
+
                 deleteBlogMock = A.CallTo(() => fakeTaskMapRunner.Run6(
                     A<DeleteBlog4>.Ignored,
 
