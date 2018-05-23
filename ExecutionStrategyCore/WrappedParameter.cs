@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ExecutionStrategyCore
@@ -256,7 +257,7 @@ namespace ExecutionStrategyCore
         Task<ReturnType> Run9<ParameterType, T, ReturnType>(
             T mapper, 
             IRunner<ParameterType> parameterFactory, 
-            TaskMapRunner16<ParameterType, ReturnType> runner
+            ITaskMapRunner16<ParameterType, ReturnType> runner
         )
             where T : IMapper<ParameterType, Task<ReturnType>>;
     }
@@ -268,14 +269,20 @@ namespace ExecutionStrategyCore
             return this;
         }
 
-        public async Task<ReturnType> Run9<ParameterType, T, ReturnType>(T mapper, IRunner<ParameterType> parameterFactory, TaskMapRunner16<ParameterType, ReturnType> runner)
+        public async Task<ReturnType> Run9<ParameterType, T, ReturnType>(T mapper, IRunner<ParameterType> parameterFactory, ITaskMapRunner16<ParameterType, ReturnType> runner)
             where T : IMapper<ParameterType, Task<ReturnType>>
         {
             return await runner.Run8(mapper, parameterFactory);
         }
     }
 
-    public struct TaskMapRunner16<ParameterType, ReturnType>
+    public interface ITaskMapRunner16<ParameterType, ReturnType>
+    {
+        Task<ReturnType> Run8<T>(T arg, IRunner<ParameterType> parameterFactory)
+            where T : IMapper<ParameterType, Task<ReturnType>>;
+    }
+
+    public struct TaskMapRunner16<ParameterType, ReturnType> : ITaskMapRunner16<ParameterType, ReturnType>
     {
         private ITaskRunner runner;
 

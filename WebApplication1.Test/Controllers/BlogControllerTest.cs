@@ -405,6 +405,7 @@ namespace WebApplication1.Test.Controllers
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private IReturnValueArgumentValidationConfiguration<Task<int>> deleteBlogMock;
 
+            //todo: test failures due to a bad id are difficult to read for understanding - fix that
             [TestInitialize]
             public void TestInitialize()
             {
@@ -417,8 +418,7 @@ namespace WebApplication1.Test.Controllers
                         //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
                         A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored,
 
-                        //todo: interfaces and wrappers for lookup, change, etc
-                        A<TaskMapRunner16<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
+                        CommonArgumentConstraints.Lookup<Blog>().Ignored
                     )
                 );
 
@@ -430,7 +430,7 @@ namespace WebApplication1.Test.Controllers
                         A<IRunner<WrappedParameter<BloggingContext>>>.Ignored,
 
                         //todo: interfaces and wrappers for lookup, change, etc
-                        A<TaskMapRunner16<WrappedParameter<BloggingContext>, int>>.Ignored
+                        A<ITaskMapRunner16<WrappedParameter<BloggingContext>, int>>.Ignored
                     )
                 );
 
@@ -487,6 +487,18 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.AreSame(result, fakeException);
             }
+        }
+    }
+
+
+    //todo: make this a tool that is useful for type matching in the application
+    //I think I can make ArgumentConstraint an empty type and make the FakeItEasy adaptors and InstanceOf adaptors (for application) with extensions
+    public static class CommonArgumentConstraints
+    {
+        public static ArgumentConstraint<ITaskMapRunner16<WrappedParameter<IQueryable<T>>, T>> 
+            Lookup<T>()
+        {
+            return new ArgumentConstraint<ITaskMapRunner16<WrappedParameter<IQueryable<T>>, T>>();
         }
     }
 
