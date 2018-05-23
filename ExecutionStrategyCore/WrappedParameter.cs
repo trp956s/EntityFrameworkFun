@@ -173,7 +173,7 @@ namespace ExecutionStrategyCore
             this.runner = runner;
         }
 
-        public TaskMapRunner11<WrappedParameter<ParameterType>, ReturnType> CreateRunner<ParameterType>(
+        public TaskMapRunner14<WrappedParameter<ParameterType>, ReturnType> CreateRunner<ParameterType>(
             IRunner<ParameterType> parameterFactory
         )
         {
@@ -182,7 +182,7 @@ namespace ExecutionStrategyCore
             var wrappedParameter = new WrappedParameter<ParameterType>(parameter);
 
             var newParameterFactory = new ValueCacheRunner<WrappedParameter<ParameterType>>(wrappedParameter);
-            return new TaskMapRunner11<WrappedParameter<ParameterType>, ReturnType>(runner, newParameterFactory);
+            return new TaskMapRunner14<WrappedParameter<ParameterType>, ReturnType>(runner, newParameterFactory);
         }
     }
 

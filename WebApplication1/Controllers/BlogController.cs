@@ -189,9 +189,9 @@ namespace WebApplication1.Controllers
             var y = runner.CreateAsyncMapRuner2();
 
             var blogFoundById = await runner.
-                For13(
+                For9<Blog>().CreateRunner(
                     blogData as IRunner<IQueryable<Blog>>
-                ).Run7<Blog>().Run8(
+                ).Run8(
                     new GetAllById4<Blog>(id)
                 );
 

@@ -437,6 +437,7 @@ namespace WebApplication1.Test.Controllers
                 //TODO:VERIFY THAT THE CORRECT dbset is used
                 A.CallTo(() => runner.Run(A<IRunner<IQueryable<Blog>>>.Ignored)).Returns(null);
                 A.CallTo(() => runner.Run(A<IRunner<BloggingContext>>.Ignored)).Returns(null);
+
                 blogController = new BlogController(runner, dbSet);
             }
 
