@@ -247,16 +247,24 @@ namespace ExecutionStrategyCore
             var factory = runner.Run(factoryFactory);
             var factory16 = new TaskMapRunner16<ParameterType, ReturnType>(runner);
 
-            return await factory.Run9(arg, parameterFactory, factory16);
+            return await factory.Run9(arg, parameterFactory, runner, new ReturnType<ReturnType>());
         }
+    }
+
+    public struct ReturnType<ResponseType>
+    {
     }
 
     public interface ITaskMapRunner17 : IRunner<ITaskMapRunner17>
     {
         Task<ReturnType> Run9<ParameterType, T, ReturnType>(
-            T mapper, 
-            IRunner<ParameterType> parameterFactory, 
-            TaskMapRunner16<ParameterType, ReturnType> runner
+            T mapper,
+            IRunner<ParameterType> parameterFactory,
+            ITaskRunner runner,
+
+            //todo: consider wrapping mapper + param
+            //consider some wrapping interface and wrappers for lookup, change, etc
+            ReturnType<ReturnType> returnType
         )
             where T : IMapper<ParameterType, Task<ReturnType>>;
     }
@@ -268,10 +276,11 @@ namespace ExecutionStrategyCore
             return this;
         }
 
-        public async Task<ReturnType> Run9<ParameterType, T, ReturnType>(T mapper, IRunner<ParameterType> parameterFactory, TaskMapRunner16<ParameterType, ReturnType> runner)
+        public async Task<ReturnType> Run9<ParameterType, T, ReturnType>(T mapper, IRunner<ParameterType> parameterFactory, ITaskRunner runner, ReturnType<ReturnType> returnType)
             where T : IMapper<ParameterType, Task<ReturnType>>
         {
-            return await runner.Run8(mapper, parameterFactory);
+            var parameter = runner.Run(parameterFactory);
+            return await mapper.Run(parameter);
         }
     }
 

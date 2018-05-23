@@ -418,7 +418,8 @@ namespace WebApplication1.Test.Controllers
                         A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored,
 
                         //todo: interfaces and wrappers for lookup, change, etc
-                        A<TaskMapRunner16<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
+                        A<ITaskRunner>.Ignored,
+                        A<ReturnType<Blog>>.Ignored
                     )
                 );
 
@@ -430,7 +431,8 @@ namespace WebApplication1.Test.Controllers
                         A<IRunner<WrappedParameter<BloggingContext>>>.Ignored,
 
                         //todo: interfaces and wrappers for lookup, change, etc
-                        A<TaskMapRunner16<WrappedParameter<BloggingContext>, int>>.Ignored
+                        A<ITaskRunner>.Ignored, 
+                        A<ReturnType<int>>.Ignored
                     )
                 );
 
