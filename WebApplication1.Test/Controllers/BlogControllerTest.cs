@@ -397,6 +397,8 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Delete : BlogControllerTest
         {
+            private ITaskMapRunner17 fake17 = A.Fake<ITaskMapRunner17>();
+
             private ITaskMapRunner12 fakeTaskMapRunner = A.Fake<ITaskMapRunner12>();
             private BlogDbSetRunner dbSet = A.Fake<BlogDbSetRunner>();
 
@@ -406,6 +408,13 @@ namespace WebApplication1.Test.Controllers
             [TestInitialize]
             public void TestInitialize()
             {
+                A.CallTo(() => runner.Run(A<ITaskMapRunner17>.Ignored)).Returns(fake17);
+                var lookupBlogFake = A.CallTo(() =>
+                fake17.Run9(
+                    A<GetAllById4<Blog>>.Ignored,
+                    A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored,
+                    A<TaskMapRunner16<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
+                ));
 
                 //TODO:VERIFY THAT THE CORRECT dbset is used
                 A.CallTo(() => runner.Run(dbSet as IRunner<BloggingContext>)).Returns(null);
