@@ -409,32 +409,34 @@ namespace WebApplication1.Test.Controllers
             public void TestInitialize()
             {
                 A.CallTo(() => runner.Run(A<ITaskMapRunner17>.Ignored)).Returns(fake17);
-                var lookupBlogFake = A.CallTo(() =>
-                fake17.Run9(
-                    A<GetAllById4<Blog>>.Ignored,
-                    A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored,
-                    A<TaskMapRunner16<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
-                ));
+
+                lookupBlogByIdMock = A.CallTo(() =>
+                    fake17.Run9(
+                        A<GetAllById4<Blog>>.Ignored,
+
+                        //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
+                        A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored,
+
+                        //todo: interfaces and wrappers for lookup, change, etc
+                        A<TaskMapRunner16<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
+                    )
+                );
+
+                deleteBlogMock = A.CallTo(() =>
+                    fake17.Run9(
+                        A<DeleteBlog4>.Ignored,
+
+                        //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
+                        A<IRunner<WrappedParameter<BloggingContext>>>.Ignored,
+
+                        //todo: interfaces and wrappers for lookup, change, etc
+                        A<TaskMapRunner16<WrappedParameter<BloggingContext>, int>>.Ignored
+                    )
+                );
 
                 //TODO:VERIFY THAT THE CORRECT dbset is used
-                A.CallTo(() => runner.Run(dbSet as IRunner<BloggingContext>)).Returns(null);
-                A.CallTo(() => runner.Run(dbSet as IRunner<IQueryable<Blog>>)).Returns(null);
-
-                A.CallTo(() => runner.Run(A<TaskMapRunner12>.Ignored)).Returns(fakeTaskMapRunner);
-                lookupBlogByIdMock = A.CallTo(() => fakeTaskMapRunner.Run6(
-                    A<GetAllById4<Blog>>.Ignored,
-
-                    //TODO: SIMPLIFY THIS TYPE
-                    A<TaskMapRunner11<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
-                ));
-
-                deleteBlogMock = A.CallTo(() => fakeTaskMapRunner.Run6(
-                    A<DeleteBlog4>.Ignored,
-
-                    //TODO: SIMPLIFY THIS TYPE
-                    A<TaskMapRunner11<WrappedParameter<BloggingContext>, int>>.Ignored
-                ));
-
+                A.CallTo(() => runner.Run(A<IRunner<IQueryable<Blog>>>.Ignored)).Returns(null);
+                A.CallTo(() => runner.Run(A<IRunner<BloggingContext>>.Ignored)).Returns(null);
                 blogController = new BlogController(runner, dbSet);
             }
 
@@ -450,11 +452,9 @@ namespace WebApplication1.Test.Controllers
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
 
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
-
-                A.CallTo(() => fakeTaskMapRunner.Run6(
-                     new GetAllById4<Blog>(deleteId),
-                    A<TaskMapRunner11<WrappedParameter<IQueryable<Blog>>, Blog>>.Ignored
-                )).MustHaveHappenedOnceExactly();
+                lookupBlogByIdMock.WhenArgumentsMatch(args =>
+                    new GetAllById4<Blog>(deleteId).Equals(args[0])
+                ).MustHaveHappenedOnceExactly();
             }
 
             [TestMethod]
@@ -468,10 +468,9 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
 
-                A.CallTo(()=> fakeTaskMapRunner.Run6(
-                    new DeleteBlog4(mockedBlogFoundById),
-                    A<TaskMapRunner11<WrappedParameter<BloggingContext>, int>>.Ignored
-                )).MustHaveHappenedOnceExactly();
+                deleteBlogMock.WhenArgumentsMatch(args =>
+                    new DeleteBlog4(mockedBlogFoundById).Equals(args[0])
+                ).MustHaveHappenedOnceExactly();
             }
 
             [TestMethod]
