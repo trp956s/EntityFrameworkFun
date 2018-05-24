@@ -59,9 +59,9 @@ namespace ExecutionStrategyCore
             return new TaskMapRunner8<ReturnType>(runner); //todo: actualy pass 5 so 5 will process mapper and 6
         }
 
-        public static TaskMapRunner9<ReturnType> For9<ReturnType>(this ITaskRunner runner)
+        public static ITaskMapRunner9<ReturnType> For9<ReturnType>(this ITaskRunner runner)
         {
-            return new TaskMapRunner9<ReturnType>(runner); //todo: actualy pass 5 so 5 will process mapper and 6
+            return runner.Run(new TaskMapRunner9<ReturnType>(runner)); //todo: actualy pass 5 so 5 will process mapper and 6
         }
 
         public static TaskMapRunner13<ParameterType> For13<ParameterType>(this ITaskRunner runer, IRunner<ParameterType> parameterFactory)
@@ -73,7 +73,17 @@ namespace ExecutionStrategyCore
         {
             return new TaskMapRunner15<ParameterType>(runer, parameterFactory);
         }
-
+        
+        public static async Task<ReturnType> Run11<ParameterType, T, ReturnType>(
+            this TaskMapRunner9<ReturnType> taskMapRunner9,
+            T arg,
+            IRunner<ParameterType> parameterFactory
+        )
+            where T : IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>
+        {
+            var wrappedParameter = taskMapRunner9.CreateWrappedParameter(parameterFactory);
+            return await taskMapRunner9.Run10(arg, wrappedParameter);
+        }
     }
 
     public struct TaskMapRunner7<ReturnType> : 
@@ -165,13 +175,35 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public struct TaskMapRunner9<ReturnType>
+    public interface ITaskMapRunner9<ReturnType> : IRunner<ITaskMapRunner9<ReturnType>>
+    {
+        Task<ReturnType> Run10<ParameterType, T>(
+            T arg, IRunner<WrappedParameter<ParameterType>> parameterFactory
+        )
+            where T : IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>;
+
+        [Obsolete("Use Run10")]
+        TaskMapRunner14<WrappedParameter<ParameterType>, ReturnType> CreateRunner<ParameterType>(
+                    IRunner<ParameterType> parameterFactory
+                );
+    }
+
+    public struct TaskMapRunner9<ReturnType> : ITaskMapRunner9<ReturnType>
     {
         private ITaskRunner runner;
 
         internal TaskMapRunner9(ITaskRunner runner)
         {
             this.runner = runner;
+        }
+
+        public async Task<ReturnType> Run10<ParameterType, T>(
+            T arg, IRunner<WrappedParameter<ParameterType>> parameterFactory
+        )
+            where T : IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>
+        {
+            var parameter = runner.Run(parameterFactory);
+            return await arg.Run(parameter);
         }
 
         public TaskMapRunner14<WrappedParameter<ParameterType>, ReturnType> CreateRunner<ParameterType>(
@@ -184,6 +216,18 @@ namespace ExecutionStrategyCore
 
             var newParameterFactory = new ValueCacheRunner<WrappedParameter<ParameterType>>(wrappedParameter);
             return new TaskMapRunner14<WrappedParameter<ParameterType>, ReturnType>(runner, newParameterFactory);
+        }
+
+        public ITaskMapRunner9<ReturnType> Run()
+        {
+            return this;
+        }
+
+        internal IRunner<WrappedParameter<ParameterType>> CreateWrappedParameter<ParameterType>(IRunner<ParameterType> parameterFactory)
+        {
+            //TODO: encapsulate the next 2 lines into their own mockable factory class
+            var parameter = runner.Run(parameterFactory);
+            return new ValueCacheRunner<WrappedParameter<ParameterType>>(new WrappedParameter<ParameterType>(parameter));
         }
     }
 

@@ -186,8 +186,6 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var y = runner.CreateAsyncMapRuner2();
-
             var blogFoundById = await runner.
                 For9<Blog>().CreateRunner(
                     blogData as IRunner<IQueryable<Blog>>

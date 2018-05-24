@@ -397,6 +397,10 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Delete : BlogControllerTest
         {
+            //todo: consider that the same type used as a fake that is also used to ignore run and return the fake... hummmm
+            private ITaskMapRunner9<Blog> fakeBlogMapper;
+            private ITaskMapRunner9<int> fakeIntMapper;
+
             private ITaskMapRunner17 fake17 = A.Fake<ITaskMapRunner17>();
 
             private ITaskMapRunner12 fakeTaskMapRunner = A.Fake<ITaskMapRunner12>();
@@ -409,6 +413,17 @@ namespace WebApplication1.Test.Controllers
             [TestInitialize]
             public void TestInitialize()
             {
+                fakeBlogMapper = A.Fake<ITaskMapRunner9<Blog>>(x => x.Wrapping(runner.For9<Blog>()));
+                fakeIntMapper = A.Fake<ITaskMapRunner9<int>>(x => x.Wrapping(runner.For9<int>()));
+
+                A.CallTo(() => runner.Run(A<ITaskMapRunner9<Blog>>.Ignored)).Returns(fakeBlogMapper);
+                A.CallTo(() => runner.Run(A<ITaskMapRunner9<int>>.Ignored)).Returns(fakeIntMapper);
+
+                lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Run10(
+                    A<GetAllById4<Blog>>.Ignored,
+                    A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored
+                ));
+
                 A.CallTo(() => runner.Run(A<ITaskMapRunner17>.Ignored)).Returns(fake17);
 
                 lookupBlogByIdMock = A.CallTo(() =>
