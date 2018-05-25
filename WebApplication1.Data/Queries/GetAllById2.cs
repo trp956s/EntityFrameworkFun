@@ -80,6 +80,10 @@ namespace WebApplication1.Data.Queries
             var match = await dbSet.GetValue().FirstOrDefaultAsync(x => x.Id == searchId);
             return match;
         }
-    }
 
+        public override string ToString()
+        {
+            return base.ToString() + " where id = " + id.ToString();
+        }
+    }
 }

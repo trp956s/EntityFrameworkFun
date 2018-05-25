@@ -421,21 +421,12 @@ namespace WebApplication1.Test.Controllers
 
                 lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Run10(
                     A<GetAllById4<Blog>>.Ignored,
+
+                    //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
                     A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored
                 ));
 
                 A.CallTo(() => runner.Run(A<ITaskMapRunner17>.Ignored)).Returns(fake17);
-
-                lookupBlogByIdMock = A.CallTo(() =>
-                    fake17.Run9(
-                        A<GetAllById4<Blog>>.Ignored,
-
-                        //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
-                        A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored,
-
-                        CommonArgumentConstraints.Lookup<Blog>().Ignored
-                    )
-                );
 
                 deleteBlogMock = A.CallTo(() =>
                     fake17.Run9(
@@ -461,16 +452,19 @@ namespace WebApplication1.Test.Controllers
             {
                 var deleteId = 99;
                 Blog noBlog = null;
+                var lookupBlogByIdMockCalls = new List<FakeItEasy.Core.IFakeObjectCall>();
                 lookupBlogByIdMock.Returns(noBlog);
+                lookupBlogByIdMock.Invokes(lookupBlogByIdMockCalls.Add);
 
                 var result = await blogController.Delete(deleteId);
 
                 Assert.IsInstanceOfType(result, typeof(NotFoundResult));
 
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
-                lookupBlogByIdMock.WhenArgumentsMatch(args =>
-                    new GetAllById4<Blog>(deleteId).Equals(args[0])
-                ).MustHaveHappenedOnceExactly();
+                Assert.AreEqual(
+                    new GetAllById4<Blog>(deleteId),
+                    lookupBlogByIdMockCalls[0].Arguments[0]
+                );
             }
 
             [TestMethod]

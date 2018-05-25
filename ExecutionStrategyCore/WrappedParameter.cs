@@ -75,7 +75,7 @@ namespace ExecutionStrategyCore
         }
         
         public static async Task<ReturnType> Run11<ParameterType, T, ReturnType>(
-            this TaskMapRunner9<ReturnType> taskMapRunner9,
+            this ITaskMapRunner9<ReturnType> taskMapRunner9,
             T arg,
             IRunner<ParameterType> parameterFactory
         )
@@ -186,6 +186,7 @@ namespace ExecutionStrategyCore
         TaskMapRunner14<WrappedParameter<ParameterType>, ReturnType> CreateRunner<ParameterType>(
                     IRunner<ParameterType> parameterFactory
                 );
+        IRunner<WrappedParameter<ParameterType>> CreateWrappedParameter<ParameterType>(IRunner<ParameterType> parameterFactory);
     }
 
     public struct TaskMapRunner9<ReturnType> : ITaskMapRunner9<ReturnType>
@@ -223,7 +224,8 @@ namespace ExecutionStrategyCore
             return this;
         }
 
-        internal IRunner<WrappedParameter<ParameterType>> CreateWrappedParameter<ParameterType>(IRunner<ParameterType> parameterFactory)
+        [Obsolete("This /will be/ replaced with a unique class which is 1. mockable and 2. not contain a publically exposed constructor")]
+        public IRunner<WrappedParameter<ParameterType>> CreateWrappedParameter<ParameterType>(IRunner<ParameterType> parameterFactory)
         {
             //TODO: encapsulate the next 2 lines into their own mockable factory class
             var parameter = runner.Run(parameterFactory);
