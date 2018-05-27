@@ -398,10 +398,8 @@ namespace WebApplication1.Test.Controllers
         public class Delete : BlogControllerTest
         {
             //todo: consider that the same type used as a fake that is also used to ignore run and return the fake... hummmm
-            private ITaskMapRunner9<Blog> fakeBlogMapper;
-            private ITaskMapRunner9<int> fakeIntMapper;
-
-            private ITaskMapRunner17 fake17 = A.Fake<ITaskMapRunner17>();
+            private ITaskMapRunner9<Blog> fakeBlogMapper = A.Fake<ITaskMapRunner9<Blog>>();
+            private ITaskMapRunner9<int> fakeIntMapper = A.Fake<ITaskMapRunner9<int>>();
 
             private ITaskMapRunner12 fakeTaskMapRunner = A.Fake<ITaskMapRunner12>();
             private BlogDbSetRunner dbSet = A.Fake<BlogDbSetRunner>();
@@ -409,13 +407,11 @@ namespace WebApplication1.Test.Controllers
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private IReturnValueArgumentValidationConfiguration<Task<int>> deleteBlogMock;
 
-            //todo: test failures due to a bad id are difficult to read for understanding - fix that
+            //todo: some test failures are difficult to read for understanding - fix that
+            //todo: support 3s and 4s
             [TestInitialize]
             public void TestInitialize()
             {
-                fakeBlogMapper = A.Fake<ITaskMapRunner9<Blog>>(x => x.Wrapping(runner.For9<Blog>()));
-                fakeIntMapper = A.Fake<ITaskMapRunner9<int>>(x => x.Wrapping(runner.For9<int>()));
-
                 A.CallTo(() => runner.Run(A<ITaskMapRunner9<Blog>>.Ignored)).Returns(fakeBlogMapper);
                 A.CallTo(() => runner.Run(A<ITaskMapRunner9<int>>.Ignored)).Returns(fakeIntMapper);
 
@@ -426,19 +422,12 @@ namespace WebApplication1.Test.Controllers
                     A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored
                 ));
 
-                A.CallTo(() => runner.Run(A<ITaskMapRunner17>.Ignored)).Returns(fake17);
+                deleteBlogMock = A.CallTo(() => fakeIntMapper.Run10(
+                    A<DeleteBlog4>.Ignored,
 
-                deleteBlogMock = A.CallTo(() =>
-                    fake17.Run9(
-                        A<DeleteBlog4>.Ignored,
-
-                        //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
-                        A<IRunner<WrappedParameter<BloggingContext>>>.Ignored,
-
-                        //todo: interfaces and wrappers for lookup, change, etc
-                        A<ITaskMapRunner16<WrappedParameter<BloggingContext>, int>>.Ignored
-                    )
-                );
+                    //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
+                    A<IRunner<WrappedParameter<BloggingContext>>>.Ignored
+                ));
 
                 //TODO:VERIFY THAT THE CORRECT dbset is used
                 A.CallTo(() => runner.Run(A<IRunner<IQueryable<Blog>>>.Ignored)).Returns(null);
@@ -495,37 +484,6 @@ namespace WebApplication1.Test.Controllers
                 );
 
                 Assert.AreSame(result, fakeException);
-            }
-        }
-    }
-
-
-    //todo: make this a tool that is useful for type matching in the application
-    //I think I can make ArgumentConstraint an empty type and make the FakeItEasy adaptors and InstanceOf adaptors (for application) with extensions
-    public static class CommonArgumentConstraints
-    {
-        public static ArgumentConstraint<ITaskMapRunner16<WrappedParameter<IQueryable<T>>, T>> 
-            Lookup<T>()
-        {
-            return new ArgumentConstraint<ITaskMapRunner16<WrappedParameter<IQueryable<T>>, T>>();
-        }
-    }
-
-    public class ArgumentConstraint<T>
-    {
-        public T Ignored
-        {
-            get
-            {
-                return A<T>.Ignored;
-            }
-        }
-
-        public INegatableArgumentConstraintManager<T> That
-        {
-            get
-            {
-                return A<T>.That;
             }
         }
     }

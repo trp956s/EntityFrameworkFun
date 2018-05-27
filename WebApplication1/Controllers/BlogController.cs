@@ -189,6 +189,8 @@ namespace WebApplication1.Controllers
             var blogFoundById = await runner.
                 For9<Blog>().Run11(
                     new GetAllById4<Blog>(id),
+
+                    //todo: this casting is awkward - fix it
                     blogData as IRunner<IQueryable<Blog>>
                 );
 
@@ -199,10 +201,9 @@ namespace WebApplication1.Controllers
             }
 
             await runner.
-                For13(
+                For9<int>().Run11(
+                    new DeleteBlog4(blogFoundById),
                     blogData as IRunner<BloggingContext>
-                ).Run7<int>().Run8(
-                    new DeleteBlog4(blogFoundById)
                 );
 
             return Ok(null);
