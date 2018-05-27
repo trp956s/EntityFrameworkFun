@@ -397,32 +397,28 @@ namespace WebApplication1.Test.Controllers
         [TestClass]
         public class Delete : BlogControllerTest
         {
-            //todo: consider that the same type used as a fake that is also used to ignore run and return the fake... hummmm
-            private ITaskMapRunner9<Blog> fakeBlogMapper = A.Fake<ITaskMapRunner9<Blog>>();
-            private ITaskMapRunner9<int> fakeIntMapper = A.Fake<ITaskMapRunner9<int>>();
-
-            private ITaskMapRunner12 fakeTaskMapRunner = A.Fake<ITaskMapRunner12>();
-            private BlogDbSetRunner dbSet = A.Fake<BlogDbSetRunner>();
-
             private IReturnValueArgumentValidationConfiguration<Task<Blog>> lookupBlogByIdMock;
             private IReturnValueArgumentValidationConfiguration<Task<int>> deleteBlogMock;
 
-            //todo: some test failures are difficult to read for understanding - fix that
-            //todo: support 3s and 4s
+            //todo: test support for WrappedParameters and "naked" parameters
             [TestInitialize]
             public void TestInitialize()
             {
-                A.CallTo(() => runner.Run(A<ITaskMapRunner9<Blog>>.Ignored)).Returns(fakeBlogMapper);
-                A.CallTo(() => runner.Run(A<ITaskMapRunner9<int>>.Ignored)).Returns(fakeIntMapper);
+                //todo: consider that the same type used as a fake that is also used to ignore run and return the fake... hummmm
+                var fakeBlogMapper = A.Fake<IMapRunner<Blog>>();
+                var fakeIntMapper = A.Fake<IMapRunner<int>>();
 
-                lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Run10(
+                A.CallTo(() => runner.Run(A<IMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
+                A.CallTo(() => runner.Run(A<IMapRunner<int>>.Ignored)).Returns(fakeIntMapper);
+
+                lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Map(
                     A<GetAllById4<Blog>>.Ignored,
 
                     //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
                     A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored
                 ));
 
-                deleteBlogMock = A.CallTo(() => fakeIntMapper.Run10(
+                deleteBlogMock = A.CallTo(() => fakeIntMapper.Map(
                     A<DeleteBlog4>.Ignored,
 
                     //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
@@ -433,6 +429,7 @@ namespace WebApplication1.Test.Controllers
                 A.CallTo(() => runner.Run(A<IRunner<IQueryable<Blog>>>.Ignored)).Returns(null);
                 A.CallTo(() => runner.Run(A<IRunner<BloggingContext>>.Ignored)).Returns(null);
 
+                var dbSet = A.Fake<BlogDbSetRunner>();
                 blogController = new BlogController(runner, dbSet);
             }
 

@@ -187,7 +187,7 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             var blogFoundById = await runner.
-                For9<Blog>().Run11(
+                ToMapRunner<Blog>().Map(
                     new GetAllById4<Blog>(id),
 
                     //todo: this casting is awkward - fix it
@@ -201,25 +201,12 @@ namespace WebApplication1.Controllers
             }
 
             await runner.
-                For9<int>().Run11(
+                ToMapRunner<int>().Map(
                     new DeleteBlog4(blogFoundById),
                     blogData as IRunner<BloggingContext>
                 );
 
             return Ok(null);
-
-            //OH MY GOD IT WORKS!!! 
-
-            //TODO: something about the blogData 'as'
-            //var a = await x.For8<int>().Run2(
-            //    new DeleteBlog3(blogFoundById), 
-            //    blogData as IRunner<BloggingContext>
-            //);
-
-            //var b = await x.For8<Blog>().Run2(
-            //    new GetAllById3<Blog>(id),
-            //    blogData as IRunner<IQueryable<Blog>>
-            //);
         }
     }
 }
