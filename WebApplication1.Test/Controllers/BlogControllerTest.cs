@@ -441,9 +441,8 @@ namespace WebApplication1.Test.Controllers
             {
                 var deleteId = 99;
                 Blog noBlog = null;
-                var lookupBlogByIdMockCalls = new List<FakeItEasy.Core.IFakeObjectCall>();
+                var lookupBlogByIdMockInvocations = lookupBlogByIdMock.CollectInvocations();
                 lookupBlogByIdMock.Returns(noBlog);
-                lookupBlogByIdMock.Invokes(lookupBlogByIdMockCalls.Add);
 
                 var result = await blogController.Delete(deleteId);
 
@@ -452,7 +451,7 @@ namespace WebApplication1.Test.Controllers
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
                 Assert.AreEqual(
                     new GetAllById4<Blog>(deleteId),
-                    lookupBlogByIdMockCalls[0].Arguments[0]
+                    lookupBlogByIdMockInvocations.Argument(0,0)
                 );
             }
 
@@ -460,6 +459,7 @@ namespace WebApplication1.Test.Controllers
             public async Task OKReturnedWhenGetByIdReturnsBlogAndDelteSuccessful()
             {
                 var mockedBlogFoundById = new Blog();
+                var deleteBlogMockInvocations = deleteBlogMock.CollectInvocations();
                 lookupBlogByIdMock.Returns(mockedBlogFoundById);
                 deleteBlogMock.Returns(0);
 
@@ -467,9 +467,11 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
 
-                deleteBlogMock.WhenArgumentsMatch(args =>
-                    new DeleteBlog4(mockedBlogFoundById).Equals(args[0])
-                ).MustHaveHappenedOnceExactly();
+                Assert.AreEqual(
+                    new DeleteBlog4(mockedBlogFoundById),
+                    deleteBlogMockInvocations[0].Arguments[0]
+                );
+                deleteBlogMock.MustHaveHappenedOnceExactly();
             }
 
             [TestMethod]
@@ -485,6 +487,23 @@ namespace WebApplication1.Test.Controllers
 
                 Assert.AreSame(result, fakeException);
             }
+        }
+    }
+
+    public static class IReturnValueArgumentValidationConfigurationExtensions
+    {
+        public static List<FakeItEasy.Core.IFakeObjectCall> CollectInvocations<T>(this IReturnValueArgumentValidationConfiguration<T> callTarget)
+        {
+            var callsMade = new List<FakeItEasy.Core.IFakeObjectCall>();
+            callTarget.Invokes(callsMade.Add);
+
+            return callsMade;
+        }
+
+        public static object Argument(this List<FakeItEasy.Core.IFakeObjectCall> list, int invocationCardinality, int argumentCardinality)
+        {
+            var callInvocation = list[invocationCardinality];
+            return callInvocation.Arguments[argumentCardinality];
         }
     }
 

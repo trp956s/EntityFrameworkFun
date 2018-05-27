@@ -60,7 +60,10 @@ namespace WebApplication1.Data.Queries
             bloggingContext.Blogs.Remove(deleteEntity);
             return await bloggingContext.SaveChangesAsync();
         }
+
+        public override string ToString()
+        {
+            return base.ToString() + " where blog = " + deleteEntity.ToString();
+        }
     }
-
-
 }
