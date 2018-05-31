@@ -404,17 +404,12 @@ namespace WebApplication1.Test.Controllers
             [TestInitialize]
             public void TestInitialize()
             {
-                var fakeMapFactory = A.Fake<IMapRunnerFactory>();
-                var fakeBlogUnwrappedMapper = A.Fake<IMapRunner<Blog>>();
-                var fakeUnwrappedMapRunner = A.Fake<IMapRunner<IUnwrappedMapRunner<Blog>>>();
+                var fakeMapFactory = A.Fake<IMapRunnerFactory>(o=>o.Wrapping(new MapRunnerFactory(runner)));
                 var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
                 var fakeIntMapper = A.Fake<IMapRunner<int>>();
 
                 A.CallTo(() => runner.Run(A<IMapRunnerFactory>.Ignored)).Returns(fakeMapFactory);
-                A.CallTo(() => fakeMapFactory.CreateMapRunner<Blog>()).Returns(fakeBlogUnwrappedMapper);
-                A.CallTo(() => fakeBlogUnwrappedMapper.Run(A<IMapRunnerFactory>.Ignored)).Returns(fakeMapFactory);
-                A.CallTo(() => fakeMapFactory.CreateMapRunner<IUnwrappedMapRunner<Blog>>()).Returns(fakeUnwrappedMapRunner);
-                A.CallTo(() => fakeUnwrappedMapRunner.Map(A<UnwrappedMapRunnerFactory<Blog>>.Ignored, A<IMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
+                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
                 A.CallTo(() => fakeMapFactory.CreateMapRunner<int>()).Returns(fakeIntMapper);
 
                 lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Map(

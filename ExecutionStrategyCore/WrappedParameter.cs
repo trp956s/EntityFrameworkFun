@@ -42,7 +42,7 @@ namespace ExecutionStrategyCore
             var unwrappedMapRunner2 = unwrappedMapRunnerFactory.CreateMapRunner<IUnwrappedMapRunner<ReturnType>>();
 
             //todo: remove await
-            var unwrappedMapRunner = await unwrappedMapRunner2.Map(new UnwrappedMapRunnerFactory<ReturnType>(), mapRunner);
+            var unwrappedMapRunner = await unwrappedMapRunner2.Map(new UnwrappedMapRunnerFactory<ReturnType>(mapRunner), mapRunner);
             return await unwrappedMapRunner.Map(arg, parameterFactory);
         }
     }
@@ -52,10 +52,18 @@ namespace ExecutionStrategyCore
         Task<IUnwrappedMapRunner<ReturnType>>
     >
     {
+        private ITaskRunner runner;
+
+        public UnwrappedMapRunnerFactory(ITaskRunner runner)
+        {
+            this.runner = runner;
+        }
+
         public async Task<IUnwrappedMapRunner<ReturnType>> Run(WrappedParameter<IMapRunner<ReturnType>> arg)
         {
             await Task.CompletedTask;
-            return new UnwrappedMapRunner<ReturnType>(arg);
+            var unwrappedMapRunnerFactory = new UnwrappedMapRunner<ReturnType>(arg);
+            return runner.Run(unwrappedMapRunnerFactory);
         }
     }
 
@@ -147,7 +155,7 @@ namespace ExecutionStrategyCore
     {
         private ITaskRunner runner;
 
-        internal MapRunner(ITaskRunner runner)
+        public MapRunner(ITaskRunner runner)
         {
             this.runner = runner;
         }
