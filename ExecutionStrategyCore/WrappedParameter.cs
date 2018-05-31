@@ -30,15 +30,75 @@ namespace ExecutionStrategyCore
             return mapRunnerFactory.CreateMapRunner<ReturnType>();
         }
 
-        public static async Task<ReturnType> Map<ParameterType, T, ReturnType>(
-            this IMapRunner<ReturnType> taskMapRunner9,
+        public static async Task<ReturnType> Map2<ParameterType, T, ReturnType>(
+            this IMapRunner<ReturnType> mapRunner,
             T arg,
             IRunner<ParameterType> parameterFactory
         )
-            where T : IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>
+            where T : IMapper<ParameterType, Task<ReturnType>>
         {
-            var wrappedParameter = taskMapRunner9.CreateWrappedParameter(parameterFactory);
-            return await taskMapRunner9.Map(arg, wrappedParameter);
+            IMapRunnerFactory mapRunnerFactory = new MapRunnerFactory(mapRunner);
+            var unwrappedMapRunnerFactory = mapRunner.Run(mapRunnerFactory);
+            var unwrappedMapRunner2 = unwrappedMapRunnerFactory.CreateMapRunner<IUnwrappedMapRunner<ReturnType>>();
+
+            //todo: remove await
+            var unwrappedMapRunner = await unwrappedMapRunner2.Map(new UnwrappedMapRunnerFactory<ReturnType>(), mapRunner);
+            return await unwrappedMapRunner.Map(arg, parameterFactory);
+        }
+    }
+
+    public class UnwrappedMapRunnerFactory<ReturnType> : IMapper<
+        WrappedParameter<IMapRunner<ReturnType>>,
+        Task<IUnwrappedMapRunner<ReturnType>>
+    >
+    {
+        public async Task<IUnwrappedMapRunner<ReturnType>> Run(WrappedParameter<IMapRunner<ReturnType>> arg)
+        {
+            await Task.CompletedTask;
+            return new UnwrappedMapRunner<ReturnType>(arg);
+        }
+    }
+
+    public class UnwrappedMapRunner<ReturnType> : IUnwrappedMapRunner<ReturnType>
+    {
+        private WrappedParameter<IMapRunner<ReturnType>> mapRunner;
+
+        public UnwrappedMapRunner(WrappedParameter<IMapRunner<ReturnType>> mapRunner)
+        {
+            this.mapRunner = mapRunner;
+        }
+
+        public async Task<ReturnType> Map<ParameterType, T>(
+            T arg, 
+            IRunner<ParameterType> parameterFactory
+            )
+            where T : IMapper<ParameterType, Task<ReturnType>>
+        {
+            var unwrappedParameterMapper = new UnwrappedParameterMapper<ParameterType, T, ReturnType>(arg);
+            return await mapRunner.Value.Map(unwrappedParameterMapper, parameterFactory);
+        }
+
+        public IUnwrappedMapRunner<ReturnType> Run()
+        {
+            return this;
+        }
+    }
+
+    public class UnwrappedParameterMapper<ParameterType, T, ReturnType> : 
+        IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>
+        where T : IMapper<ParameterType, Task<ReturnType>>
+    {
+        private T arg;
+
+        public UnwrappedParameterMapper(T arg)
+        {
+            this.arg = arg;
+        }
+
+        public async Task<ReturnType> Run(WrappedParameter<ParameterType> wrappedParameter)
+        {
+            var parameter = wrappedParameter.GetValue();
+            return await arg.Run(parameter);
         }
     }
 
@@ -67,10 +127,18 @@ namespace ExecutionStrategyCore
         }
     }
 
-    public interface IMapRunner<ReturnType> : IRunner<IMapRunner<ReturnType>>
+    public interface IUnwrappedMapRunner<ReturnType> : IRunner<IUnwrappedMapRunner<ReturnType>>
     {
         Task<ReturnType> Map<ParameterType, T>(
-            T arg, IRunner<WrappedParameter<ParameterType>> parameterFactory
+            T arg, IRunner<ParameterType> parameterFactory
+        )
+            where T : IMapper<ParameterType, Task<ReturnType>>;
+    }
+
+    public interface IMapRunner<ReturnType> : IRunner<IMapRunner<ReturnType>>, ITaskRunner
+    {
+        Task<ReturnType> Map<ParameterType, T>(
+            T arg, IRunner<ParameterType> parameterFactory
         )
             where T : IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>;
 
@@ -87,11 +155,11 @@ namespace ExecutionStrategyCore
         }
 
         public async Task<ReturnType> Map<ParameterType, T>(
-            T arg, IRunner<WrappedParameter<ParameterType>> parameterFactory
+            T arg, IRunner<ParameterType> parameterFactory
         )
             where T : IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>
         {
-            var parameter = runner.Run(parameterFactory);
+            var parameter = runner.Run(CreateWrappedParameter(parameterFactory));
             return await arg.Run(parameter);
         }
 
@@ -106,6 +174,11 @@ namespace ExecutionStrategyCore
             //TODO: encapsulate the next 2 lines into their own mockable factory class
             var parameter = runner.Run(parameterFactory);
             return new ValueCacheRunner<WrappedParameter<ParameterType>>(new WrappedParameter<ParameterType>(parameter));
+        }
+
+        public T Run<T>(IRunner<T> wrapper)
+        {
+            return runner.Run(wrapper);
         }
     }
 

@@ -404,25 +404,30 @@ namespace WebApplication1.Test.Controllers
             [TestInitialize]
             public void TestInitialize()
             {
-                //todo: consider that the same type used as a fake that is also used to ignore run and return the fake... hummmm
-                var fakeBlogMapper = A.Fake<IMapRunner<Blog>>();
+                var fakeMapFactory = A.Fake<IMapRunnerFactory>();
+                var fakeBlogUnwrappedMapper = A.Fake<IMapRunner<Blog>>();
+                var fakeUnwrappedMapRunner = A.Fake<IMapRunner<IUnwrappedMapRunner<Blog>>>();
+                var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
                 var fakeIntMapper = A.Fake<IMapRunner<int>>();
 
-                A.CallTo(() => runner.Run(A<IMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
-                A.CallTo(() => runner.Run(A<IMapRunner<int>>.Ignored)).Returns(fakeIntMapper);
+                var wrappedFactory = A.CallTo(() => runner.Run(A<IMapRunnerFactory>.Ignored));
+                wrappedFactory.Returns(fakeMapFactory);
+                A.CallTo(() => fakeMapFactory.CreateMapRunner<Blog>()).Returns(fakeBlogUnwrappedMapper);
+                A.CallTo(() => fakeBlogUnwrappedMapper.Run(A<IMapRunnerFactory>.Ignored)).Returns(fakeMapFactory);
+                var unwrappedFactory = A.CallTo(() => fakeMapFactory.CreateMapRunner<IUnwrappedMapRunner<Blog>>());
+                unwrappedFactory.Returns(fakeUnwrappedMapRunner);
+                A.CallTo(() => fakeUnwrappedMapRunner.Map(A<UnwrappedMapRunnerFactory<Blog>>.Ignored, A<IMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
+                A.CallTo(() => fakeMapFactory.CreateMapRunner<int>()).Returns(fakeIntMapper);
 
                 lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Map(
-                    A<GetAllById4<Blog>>.Ignored,
-
-                    //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
-                    A<IRunner<WrappedParameter<IQueryable<Blog>>>>.Ignored
+                    A<GetAllById3<Blog>>.Ignored,
+                    A<IRunner<IQueryable<Blog>>>.Ignored
                 ));
 
                 deleteBlogMock = A.CallTo(() => fakeIntMapper.Map(
                     A<DeleteBlog4>.Ignored,
 
-                    //todo: remove wrapped parameter here by putting a wrapped parameter mapper in #16
-                    A<IRunner<WrappedParameter<BloggingContext>>>.Ignored
+                    A<IRunner<BloggingContext>>.Ignored
                 ));
 
                 //TODO:VERIFY THAT THE CORRECT dbset is used
@@ -431,6 +436,18 @@ namespace WebApplication1.Test.Controllers
 
                 var dbSet = A.Fake<BlogDbSetRunner>();
                 blogController = new BlogController(runner, dbSet);
+
+                wrappedFactory.Invokes(c => {
+                    Console.Write(c.Arguments);
+                });
+
+                lookupBlogByIdMock.Invokes(c => {
+                    Console.Write(c.Arguments);
+                });
+
+                unwrappedFactory.Invokes(c => {
+                    Console.Write(c.Arguments);
+                });
             }
 
             [TestMethod]
@@ -447,7 +464,7 @@ namespace WebApplication1.Test.Controllers
 
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
                 Assert.AreEqual(
-                    new GetAllById4<Blog>(deleteId),
+                    new GetAllById3<Blog>(deleteId),
                     lookupBlogByIdMockInvocations.Argument(0,0)
                 );
             }
