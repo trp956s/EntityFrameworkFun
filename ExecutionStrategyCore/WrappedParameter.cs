@@ -141,8 +141,6 @@ namespace ExecutionStrategyCore
             T arg, IRunner<ParameterType> parameterFactory
         )
             where T : IMapper<WrappedParameter<ParameterType>, Task<ReturnType>>;
-
-        IRunner<WrappedParameter<ParameterType>> CreateWrappedParameter<ParameterType>(IRunner<ParameterType> parameterFactory);
     }
 
     public struct MapRunner<ReturnType> : IMapRunner<ReturnType>
@@ -169,7 +167,7 @@ namespace ExecutionStrategyCore
         }
 
         [Obsolete("This /will be/ replaced with a unique class which is 1. mockable and 2. not contain a publically exposed constructor")]
-        public IRunner<WrappedParameter<ParameterType>> CreateWrappedParameter<ParameterType>(IRunner<ParameterType> parameterFactory)
+        private IRunner<WrappedParameter<ParameterType>> CreateWrappedParameter<ParameterType>(IRunner<ParameterType> parameterFactory)
         {
             //TODO: encapsulate the next 2 lines into their own mockable factory class
             var parameter = runner.Run(parameterFactory);

@@ -410,12 +410,10 @@ namespace WebApplication1.Test.Controllers
                 var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
                 var fakeIntMapper = A.Fake<IMapRunner<int>>();
 
-                var wrappedFactory = A.CallTo(() => runner.Run(A<IMapRunnerFactory>.Ignored));
-                wrappedFactory.Returns(fakeMapFactory);
+                A.CallTo(() => runner.Run(A<IMapRunnerFactory>.Ignored)).Returns(fakeMapFactory);
                 A.CallTo(() => fakeMapFactory.CreateMapRunner<Blog>()).Returns(fakeBlogUnwrappedMapper);
                 A.CallTo(() => fakeBlogUnwrappedMapper.Run(A<IMapRunnerFactory>.Ignored)).Returns(fakeMapFactory);
-                var unwrappedFactory = A.CallTo(() => fakeMapFactory.CreateMapRunner<IUnwrappedMapRunner<Blog>>());
-                unwrappedFactory.Returns(fakeUnwrappedMapRunner);
+                A.CallTo(() => fakeMapFactory.CreateMapRunner<IUnwrappedMapRunner<Blog>>()).Returns(fakeUnwrappedMapRunner);
                 A.CallTo(() => fakeUnwrappedMapRunner.Map(A<UnwrappedMapRunnerFactory<Blog>>.Ignored, A<IMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
                 A.CallTo(() => fakeMapFactory.CreateMapRunner<int>()).Returns(fakeIntMapper);
 
@@ -436,18 +434,6 @@ namespace WebApplication1.Test.Controllers
 
                 var dbSet = A.Fake<BlogDbSetRunner>();
                 blogController = new BlogController(runner, dbSet);
-
-                wrappedFactory.Invokes(c => {
-                    Console.Write(c.Arguments);
-                });
-
-                lookupBlogByIdMock.Invokes(c => {
-                    Console.Write(c.Arguments);
-                });
-
-                unwrappedFactory.Invokes(c => {
-                    Console.Write(c.Arguments);
-                });
             }
 
             [TestMethod]
