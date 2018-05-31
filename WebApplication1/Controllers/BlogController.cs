@@ -186,9 +186,9 @@ namespace WebApplication1.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var blogFoundById = await runner.
-                ToMapRunner<Blog>().Map2(
-                    new GetAllById3<Blog>(id),
+            var blogFoundById = await WrappedParameterExtensions.Map(
+runner.
+                ToMapRunner<Blog>(), new GetAllById3<Blog>(id),
 
                     //todo: this casting is awkward - fix it
                     blogData as IRunner<IQueryable<Blog>>

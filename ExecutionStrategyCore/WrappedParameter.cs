@@ -30,7 +30,7 @@ namespace ExecutionStrategyCore
             return mapRunnerFactory.CreateMapRunner<ReturnType>();
         }
 
-        public static async Task<ReturnType> Map2<ParameterType, T, ReturnType>(
+        public static async Task<ReturnType> Map<ParameterType, T, ReturnType>(
             this IMapRunner<ReturnType> mapRunner,
             T arg,
             IRunner<ParameterType> parameterFactory
@@ -59,7 +59,9 @@ namespace ExecutionStrategyCore
             this.runner = runner;
         }
 
-        public async Task<IUnwrappedMapRunner<ReturnType>> Run(WrappedParameter<IMapRunner<ReturnType>> arg)
+        public async Task<IUnwrappedMapRunner<ReturnType>> Run(
+            WrappedParameter<IMapRunner<ReturnType>> arg
+        )
         {
             await Task.CompletedTask;
             var unwrappedMapRunnerFactory = new UnwrappedMapRunner<ReturnType>(arg);
@@ -79,11 +81,11 @@ namespace ExecutionStrategyCore
         public async Task<ReturnType> Map<ParameterType, T>(
             T arg, 
             IRunner<ParameterType> parameterFactory
-            )
+        )
             where T : IMapper<ParameterType, Task<ReturnType>>
         {
             var unwrappedParameterMapper = new UnwrappedParameterMapper<ParameterType, T, ReturnType>(arg);
-            return await mapRunner.Value.Map(unwrappedParameterMapper, parameterFactory);
+            return await mapRunner.GetValue().Map(unwrappedParameterMapper, parameterFactory);
         }
 
         public IUnwrappedMapRunner<ReturnType> Run()
