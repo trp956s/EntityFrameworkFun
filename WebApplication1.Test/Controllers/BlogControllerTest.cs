@@ -406,11 +406,11 @@ namespace WebApplication1.Test.Controllers
             {
                 var fakeMapFactory = A.Fake<IMapRunnerFactory>(o=>o.Wrapping(new MapRunnerFactory(runner)));
                 var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
-                var fakeIntMapper = A.Fake<IMapRunner<int>>();
+                var fakeIntMapper = A.Fake<IAsyncMapRunner<int>>();
 
                 A.CallTo(() => runner.Run(A<IMapRunnerFactory>.Ignored)).Returns(fakeMapFactory);
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
-                A.CallTo(() => fakeMapFactory.CreateMapRunner<int>()).Returns(fakeIntMapper);
+                A.CallTo(() => fakeMapFactory.CreateMapRunnerAsync<int>()).Returns(fakeIntMapper);
 
                 lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Map(
                     A<GetAllById3<Blog>>.Ignored,
