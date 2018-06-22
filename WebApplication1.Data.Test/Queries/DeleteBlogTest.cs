@@ -43,9 +43,14 @@ namespace WebApplication1.Data.Test.Queries
             {
                 var oldValues = bloggingContext.Blogs.ToArray();
                 var deleteBlog = oldValues.First();
-                var deleter = new DeleteBlog(deleteBlog);
+                var deleter = new DeleteBlog4(deleteBlog);
 
-                await deleter.Run(bloggingContext);
+                var runner = new ExecutionStrategyRunner().ToAsyncMapRunner<int>();
+                
+                await runner.Map(
+                    deleter,
+                    new ValueCacheRunner<BloggingContext>(bloggingContext)
+                );
 
                 var newValues = bloggingContext.Blogs.ToArray();
                 var hasChanges = bloggingContext.ChangeTracker.HasChanges();

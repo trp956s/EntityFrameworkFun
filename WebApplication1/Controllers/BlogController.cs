@@ -14,17 +14,16 @@ using WebApplication1.Data.GeneralInterfaces;
 
 namespace WebApplication1.Controllers
 {
-    //todo: test the GetAllById2 and DeleteBlog2 classes
-    //todo: rewrite Mapper (and runner) to follow command pattern DataInteraction : IInternalDataInteraction { internal T Act(){...}; public InternalExecutionStrategyRunner AsRunner(){return new InternalExecutionStrategyRunner(new InternalDataInteraction(this))**;} };
-    //todo: rename Execution Strategy to follow command pattern names
-    //todo: **internal helper this.ToInternalRunner()
-    //todo: clean up code, consolidate stories 1-3, reduce test code
-    //todo: get by id.. 9-11 are post, put, and delete
-    //todo: 9,  10, 11: test drive the rest of this class keeping blogs simple
-    //todo: 12: refactor injection to use IRunner
-    //todo: 13: refactor DbSetRunner
-    //todo: 14, 15, 16, 17, 18: test drive post using a service to encapsulate relationships and business rules and a PostApi to pass to/from the controller
-    //todo: 19 - use custom logger to show full path names
+    //todo: 1 run and test the application
+    //todo: 2 testdrive the GetAllById2 and DeleteBlog2 classes
+    //todo: 3 rewrite Mapper (and runner) to follow command pattern DataInteraction : IInternalDataInteraction { internal T Act(){...}; public InternalExecutionStrategyRunner AsRunner(){return new InternalExecutionStrategyRunner(new InternalDataInteraction(this))**;} };
+    //todo: 4 rename Execution Strategy to follow command pattern names
+    //todo: 5 breakout multi class files into individual files
+    //todo: 6 clean up code, consolidate stories 1-3, reduce test code
+    //todo: 7: refactor injection to use IRunner
+    //todo: 8: refactor DbSetRunner
+    //todo: 9, 10, 11, 12, 13: testdrive post using a service to encapsulate relationships and business rules and a PostApi to pass to/from the controller
+    //todo: 14 - use custom logger to show full path names in test results run from a terminal
     [Route("api/[controller]")]
     public class BlogController : Controller
     {
