@@ -345,8 +345,12 @@ namespace WebApplication1.Test.Controllers
 
                     var id = 999;
 
-                    var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
-                    A.CallTo(() => runner.Run(getById)).
+                    var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
+                    A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
+                    A.CallTo(() => fakeBlogMapper.Map(
+                        A<GetAllById3<Blog>>.Ignored,
+                        A<IRunner<IQueryable<Blog>>>.Ignored
+                    )).
                         Returns(Task.FromResult(((Blog)null)));
 
                     var response = await blogController.Put(id, null);
@@ -361,9 +365,13 @@ namespace WebApplication1.Test.Controllers
 
                 var id = 321;
 
-                var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
-                A.CallTo(() => runner.Run(getById)).
-                    Returns(Task.FromResult((new Blog())));
+                var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
+                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
+                A.CallTo(() => fakeBlogMapper.Map(
+                    A<GetAllById3<Blog>>.Ignored,
+                    A<IRunner<IQueryable<Blog>>>.Ignored
+                )).
+                Returns(Task.FromResult((new Blog())));
 
                 var response = await blogController.Put(id, null);
 
@@ -380,9 +388,13 @@ namespace WebApplication1.Test.Controllers
                 var editBlog = new Blog() { Id = id };
                 var expected = 876;
 
-                var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
-                A.CallTo(() => runner.Run(getById)).
-                    Returns(Task.FromResult(editBlog));
+                var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
+                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
+                A.CallTo(() => fakeBlogMapper.Map(
+                    A<GetAllById3<Blog>>.Ignored,
+                    A<IRunner<IQueryable<Blog>>>.Ignored
+                )).
+                Returns(Task.FromResult(editBlog));
                 var updateBlog = new UpdateBlog(editBlog, putArg).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(updateBlog))
                     .Returns(Task.FromResult(expected));

@@ -15,7 +15,7 @@ using WebApplication1.Data.GeneralInterfaces;
 namespace WebApplication1.Controllers
 {
     //todo: 1 run and test the application
-    //todo: 2 testdrive the GetAllById2 and DeleteBlog2 classes
+    //todo: 2 testdrive the GetAllById4 and DeleteBlog3 classes
     //todo: 3 rewrite Mapper (and runner) to follow command pattern DataInteraction : IInternalDataInteraction { internal T Act(){...}; public InternalExecutionStrategyRunner AsRunner(){return new InternalExecutionStrategyRunner(new InternalDataInteraction(this))**;} };
     //todo: 4 rename Execution Strategy to follow command pattern names
     //todo: 5 breakout multi class files into individual files
@@ -178,7 +178,10 @@ namespace WebApplication1.Controllers
 
         private async Task<Blog> Find(int id)
         {
-            return await runner.Run(new GetAllById<Blog>(id), blogData);
+            return await runner.ToAsyncMapRunner<Blog>().MapUnwrapped(
+                new GetAllById3<Blog>(id),
+                blogData as IRunner<IQueryable<Blog>>
+            );
         }
 
         // DELETE api/values/5
