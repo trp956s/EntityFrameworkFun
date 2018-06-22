@@ -345,13 +345,14 @@ namespace WebApplication1.Test.Controllers
 
                     var id = 999;
 
-                    var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
-                    A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
-                    A.CallTo(() => fakeBlogMapper.Map(
-                        A<GetAllById3<Blog>>.Ignored,
-                        A<IRunner<IQueryable<Blog>>>.Ignored
-                    )).
+                    A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
+                    {
+                        A.CallTo(() => fake.Map(
+                            A<GetAllById3<Blog>>.Ignored,
+                            A<IRunner<IQueryable<Blog>>>.Ignored
+                        )).
                         Returns(Task.FromResult(((Blog)null)));
+                    });
 
                     var response = await blogController.Put(id, null);
                     Assert.IsInstanceOfType(response, typeof(NotFoundResult));
@@ -365,13 +366,12 @@ namespace WebApplication1.Test.Controllers
 
                 var id = 321;
 
-                var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
-                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
-                A.CallTo(() => fakeBlogMapper.Map(
-                    A<GetAllById3<Blog>>.Ignored,
-                    A<IRunner<IQueryable<Blog>>>.Ignored
-                )).
-                Returns(Task.FromResult((new Blog())));
+                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fakeBlogMapper=> { 
+                    A.CallTo(() => fakeBlogMapper.Map(
+                        A<GetAllById3<Blog>>.Ignored,
+                        A<IRunner<IQueryable<Blog>>>.Ignored
+                    )).Returns(Task.FromResult((new Blog())));
+                });
 
                 var response = await blogController.Put(id, null);
 
@@ -388,13 +388,15 @@ namespace WebApplication1.Test.Controllers
                 var editBlog = new Blog() { Id = id };
                 var expected = 876;
 
-                var fakeBlogMapper = A.Fake<IUnwrappedMapRunner<Blog>>();
-                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
-                A.CallTo(() => fakeBlogMapper.Map(
-                    A<GetAllById3<Blog>>.Ignored,
-                    A<IRunner<IQueryable<Blog>>>.Ignored
-                )).
-                Returns(Task.FromResult(editBlog));
+                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fakeBlogMapper=>
+                {
+                    A.CallTo(() => fakeBlogMapper.Map(
+                        A<GetAllById3<Blog>>.Ignored,
+                        A<IRunner<IQueryable<Blog>>>.Ignored
+                    )).
+                    Returns(Task.FromResult(editBlog));
+                });
+
                 var updateBlog = new UpdateBlog(editBlog, putArg).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(updateBlog))
                     .Returns(Task.FromResult(expected));
@@ -511,6 +513,14 @@ namespace WebApplication1.Test.Controllers
         {
             var callInvocation = list[invocationCardinality];
             return callInvocation.Arguments[argumentCardinality];
+        }
+
+        //PROMOTE THIS EXTENSION THIS THING IS HANDY!
+        public static T ReturnsNewFake<T>(this IReturnValueArgumentValidationConfiguration<T> callConfig, Action<T> fakeConfiguration = null)
+        {
+            var fake = (fakeConfiguration == null) ? A.Fake<T>() : A.Fake<T>(optionsBuilder=>optionsBuilder.ConfigureFake(fakeConfiguration));
+            callConfig.Returns<T>(fake);
+            return fake;
         }
     }
 
