@@ -418,7 +418,7 @@ namespace WebApplication1.Test.Controllers
                 ));
 
                 deleteBlogMock = A.CallTo(() => fakeIntMapper.Map(
-                    A<DeleteBlog4>.Ignored,
+                    A<DeleteBlog>.Ignored,
 
                     A<IRunner<BloggingContext>>.Ignored
                 ));
@@ -463,7 +463,7 @@ namespace WebApplication1.Test.Controllers
                 Assert.IsInstanceOfType(result, typeof(OkObjectResult));
 
                 Assert.AreEqual(
-                    new DeleteBlog4(mockedBlogFoundById),
+                    new DeleteBlog(mockedBlogFoundById),
                     deleteBlogMockInvocations[0].Arguments[0]
                 );
                 deleteBlogMock.MustHaveHappenedOnceExactly();

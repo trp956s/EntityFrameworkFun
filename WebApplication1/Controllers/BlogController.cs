@@ -200,7 +200,7 @@ namespace WebApplication1.Controllers
 
             await runner.
                 ToAsyncMapRunner<int>().Map(
-                    new DeleteBlog4(blogFoundById),
+                    new DeleteBlog(blogFoundById),
                     blogData as IRunner<BloggingContext>
                 );
 
