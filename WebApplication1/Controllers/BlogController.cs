@@ -83,7 +83,10 @@ namespace WebApplication1.Controllers
 
         private async Task<ActionResult> GetBlog(int id)
         {
-            var runResult = await runner.Run(new GetAllById<Blog>(id), blogData);
+            var runResult = await runner.ToAsyncMapRunner<Blog>().MapUnwrapped(
+                new GetAllById3<Blog>(id),
+                blogData as IRunner<IQueryable<Blog>>
+            );
             return WrapGetSingleBlogIntoAResult(runResult);
         }
 

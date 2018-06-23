@@ -169,18 +169,24 @@ namespace WebApplication1.Test.Controllers
             public async Task ReturnsNotFoundWhenDbEmpty()
             {
                 var id = 99;
-                var mockDbResponse = Task.FromResult(((Blog)null));
+                var mockDbResponse = (Blog)null;
                 activeStories.ActiveStory = "5";
 
-                var getAllRunner = new GetAllById<Blog>(id).ToRunner(dbSet);
-                A.CallTo(() => runner.Run(getAllRunner)).
-                    Returns(mockDbResponse);
+                IReturnValueArgumentValidationConfiguration<Task<Blog>> getAllRunner = null;
+                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
+                {
+                    getAllRunner = A.CallTo(() => fake.Map(
+                        A<GetAllById3<Blog>>.Ignored,
+                        A<IRunner<IQueryable<Blog>>>.Ignored
+                    ));
+
+                    getAllRunner.Returns(Task.FromResult(mockDbResponse));
+                });
 
                 var getResult = await blogController.Get(id);
 
                 Assert.IsInstanceOfType(getResult, typeof(NotFoundResult));
-                A.CallTo(() => runner.Run(getAllRunner)).
-                    MustHaveHappenedOnceExactly();
+                getAllRunner.MustHaveHappenedOnceExactly();
             }
 
             [TestMethod]
@@ -190,9 +196,13 @@ namespace WebApplication1.Test.Controllers
                 var expectedBlog = new Blog();
                 activeStories.ActiveStory = "6";
 
-                var getById = new GetAllById<Blog>(id).ToRunner(dbSet);
-                A.CallTo(() => runner.Run(getById)).
-                    Returns(Task.FromResult(expectedBlog));
+                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
+                {
+                    A.CallTo(() => fake.Map(
+                        A<GetAllById3<Blog>>.Ignored,
+                        A<IRunner<IQueryable<Blog>>>.Ignored
+                    )).Returns(Task.FromResult(expectedBlog));
+                });
 
                 var getResult = await blogController.Get(id);
 
