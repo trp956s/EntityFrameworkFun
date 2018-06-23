@@ -115,7 +115,11 @@ namespace WebApplication1.Controllers
                 return await Task.FromResult(BadRequest());
             }
 
-            var result = await runner.Run(new GetAllById<Blog>(postBlog.Id), blogData);
+            //todo: make this call simpler
+            var result = await runner.ToAsyncMapRunner<Blog>().MapUnwrapped(
+                new GetAllById3<Blog>(postBlog.Id),
+                blogData as IRunner<IQueryable<Blog>>
+            );
 
             if(!runner.IsStoryOverrideActive(out var story8Or9, "8", "9"))
             {

@@ -244,21 +244,28 @@ namespace WebApplication1.Test.Controllers
             {
                 //this would be better with test cases
                 var stories = new string[] { "7", "8", "9" };
-                var expectedCount = 1;
                 foreach (var story in stories)
                 {
                     activeStories.ActiveStory = story;
                     var blog = new Blog();
 
-                    var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
-                    var getByIdCall = A.CallTo(() => runner.Run(getById));
-                    getByIdCall.Returns(Task.FromResult(blog));
+                    var getById = new GetAllById3<Blog>(blog.Id);
+                    IReturnValueArgumentValidationConfiguration<Task<Blog>> getByIdCall = null;
+                    A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
+                    {
+                        getByIdCall = A.CallTo(() => fake.Map(
+                            A<GetAllById3<Blog>>.Ignored,
+                            A<IRunner<IQueryable<Blog>>>.Ignored
+                        ));
+
+                        getByIdCall.Returns(Task.FromResult(blog));
+                    });
 
                     var result = await blogController.Post(blog);
 
                     Assert.IsInstanceOfType(result, typeof(StatusCodeResult));
                     Assert.AreEqual(result.StatusCode, StatusCodes.Status409Conflict);
-                    getByIdCall.MustHaveHappened(expectedCount++, Times.Exactly);
+                    getByIdCall.MustHaveHappenedOnceExactly();
                 }
             }
 
@@ -266,14 +273,21 @@ namespace WebApplication1.Test.Controllers
             public async Task ReturnsSuccessWhenUnique()
             {
                 var stories = new string[] { "8", "9" };
-                var expectedCount = 1;
                 foreach (var story in stories)
                 {
                     var blog = new Blog();
                     activeStories.ActiveStory = story;
-                    var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
-                    var getByIdCall = A.CallTo(() => runner.Run(getById));
-                    getByIdCall.Returns(Task.FromResult(((Blog)null)));
+                    var getById = new GetAllById3<Blog>(blog.Id);
+                    IReturnValueArgumentValidationConfiguration<Task<Blog>> getByIdCall = null;
+                    A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
+                    {
+                        getByIdCall = A.CallTo(() => fake.Map(
+                            A<GetAllById3<Blog>>.Ignored,
+                            A<IRunner<IQueryable<Blog>>>.Ignored
+                        ));
+
+                        getByIdCall.Returns(Task.FromResult(((Blog)null)));
+                    });
 
                     if (story == "9")
                     {
@@ -285,7 +299,7 @@ namespace WebApplication1.Test.Controllers
 
                     Assert.IsInstanceOfType(result, typeof(StatusCodeResult));
                     Assert.AreEqual(StatusCodes.Status201Created, result.StatusCode);
-                    getByIdCall.MustHaveHappened(expectedCount++, Times.Exactly);
+                    getByIdCall.MustHaveHappenedOnceExactly();
                 }
             }
 
@@ -296,10 +310,15 @@ namespace WebApplication1.Test.Controllers
                 var blog = new Blog();
                 activeStories.ActiveStory = "9";
                 var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
+                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
+                {
+                    A.CallTo(() => fake.Map(
+                        A<GetAllById3<Blog>>.Ignored,
+                        A<IRunner<IQueryable<Blog>>>.Ignored
+                    )).Returns(Task.FromResult(((Blog)null)));
+                });
+
                 var createBlog = new CreateBlog(blog).ToRunner(dbSet);
-                A.CallTo(() => runner.Run(getById)).Returns(
-                    Task.FromResult(((Blog)null))
-                );
                 A.CallTo(() => runner.Run(createBlog)).Throws(
                     expected
                 );
