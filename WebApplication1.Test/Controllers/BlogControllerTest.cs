@@ -259,7 +259,6 @@ namespace WebApplication1.Test.Controllers
                     activeStories.ActiveStory = story;
                     var blog = new Blog();
 
-                    var getById = new GetAllById3<Blog>(blog.Id);
                     IReturnValueArgumentValidationConfiguration<Task<Blog>> getByIdCall = null;
                     A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                     {
@@ -287,7 +286,6 @@ namespace WebApplication1.Test.Controllers
                 {
                     var blog = new Blog();
                     activeStories.ActiveStory = story;
-                    var getById = new GetAllById3<Blog>(blog.Id);
                     IReturnValueArgumentValidationConfiguration<Task<Blog>> getByIdCall = null;
                     A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                     {
@@ -319,7 +317,6 @@ namespace WebApplication1.Test.Controllers
                 var expected = new System.Exception();
                 var blog = new Blog();
                 activeStories.ActiveStory = "9";
-                var getById = new GetAllById<Blog>(blog.Id).ToRunner(dbSet);
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                 {
                     A.CallTo(() => fake.Map(
