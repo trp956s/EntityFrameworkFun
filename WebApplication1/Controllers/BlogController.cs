@@ -84,7 +84,7 @@ namespace WebApplication1.Controllers
         private async Task<ActionResult> GetBlog(int id)
         {
             var runResult = await runner.ToAsyncMapRunner<Blog>().MapUnwrapped(
-                new GetAllById3<Blog>(id),
+                new GetAllById<Blog>(id),
                 blogData as IRunner<IQueryable<Blog>>
             );
             return WrapGetSingleBlogIntoAResult(runResult);
@@ -120,7 +120,7 @@ namespace WebApplication1.Controllers
 
             //todo: make this call simpler
             var result = await runner.ToAsyncMapRunner<Blog>().MapUnwrapped(
-                new GetAllById3<Blog>(postBlog.Id),
+                new GetAllById<Blog>(postBlog.Id),
                 blogData as IRunner<IQueryable<Blog>>
             );
 
@@ -186,7 +186,7 @@ namespace WebApplication1.Controllers
         private async Task<Blog> Find(int id)
         {
             return await runner.ToAsyncMapRunner<Blog>().MapUnwrapped(
-                new GetAllById3<Blog>(id),
+                new GetAllById<Blog>(id),
                 blogData as IRunner<IQueryable<Blog>>
             );
         }
@@ -196,7 +196,7 @@ namespace WebApplication1.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             var blogFoundById = await runner.ToAsyncMapRunner<Blog>().MapUnwrapped(
-                new GetAllById3<Blog>(id),
+                new GetAllById<Blog>(id),
 
                 //todo: this casting is awkward - fix it
                 blogData as IRunner<IQueryable<Blog>>

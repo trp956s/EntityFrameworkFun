@@ -176,7 +176,7 @@ namespace WebApplication1.Test.Controllers
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                 {
                     getAllRunner = A.CallTo(() => fake.Map(
-                        A<GetAllById3<Blog>>.Ignored,
+                        A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     ));
 
@@ -199,7 +199,7 @@ namespace WebApplication1.Test.Controllers
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                 {
                     A.CallTo(() => fake.Map(
-                        A<GetAllById3<Blog>>.Ignored,
+                        A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     )).Returns(Task.FromResult(expectedBlog));
                 });
@@ -263,7 +263,7 @@ namespace WebApplication1.Test.Controllers
                     A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                     {
                         getByIdCall = A.CallTo(() => fake.Map(
-                            A<GetAllById3<Blog>>.Ignored,
+                            A<GetAllById<Blog>>.Ignored,
                             A<IRunner<IQueryable<Blog>>>.Ignored
                         ));
 
@@ -290,7 +290,7 @@ namespace WebApplication1.Test.Controllers
                     A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                     {
                         getByIdCall = A.CallTo(() => fake.Map(
-                            A<GetAllById3<Blog>>.Ignored,
+                            A<GetAllById<Blog>>.Ignored,
                             A<IRunner<IQueryable<Blog>>>.Ignored
                         ));
 
@@ -320,7 +320,7 @@ namespace WebApplication1.Test.Controllers
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                 {
                     A.CallTo(() => fake.Map(
-                        A<GetAllById3<Blog>>.Ignored,
+                        A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     )).Returns(Task.FromResult(((Blog)null)));
                 });
@@ -374,7 +374,7 @@ namespace WebApplication1.Test.Controllers
                     A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                     {
                         A.CallTo(() => fake.Map(
-                            A<GetAllById3<Blog>>.Ignored,
+                            A<GetAllById<Blog>>.Ignored,
                             A<IRunner<IQueryable<Blog>>>.Ignored
                         )).
                         Returns(Task.FromResult(((Blog)null)));
@@ -394,7 +394,7 @@ namespace WebApplication1.Test.Controllers
 
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fakeBlogMapper=> { 
                     A.CallTo(() => fakeBlogMapper.Map(
-                        A<GetAllById3<Blog>>.Ignored,
+                        A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     )).Returns(Task.FromResult((new Blog())));
                 });
@@ -417,7 +417,7 @@ namespace WebApplication1.Test.Controllers
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fakeBlogMapper=>
                 {
                     A.CallTo(() => fakeBlogMapper.Map(
-                        A<GetAllById3<Blog>>.Ignored,
+                        A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     )).
                     Returns(Task.FromResult(editBlog));
@@ -453,7 +453,7 @@ namespace WebApplication1.Test.Controllers
                 A.CallTo(() => fakeMapFactory.CreateMapRunnerAsync<int>()).Returns(fakeIntMapper);
 
                 lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Map(
-                    A<GetAllById3<Blog>>.Ignored,
+                    A<GetAllById<Blog>>.Ignored,
                     A<IRunner<IQueryable<Blog>>>.Ignored
                 ));
 
@@ -485,7 +485,7 @@ namespace WebApplication1.Test.Controllers
 
                 lookupBlogByIdMock.MustHaveHappenedOnceExactly();
                 Assert.AreEqual(
-                    new GetAllById3<Blog>(deleteId),
+                    new GetAllById<Blog>(deleteId),
                     lookupBlogByIdMockInvocations.Argument(0,0)
                 );
             }

@@ -34,7 +34,7 @@ namespace WebApplication1.Data.Test.Queries
             public async Task ReturnsNullAsynchronouslyWhenListEmpty()
             {
                 var uniqueId = 1234;
-                var getById = new GetAllById3<IHasId>(uniqueId);
+                var getById = new GetAllById<IHasId>(uniqueId);
                 var testList = new Collection<IHasId>();
                 var asyncQuery = FakeIAsyncEnumFactory.CreateFakeIAsyncEnum(testList, testList.AsQueryable());
                 var queryableEntity = new ValueCacheRunner<IQueryable<IHasId>>(asyncQuery);
@@ -48,7 +48,7 @@ namespace WebApplication1.Data.Test.Queries
             public async Task ReturnsNullAsynchronouslyWhenNoIdsMatch()
             {
                 var uniqueId = 1234;
-                var getById = new GetAllById3<IHasId>(uniqueId);
+                var getById = new GetAllById<IHasId>(uniqueId);
                 var testList = new Collection<IHasId> { A.Fake<IHasId>() };
                 var asyncQuery = FakeIAsyncEnumFactory.CreateFakeIAsyncEnum(testList, testList.AsQueryable());
                 var queryableEntity = new ValueCacheRunner<IQueryable<IHasId>>(asyncQuery);
@@ -63,7 +63,7 @@ namespace WebApplication1.Data.Test.Queries
             public async Task ReturnsFirstItemWIthMatchingId()
             {
                 var matchingId = 1234;
-                var getById = new GetAllById3<IHasId>(matchingId);
+                var getById = new GetAllById<IHasId>(matchingId);
                 var expectedElement = A.Fake<IHasId>();
                 var unexpectedElement = A.Fake<IHasId>();
                 var testList = new Collection<IHasId> { A.Fake<IHasId>(), expectedElement, unexpectedElement, A.Fake<IHasId>() };
