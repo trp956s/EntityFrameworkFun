@@ -14,6 +14,7 @@ using System;
 using WebApplication1.Data;
 using FakeItEasy.Configuration;
 using WebApplication1.Data.GeneralInterfaces;
+using System.Linq.Expressions;
 
 namespace WebApplication1.Test.Controllers
 {
@@ -172,16 +173,16 @@ namespace WebApplication1.Test.Controllers
                 var mockDbResponse = (Blog)null;
                 activeStories.ActiveStory = "5";
 
-                IReturnValueArgumentValidationConfiguration<Task<Blog>> getAllRunner = null;
-                A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
-                {
-                    getAllRunner = A.CallTo(() => fake.MapAsync(
+                var getAllRunner = A.CallTo(() =>
+                    runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)
+                ).CallsFake(fake => A.CallTo(()=>
+                    fake.MapAsync(
                         A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
-                    ));
-
-                    getAllRunner.Returns(Task.FromResult(mockDbResponse));
-                });
+                    )
+                )).AndReturns(
+                    Task.FromResult(mockDbResponse)
+                );
 
                 var getResult = await blogController.Get(id);
 
@@ -545,9 +546,24 @@ namespace WebApplication1.Test.Controllers
         public static T ReturnsNewFake<T>(this IReturnValueArgumentValidationConfiguration<T> callConfig, Action<T> fakeConfiguration = null)
         {
             var fake = (fakeConfiguration == null) ? A.Fake<T>() : A.Fake<T>(optionsBuilder=>optionsBuilder.ConfigureFake(fakeConfiguration));
-            callConfig.Returns<T>(fake);
+            callConfig.Returns(fake);
             return fake;
         }
+
+        public static IReturnValueArgumentValidationConfiguration<T2> CallsFake<T, T2>(this IReturnValueArgumentValidationConfiguration<T> callConfig, Func<T, IReturnValueArgumentValidationConfiguration<T2>> useFake)
+        {
+            var fake = A.Fake<T>();
+            callConfig.Returns(fake);
+            return useFake(fake);
+        }
+
+        public static IReturnValueArgumentValidationConfiguration<T> AndReturns<T>(this IReturnValueArgumentValidationConfiguration<T> config, T value)
+        {
+            config.Returns(value);
+            return config;
+        }
+
+
     }
 
     public class FakeActiveStoryFactory : IRunner<ActiveStories>

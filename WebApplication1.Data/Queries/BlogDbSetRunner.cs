@@ -13,6 +13,9 @@ namespace WebApplication1.Data.Queries
             this.context = context;
         }
 
+        public IRunner<IQueryable<Blog>> Queryable { get { return this; } }
+        public IRunner<BloggingContext> BloggingContext { get { return this; } }
+
         public IQueryable<Blog> Run()
         {
             return context.Run().Blogs;
