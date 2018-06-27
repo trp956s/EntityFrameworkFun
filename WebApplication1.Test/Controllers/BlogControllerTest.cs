@@ -175,7 +175,7 @@ namespace WebApplication1.Test.Controllers
                 IReturnValueArgumentValidationConfiguration<Task<Blog>> getAllRunner = null;
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                 {
-                    getAllRunner = A.CallTo(() => fake.Map(
+                    getAllRunner = A.CallTo(() => fake.MapAsync(
                         A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     ));
@@ -198,7 +198,7 @@ namespace WebApplication1.Test.Controllers
 
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                 {
-                    A.CallTo(() => fake.Map(
+                    A.CallTo(() => fake.MapAsync(
                         A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     )).Returns(Task.FromResult(expectedBlog));
@@ -262,7 +262,7 @@ namespace WebApplication1.Test.Controllers
                     IReturnValueArgumentValidationConfiguration<Task<Blog>> getByIdCall = null;
                     A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                     {
-                        getByIdCall = A.CallTo(() => fake.Map(
+                        getByIdCall = A.CallTo(() => fake.MapAsync(
                             A<GetAllById<Blog>>.Ignored,
                             A<IRunner<IQueryable<Blog>>>.Ignored
                         ));
@@ -289,7 +289,7 @@ namespace WebApplication1.Test.Controllers
                     IReturnValueArgumentValidationConfiguration<Task<Blog>> getByIdCall = null;
                     A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                     {
-                        getByIdCall = A.CallTo(() => fake.Map(
+                        getByIdCall = A.CallTo(() => fake.MapAsync(
                             A<GetAllById<Blog>>.Ignored,
                             A<IRunner<IQueryable<Blog>>>.Ignored
                         ));
@@ -319,7 +319,7 @@ namespace WebApplication1.Test.Controllers
                 activeStories.ActiveStory = "9";
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                 {
-                    A.CallTo(() => fake.Map(
+                    A.CallTo(() => fake.MapAsync(
                         A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     )).Returns(Task.FromResult(((Blog)null)));
@@ -373,7 +373,7 @@ namespace WebApplication1.Test.Controllers
 
                     A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
                     {
-                        A.CallTo(() => fake.Map(
+                        A.CallTo(() => fake.MapAsync(
                             A<GetAllById<Blog>>.Ignored,
                             A<IRunner<IQueryable<Blog>>>.Ignored
                         )).
@@ -393,7 +393,7 @@ namespace WebApplication1.Test.Controllers
                 var id = 321;
 
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fakeBlogMapper=> { 
-                    A.CallTo(() => fakeBlogMapper.Map(
+                    A.CallTo(() => fakeBlogMapper.MapAsync(
                         A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     )).Returns(Task.FromResult((new Blog())));
@@ -416,7 +416,7 @@ namespace WebApplication1.Test.Controllers
 
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fakeBlogMapper=>
                 {
-                    A.CallTo(() => fakeBlogMapper.Map(
+                    A.CallTo(() => fakeBlogMapper.MapAsync(
                         A<GetAllById<Blog>>.Ignored,
                         A<IRunner<IQueryable<Blog>>>.Ignored
                     )).
@@ -452,7 +452,7 @@ namespace WebApplication1.Test.Controllers
                 A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).Returns(fakeBlogMapper);
                 A.CallTo(() => fakeMapFactory.CreateMapRunnerAsync<int>()).Returns(fakeIntMapper);
 
-                lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.Map(
+                lookupBlogByIdMock = A.CallTo(() => fakeBlogMapper.MapAsync(
                     A<GetAllById<Blog>>.Ignored,
                     A<IRunner<IQueryable<Blog>>>.Ignored
                 ));

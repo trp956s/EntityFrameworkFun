@@ -44,17 +44,79 @@ namespace ExecutionStrategyCore
         )
             where T : IMapper<ParameterType, Task<ReturnType>>
         {
-            IMapRunnerFactory mapRunnerFactoryFactory = new MapRunnerFactory(mapRunner);
-            var mapRunnerFactory = mapRunner.Run(mapRunnerFactoryFactory);
-            var unwrappedRunnerMapperRunner = mapRunnerFactory.CreateMapRunner<IUnwrappedMapRunner<ReturnType>>();
+            var unwrappedMapRunner = mapRunner.Map(new MapFactory<ReturnType>());
+            return await unwrappedMapRunner.MapAsync(arg, parameterFactory);
+        }
 
-            var unwrappedMapRunnerFactory = new UnwrappedAsyncMapRunnerFactory<ParameterType, ReturnType>(mapRunner);
-            var unwrappedMapRunner = unwrappedRunnerMapperRunner.Map(unwrappedMapRunnerFactory, mapRunner);
-            return await unwrappedMapRunner.Map(arg, parameterFactory);
+        public static T2 Map<T1, T2>(this T1 runner, IMapper<T1, T2> mapper)
+            where T1 : ITaskRunner
+        {
+            return mapper.Run(runner);
+        }
+
+        public static async Task<T2> MapAsync<T1, T2>(this T1 runner, IMapper<T1, Task<T2>> mapper)
+            where T1 : ITaskRunner
+        {
+            return await mapper.Run(runner);
         }
     }
 
-    public class UnwrappedAsyncMapRunnerFactory<ParameterType, ReturnType> : 
+    public interface ITypedMapper<T>
+    {
+        T2 Map<T2>(T arg);
+    }
+
+    public class MapFactory<ReturnType> :
+        IMapper<ITaskRunner, IUnwrappedMapRunner<ReturnType>>
+
+    {
+        public IUnwrappedMapRunner<ReturnType> Run(ITaskRunner runner)
+        {
+            var mapRunner = runner.Map(new AsyncRunnerFactory<ReturnType>());
+            return mapRunner.Map(new UnwrappedAsyncMapRunner<ReturnType>());
+        }
+    }
+
+    public class UnwrappedAsyncMapRunner<ReturnType> :
+        IMapper<IAsyncMapRunner<ReturnType>, IUnwrappedMapRunner<ReturnType>>
+    {
+        public IUnwrappedMapRunner<ReturnType> Run(IAsyncMapRunner<ReturnType> mapRunner)
+        {
+            var unwrappedRunnerMapperRunner = mapRunner.Map(new MapRunnerFactory<ReturnType>());
+            var unwrappedMapRunnerFactory = mapRunner.Map(new UnwrappedAsyncMapRunnerFactoryFactory<ReturnType>());
+            return unwrappedRunnerMapperRunner.Map(unwrappedMapRunnerFactory, mapRunner);
+        }
+    }
+
+    public class AsyncRunnerFactory<ReturnType>
+        : IMapper<ITaskRunner, IAsyncMapRunner<ReturnType>>
+    {
+        public IAsyncMapRunner<ReturnType> Run(ITaskRunner arg)
+        {
+            return new AsyncMapRunner<ReturnType>(arg);
+        }
+    }
+
+    public class UnwrappedAsyncMapRunnerFactoryFactory<ReturnType> :
+        IMapper<ITaskRunner, UnwrappedAsyncMapRunnerFactory<ReturnType>>
+    {
+        public UnwrappedAsyncMapRunnerFactory<ReturnType> Run(ITaskRunner runner)
+        {
+            return new UnwrappedAsyncMapRunnerFactory<ReturnType>(runner);
+        }
+    }
+
+    public class MapRunnerFactory<ReturnType> : IMapper<ITaskRunner, IMapRunner<IUnwrappedMapRunner<ReturnType>>>
+    {
+        public IMapRunner<IUnwrappedMapRunner<ReturnType>> Run(ITaskRunner runner)
+        {
+            IMapRunnerFactory mapRunnerFactoryFactory = new MapRunnerFactory(runner);
+            var mapRunnerFactory = runner.Run(mapRunnerFactoryFactory);
+            return mapRunnerFactory.CreateMapRunner<IUnwrappedMapRunner<ReturnType>>();
+        }
+    }
+
+    public class UnwrappedAsyncMapRunnerFactory<ReturnType> : 
         IMapper<WrappedParameter<IAsyncMapRunner<ReturnType>>, IUnwrappedMapRunner<ReturnType>>
     {
         private ITaskRunner runner;
@@ -81,7 +143,7 @@ namespace ExecutionStrategyCore
             this.mapRunner = mapRunner;
         }
 
-        public async Task<ReturnType> Map<ParameterType, T>(
+        public async Task<ReturnType> MapAsync<ParameterType, T>(
             T arg, 
             IRunner<ParameterType> parameterFactory
         )
@@ -184,7 +246,7 @@ namespace ExecutionStrategyCore
 
     public interface IUnwrappedMapRunner<ReturnType> : IRunner<IUnwrappedMapRunner<ReturnType>>
     {
-        Task<ReturnType> Map<ParameterType, T>(
+        Task<ReturnType> MapAsync<ParameterType, T>(
             T arg, IRunner<ParameterType> parameterFactory
         )
             where T : IMapper<ParameterType, Task<ReturnType>>;
