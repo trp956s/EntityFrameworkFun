@@ -260,16 +260,12 @@ namespace WebApplication1.Test.Controllers
                     activeStories.ActiveStory = story;
                     var blog = new Blog();
 
-                    IReturnValueArgumentValidationConfiguration<Task<Blog>> getByIdCall = null;
-                    A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).ReturnsNewFake(fake =>
-                    {
-                        getByIdCall = A.CallTo(() => fake.MapAsync(
+                    var getByIdCall = A.CallTo(() => runner.Run(A<IUnwrappedMapRunner<Blog>>.Ignored)).CallsFake(fake =>
+                        A.CallTo(() => fake.MapAsync(
                             A<GetAllById<Blog>>.Ignored,
                             A<IRunner<IQueryable<Blog>>>.Ignored
-                        ));
-
-                        getByIdCall.Returns(Task.FromResult(blog));
-                    });
+                        )).AndReturns(Task.FromResult(blog))
+                    );
 
                     var result = await blogController.Post(blog);
 
